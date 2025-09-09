@@ -16,6 +16,7 @@ function App() {
           rel="noopener noreferrer"
         >
           ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+          테스트2
         </a>
       </header>
     </div>
