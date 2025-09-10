@@ -13,7 +13,7 @@ const HeaderContainer = styled.header`
 
 const RightBar = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 30px;
 `;
 
 const Logo = styled.div`
@@ -29,6 +29,22 @@ const LeftBar = styled.div`
   gap: 30px;
 `;
 
+const Login = styled.button`
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+`;
+
+const Signup = styled.button`
+  background-color: #000;
+  color: white;
+  border: none;
+  padding: 5px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 16px;
+`;
 
 function Header() {
 	return (
@@ -42,8 +58,8 @@ function Header() {
         자세ON
       </Logo>
       <RightBar>
-        <button>로그인</button>
-        <button>회원가입</button>
+        <Login>로그인</Login>
+        <Signup>회원가입</Signup>
       </RightBar>
 		</HeaderContainer>
 	);

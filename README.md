@@ -2,5 +2,9 @@
 # Nullbrain
 ## 자세ON
 
+# 실행
+- npm start
+
 # 설치
 - npm install
+- npm install styled-component
