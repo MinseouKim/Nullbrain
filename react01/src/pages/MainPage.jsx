@@ -1,5 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -14,6 +15,7 @@ function MainPage() {
       <Header />
       <h1>메인 페이지</h1>
       <p>환영합니다! 이것은 메인 페이지입니다.</p>
+      <Footer />
     </Container>
   );
 }
