@@ -1,3 +1,10 @@
 # 대림대학교 3-1 컴퓨터정보학부 2025-2학기 졸업작품
 # Nullbrain
 ## 자세ON
+
+# 실행
+- npm start
+
+# 설치
+- npm install
+- npm install styled-component
