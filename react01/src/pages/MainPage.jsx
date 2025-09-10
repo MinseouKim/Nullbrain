@@ -73,6 +73,26 @@ const FeatureList = styled.div`
   margin: 20px 0;
 `;
 
+const FeatureItemRight = styled.div`
+  background: #860000;
+  font-size: 18px;
+  display: flex;
+  text-align: left;
+  padding : 10px 20px;
+  border-radius: 0 100px 100px 0;
+  width: 80%;
+`;
+
+const FeatureItemLeft = styled.div`
+  background: #f2f2f2;
+  font-size: 18px;
+  display: flex;
+  text-align: right;
+  padding : 10px 20px;
+  border-radius: 100px 0 0 100px;
+  width: 80%;
+`;
+
 function MainPage() {
   return (
     <Container>
@@ -99,10 +119,10 @@ function MainPage() {
       <div>
         <SectionTitle>주요기능</SectionTitle>
         <FeatureList>
-          <div>기능1</div>
-          <div>기능2</div>
-          <div>기능3</div>
-          <div>기능4</div>
+          <FeatureItemRight>기능1</FeatureItemRight>
+          <FeatureItemLeft>기능2</FeatureItemLeft>
+          <FeatureItemRight>기능3</FeatureItemRight>
+          <FeatureItemLeft>기능4</FeatureItemLeft>
         </FeatureList>
       </div>
       <Footer />
