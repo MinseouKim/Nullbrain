@@ -1,0 +1,243 @@
+/* 기본 & 레이아웃 */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+}
+
+.container {
+  padding: 0 40px;
+  margin-top: 20px;
+}
+
+main {
+  max-width: 1200px;
+  margin: 30px auto;
+}
+
+/* 헤더 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header__logo {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.header__nav a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #333;
+}
+
+.header__auth button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.header__auth button.signup {
+  background-color: #333;
+  color: #fff;
+}
+
+/* 검색창 */
+.search-bar {
+  position: relative;
+  max-width: 800px;
+  margin: 40px auto;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 15px 25px;
+  border: 2px solid #000;
+  border-radius: 30px;
+  font-size: 1rem;
+  box-sizing: border-box; /
+}
+
+.search-bar button {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* 필터 탭 */
+.filter-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  justify-content: center; 
+}
+
+.filter-tabs button {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.filter-tabs button.active {
+  background-color: #9d2020;
+  color: white;
+  border-color: #9d2020;
+  font-weight: bold;
+}
+
+/* 정렬 바 */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.sort-label {
+  background-color: #333;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* 운동 카드 그리드 */
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.exercise-card {
+  border-radius: 15px;
+  background-color: #f1f1f1;
+  text-align: center;
+  overflow: hidden;
+}
+
+.image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 100%;
+  color: #333;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.exercise-card p {
+  padding: 15px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+  background-color: #ddd;
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center; /* 수평 중앙 */
+  align-items: center;     /* 수직 중앙 */
+}
+
+/* 모달 콘텐츠 */
+.modal-content {
+  background-color: #fff;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  overflow: hidden;
+  position: relative; 
+}
+/* 모달 좌측: 이미지 섹션 */
+.modal-image-section {
+  width: 30%;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.modal-image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 모달 우측: 상세 설명 섹션 */
+.modal-details-section {
+  width: 70%;
+  padding: 30px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* '닫기' 버튼 (X) */
+.modal-close-button {
+  /* [변경] 모달 우측 상단에 고정 */
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+  z-index: 10; /* 다른 콘텐츠 위에 오도록 설정 */
+}
+
+/* 모달 하단 버튼 영역 */
+.modal-actions {
+  /* [변경] flex container의 남은 공간을 모두 차지하며 아래로 밀어냄 */
+  margin-top: auto; 
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  
+  /* [변경] 버튼을 중앙 정렬 */
+  text-align: center;
+}
+.modal-start-button {
+  background-color: #9d2020;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-start-button:hover {
+  background-color: #7b1a1a;
+}

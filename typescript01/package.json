@@ -1,15 +1,22 @@
 {
   "name": "typescript01",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "typescript": "^5.9.2"
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
   }
 }
