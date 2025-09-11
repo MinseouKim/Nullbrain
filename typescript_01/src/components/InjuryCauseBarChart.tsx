@@ -39,7 +39,7 @@ const renderCustomLabel = (props: any) => {
 };
 
 const InjuryCauseBarChart = () => (
-  <ResponsiveContainer width="80%" height={300}>
+  <ResponsiveContainer width="100%" height={500}>
     <BarChart
       data={causeData}
       layout="vertical"

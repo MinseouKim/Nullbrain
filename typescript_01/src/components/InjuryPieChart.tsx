@@ -1,14 +1,14 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const data = [
-  { name: "부상경험", value: 60 },
-  { name: "미경험", value: 40 },
+  { name: "부상경험", value: 60.6 },
+  { name: "미경험", value: 39.4 },
 ];
 
 const COLORS = ["#860000", "#d9d9d9"];
 
 const InjuryPieChart = () => (
-  <ResponsiveContainer width="80%" height={300}>
+  <ResponsiveContainer width="100%" height={500}>
     <PieChart>
       <Pie
         data={data}
@@ -16,8 +16,8 @@ const InjuryPieChart = () => (
         nameKey="name"
         cx="50%"
         cy="50%"
-        innerRadius={50}
-        outerRadius={100}
+        innerRadius={100}
+        outerRadius={200}
         fill="#8884d8"
         labelLine={false}
         label={(entry: any) => {
@@ -27,7 +27,7 @@ const InjuryPieChart = () => (
           const y = entry.cy + radius * Math.sin(-entry.midAngle * RADIAN);
 
           // name에 따라 글자 크기 다르게 지정
-          const fontSize = entry.name === "부상경험" ? 30 : 12;
+          const fontSize = entry.name === "부상경험" ? 30 : 20;
           const color = entry.name === "부상경험" ? "#860000" : "#d9d9d9";
 
           return (

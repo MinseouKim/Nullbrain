@@ -60,7 +60,7 @@ const StartButton = styled.button`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 24px;
+  font-size: 35px;
   text-align: center;
   margin-bottom: 50px;
   margin-top: 300px;
@@ -71,15 +71,20 @@ const ChartRow = styled.div`
   flex-direction: row; /* 가로 정렬 */
   align-items: center;
   justify-content: center;
-  gap: 400px;
+  gap: 40px;
   margin: 50px 0;
 `;
 
 const ChartBox = styled.div`
-  width: 45%; /* 좌우 2칸으로 나누기 */
+  width: 80%;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  p {
+    width: 100%;
+    margin: 0 20px;
+    }
 `;
 
 const Video = styled.video`
@@ -93,11 +98,12 @@ const FeatureList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin: 20px 0;
+  margin: 20px 0 100px 0;
 `;
 
 const FeatureItemLeft = styled.div`
   background: #860000;
+  color: white;
   font-size: 18px;
   display: flex;
   flex-direction: column;
@@ -105,6 +111,7 @@ const FeatureItemLeft = styled.div`
   padding : 20px;
   border-radius: 0 100px 100px 0;
   width: 80%;
+  height: 130px;
   align-self: flex-start;
 `;
 
@@ -117,18 +124,28 @@ const FeatureItemRight = styled.div`
   padding : 20px;
   border-radius: 100px 0 0 100px;
   width: 80%;
+  height: 130px;
   align-self: flex-end;
+  align-items: flex-end;
 `;
 
 const FeatureItemTitle = styled.h1`
-  margin: 0;
-  font-size: 20px;
+  margin: 10px 0;
+  font-size: 30px;
   font-weight: bold;
 `;
 
-const FeatureItemText = styled.p`
+const FeatureItemLeftText = styled.p`
   margin: 0;
   font-size: 16px;
+  width: 90%;
+`;
+
+const FeatureItemRitghtText = styled.p`
+  margin: 0;
+  font-size: 16px;
+  width: 90%;
+  text-align: right;
 `;
 
 const MainPage = () => {
@@ -184,28 +201,32 @@ const MainPage = () => {
         <SectionTitle>주요기능</SectionTitle>
         <FeatureList>
           <FeatureItemLeft>
-            <FeatureItemTitle>기능1</FeatureItemTitle>
-            <FeatureItemText>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi voluptatem nobis inventore architecto totam? Ad, numquam nobis, sapiente quibusdam voluptatibus voluptatem sed ipsa nostrum similique praesentium quis error id sunt!
-            </FeatureItemText>
+            <FeatureItemTitle>실시간 자세교정</FeatureItemTitle>
+            <FeatureItemLeftText>
+              사용자가 운동을 하는 동안 카메라를 통해 실시간으로 자세를 분석합니다. 잘못된 동작이 감지되면 즉시 시각적, 청각적 알림을 제공하여 올바른 자세를 유지하도록 돕습니다. 
+              이를 통해 운동 효과를 극대화하고, 반복적인 잘못된 자세로 인한 부상을 예방할 수 있습니다.
+            </FeatureItemLeftText>
           </FeatureItemLeft>
           <FeatureItemRight>
-            <FeatureItemTitle>기능2</FeatureItemTitle>
-            <FeatureItemText>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi voluptatem nobis inventore architecto totam? Ad, numquam nobis, sapiente quibusdam voluptatibus voluptatem sed ipsa nostrum similique praesentium quis error id sunt!
-            </FeatureItemText>
+            <FeatureItemTitle>운동별 자세 가이드</FeatureItemTitle>
+            <FeatureItemRitghtText>
+              각 운동 종목마다 단계별로 올바른 자세와 주의해야 할 점을 상세하게 안내합니다. 텍스트, 이미지, 영상 등 다양한 방식으로 구성되어 있어 초보자도 쉽게 따라할 수 있으며, 올바른 동작 습관을 빠르게 익힐 수 있습니다. 
+              또한 반복 학습을 통해 자신만의 정확한 자세를 구축할 수 있습니다.
+            </FeatureItemRitghtText>
           </FeatureItemRight>
           <FeatureItemLeft>
-            <FeatureItemTitle>기능3</FeatureItemTitle>
-            <FeatureItemText>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi voluptatem nobis inventore architecto totam? Ad, numquam nobis, sapiente quibusdam voluptatibus voluptatem sed ipsa nostrum similique praesentium quis error id sunt!
-            </FeatureItemText>
+            <FeatureItemTitle>체형 분석</FeatureItemTitle>
+            <FeatureItemLeftText>
+              사용자의 신체 구조와 체형을 분석하여, 개인에게 가장 적합한 운동 방법과 자세를 추천합니다. 예를 들어 상체가 발달한 사람과 하체가 발달한 사람에게 맞는 운동 루틴과 자세 포인트를 제시하여, 보다 효율적으로 목표를 달성할 수 있도록 도와줍니다. 
+              이 기능은 운동의 효율성을 높이고 부상 가능성을 최소화하는 데 큰 역할을 합니다.
+            </FeatureItemLeftText>
           </FeatureItemLeft>
           <FeatureItemRight>
-            <FeatureItemTitle>기능4</FeatureItemTitle>
-            <FeatureItemText>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi voluptatem nobis inventore architecto totam? Ad, numquam nobis, sapiente quibusdam voluptatibus voluptatem sed ipsa nostrum similique praesentium quis error id sunt!
-            </FeatureItemText>
+            <FeatureItemTitle>개인 맞춤 루틴 추천</FeatureItemTitle>
+            <FeatureItemRitghtText>
+              사용자의 운동 목표, 현재 체형, 운동 난이도, 이전 운동 기록 등을 종합적으로 분석하여 최적화된 맞춤형 운동 루틴을 제공합니다. 
+              초보자부터 전문가까지 수준에 맞는 계획을 제시하며, 꾸준한 운동을 위한 일정 관리와 목표 달성 피드백도 포함되어 있어 장기적인 운동 습관 형성에 도움을 줍니다.
+            </FeatureItemRitghtText>
           </FeatureItemRight>
         </FeatureList>
       </div>
