@@ -2,6 +2,7 @@ import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import InjuryPieChart from "../components/InjuryPieChart";
+import InjuryCauseBarChart from "../components/InjuryCauseBarChart";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -65,6 +66,22 @@ const SectionTitle = styled.h2`
   margin-top: 300px;
 `;
 
+const ChartRow = styled.div`
+  display: flex;
+  flex-direction: row; /* 가로 정렬 */
+  align-items: center;
+  justify-content: center;
+  gap: 400px;
+  margin: 50px 0;
+`;
+
+const ChartBox = styled.div`
+  width: 45%; /* 좌우 2칸으로 나누기 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
 const Video = styled.video`
   width: 800px;
   height: 500px;
@@ -106,7 +123,7 @@ const FeatureItemRight = styled.div`
 const FeatureItemTitle = styled.h1`
   margin: 0;
   font-size: 20px;
-  font-weight: bold;]
+  font-weight: bold;
 `;
 
 const FeatureItemText = styled.p`
@@ -127,10 +144,35 @@ const MainPage = () => {
         <Card>스쿼트</Card>
         <Card>푸쉬업</Card>
       </CardContainer>
-      <div>
-        <SectionTitle>부상원인</SectionTitle>
-        <InjuryPieChart />
+      <div style={{ width: '100%', height: 'auto' }}>
+      <SectionTitle>부상원인</SectionTitle>
+      <ChartRow>
+        <ChartBox>
+          <InjuryPieChart />
+        </ChartBox>
+        <ChartBox>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit, eligendi! 
+            Repellendus nam aut, vel doloribus porro eveniet unde, id ex sunt blanditiis 
+            dignissimos inventore laborum. Alias officia fuga cupiditate reprehenderit!
+          </p>
+        </ChartBox>
+      </ChartRow>
+
+      <ChartRow>
+        <ChartBox>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit, eligendi! 
+            Repellendus nam aut, vel doloribus porro eveniet unde, id ex sunt blanditiis 
+            dignissimos inventore laborum. Alias officia fuga cupiditate reprehenderit!
+          </p>
+        </ChartBox>
+        <ChartBox>
+          <InjuryCauseBarChart />
+        </ChartBox>
+      </ChartRow>
       </div>
+
       <div>
         <SectionTitle>자세 분석 영상</SectionTitle>
         <Video controls>

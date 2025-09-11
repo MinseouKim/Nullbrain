@@ -1,12 +1,11 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const data = [
-  { name: '경험 부족', value: 5 },
-  { name: '과도한 관절 사용', value: 12 },
-  { name: '다른사람과 충돌', value: 8 },
+  { name: "부상경험", value: 60 },
+  { name: "미경험", value: 40 },
 ];
 
-const COLORS = ['#860000', '#f2a654', '#6c5ce7'];
+const COLORS = ["#860000", "#d9d9d9"];
 
 const InjuryPieChart = () => (
   <ResponsiveContainer width="80%" height={300}>
@@ -17,15 +16,39 @@ const InjuryPieChart = () => (
         nameKey="name"
         cx="50%"
         cy="50%"
+        innerRadius={50}
         outerRadius={100}
         fill="#8884d8"
-        label
+        labelLine={false}
+        label={(entry: any) => {
+          const RADIAN = Math.PI / 180;
+          const radius = entry.outerRadius + 20;
+          const x = entry.cx + radius * Math.cos(-entry.midAngle * RADIAN);
+          const y = entry.cy + radius * Math.sin(-entry.midAngle * RADIAN);
+
+          // name에 따라 글자 크기 다르게 지정
+          const fontSize = entry.name === "부상경험" ? 30 : 12;
+          const color = entry.name === "부상경험" ? "#860000" : "#d9d9d9";
+
+          return (
+            <text
+              x={x}
+              y={y}
+              fill={color}
+              textAnchor={x > entry.cx ? "start" : "end"}
+              dominantBaseline="middle"
+              fontSize={fontSize}
+              fontWeight="bold"
+            >
+              {`${entry.name} ${entry.value}%`}
+            </text>
+          );
+        }}
       >
         {data.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
         ))}
       </Pie>
-      <Tooltip />
     </PieChart>
   </ResponsiveContainer>
 );
