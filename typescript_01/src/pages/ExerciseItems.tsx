@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import ExerciseCard from "../components/ExerciseCard";
+import ExerciseCard, { CardContainer } from "../components/ExerciseCard";
 import ExerciseModal from "../components/ExerciseModal";
 import { EXERCISE_DETAILS, type ExerciseDetail } from "../datas/data";
 
@@ -83,9 +83,9 @@ const SortLabel = styled.span`
 
 /* 운동 카드 */
 const ExerciseGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 `;
 
 const ExerciseCardBox = styled.div`
@@ -150,10 +150,10 @@ const ExerciseItems = () => {
           </FilterTabs>
 
           <SortBar>
-            <SortLabel>정렬</SortLabel>
+            <SortLabel>정렬(오름차순, 내림차순, 최신순)</SortLabel>
           </SortBar>
 
-          <ExerciseGrid>
+          <CardContainer>
             {EXERCISE_DETAILS.map((exercise) => (
               <ExerciseCard
                 key={exercise.id}
@@ -164,7 +164,7 @@ const ExerciseItems = () => {
             <ExerciseCardBox>
               <ImagePlaceholder>추가 예정</ImagePlaceholder>
             </ExerciseCardBox>
-          </ExerciseGrid>
+          </CardContainer>
         </Main>
 
         <ExerciseModal
