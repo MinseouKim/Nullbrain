@@ -1,9 +1,8 @@
-import React from "react";
+import React,{ FC } from "react";
 import styled from "styled-components";
 
 const FooterContainer = styled.footer`
   margin: 0 auto;
-  position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
