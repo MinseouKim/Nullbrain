@@ -82,9 +82,24 @@ const ChartBox = styled.div`
   align-items: center;
 
   p {
-    width: 100%;
-    margin: 0 20px;
+    width: 90%;
     }
+`;
+
+const ChartRightBox = styled.div`
+  width: 80%;
+  display: flex;
+  margin-right: 50px;
+  align-items: center;
+  text-align: right;
+`;
+
+const ChartLeftBox = styled.div`
+  width: 80%;
+  display: flex;
+  margin-left: 50px;
+  align-items: center;
+  text-align: left;
 `;
 
 const Video = styled.video`
@@ -167,23 +182,27 @@ const MainPage = () => {
         <ChartBox>
           <InjuryPieChart />
         </ChartBox>
-        <ChartBox>
+        <ChartRightBox>
           <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit, eligendi! 
-            Repellendus nam aut, vel doloribus porro eveniet unde, id ex sunt blanditiis 
-            dignissimos inventore laborum. Alias officia fuga cupiditate reprehenderit!
+            스포츠안전재단의 연구에 따르면, 운동을 하는 사람 중 약 60%가 한 번 이상 부상을 경험한 것으로 나타났습니다. 
+            이러한 부상은 잘못된 자세나 과도한 운동 등 다양한 원인으로 발생하며, 꾸준한 자세 교정과 안전한 운동 습관이 중요함을 보여줍니다. 
+            우리 프로그램은 이러한 부상을 예방하고, 안전하게 운동할 수 있도록 돕습니다.
           </p>
-        </ChartBox>
+        </ChartRightBox>
       </ChartRow>
 
       <ChartRow>
-        <ChartBox>
+        <ChartLeftBox>
           <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit, eligendi! 
-            Repellendus nam aut, vel doloribus porro eveniet unde, id ex sunt blanditiis 
-            dignissimos inventore laborum. Alias officia fuga cupiditate reprehenderit!
+            운동 중 발생하는 부상의 주요 원인은 
+            '무리한 동작'(35.8%), '사람과의 충돌'(25%), '미끄러져 넘어짐'(21.3%), 
+            '점프 후 착지 실수'(11.6%), '운동장비와의 충돌'(11.1%) 순으로 나타났습니다. 
+            특히 '무리한 동작'과 '충돌'로 인한 부상이 전체 부상의 절반 이상을 차지하며, 
+            운동 중 부상의 위험이 매우 높다는 것을 보여줍니다. 
+            따라서 실시간 자세 교정과 안전한 운동 습관을 지원하는 우리 프로그램은 
+            사용자가 부상을 예방하고 더욱 효과적으로 운동할 수 있도록 꼭 필요한 도구입니다.
           </p>
-        </ChartBox>
+        </ChartLeftBox>
         <ChartBox>
           <InjuryCauseBarChart />
         </ChartBox>
