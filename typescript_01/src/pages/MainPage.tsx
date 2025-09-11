@@ -112,7 +112,7 @@ const Video = styled.video`
 const FeatureList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 40px;
   margin: 20px 0 100px 0;
 `;
 
@@ -193,10 +193,7 @@ const MainPage = () => {
 
       <ChartRow>
         <ChartLeftBox>
-          <p>
-            운동 중 발생하는 부상의 주요 원인은 
-            '무리한 동작'(35.8%), '사람과의 충돌'(25%), '미끄러져 넘어짐'(21.3%), 
-            '점프 후 착지 실수'(11.6%), '운동장비와의 충돌'(11.1%) 순으로 나타났습니다. 
+          <p> 
             특히 '무리한 동작'과 '충돌'로 인한 부상이 전체 부상의 절반 이상을 차지하며, 
             운동 중 부상의 위험이 매우 높다는 것을 보여줍니다. 
             따라서 실시간 자세 교정과 안전한 운동 습관을 지원하는 우리 프로그램은 
