@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import ExerciseCard, { CardContainer } from "../components/ExerciseCard";
-import ExerciseModal from "../components/ExerciseModal";
-import { EXERCISE_DETAILS, type ExerciseDetail } from "../datas/data";
+import React, { useState, useMemo } from 'react';
+import styled from 'styled-components';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import ExerciseCard from '../components/ExerciseCard';
+import ExerciseModal from '../components/ExerciseModal';
+import { EXERCISE_DETAILS, type ExerciseDetail } from '../datas/data';
 
 const Container = styled.div`
   padding: 0;
@@ -49,71 +49,75 @@ const SearchBar = styled.div`
 
 const FilterTabs = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 15px;
   margin-bottom: 30px; 
   justify-content: center;
 `;
 
-const FilterButton = styled.button<{ active?: boolean }>`
-  padding: 10px 20px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  background: ${({ active }) => (active ? "#9d2020" : "#f1f1f1")};
-  color: ${({ active }) => (active ? "#fff" : "#000")};
-  font-weight: ${({ active }) => (active ? "bold" : "normal")};
-  cursor: pointer;
-  font-size: 1rem;
-`;
+  const FilterButton = styled.button<{ active?: boolean }>`
+    min-width: 120px;
+    padding: 12px 20px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    background: ${({ active }) => (active ? "#9d2020" : "#f1f1f1")};
+    color: ${({ active }) => (active ? "#fff" : "#000")};
+    font-weight: ${({ active }) => (active ? "bold" : "normal")};
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    transition: all 0.2s ease;
 
-/* 정렬 */
+    &:hover {
+      background-color: ${({ active }) => (active ? '#7a1919' : '#e0e0e0')};
+    }
+  `;
+
 const SortBar = styled.div`
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin: 20px;
+  gap: 10px;
+  margin: 0 20px 20px;
+  align-self: flex-end;
 `;
 
-const SortLabel = styled.span`
-  background: #333;
-  color: white;
-  padding: 5px 12px;
-  border-radius: 5px;
-  font-weight: bold;
+const SortButton = styled.button<{ active?: boolean }>`
+  padding: 8px 16px;
+  border: 1px solid ${({ active }) => (active ? '#9d2020' : '#ddd')};
+  border-radius: 20px;
+  background: ${({ active }) => (active ? '#9d2020' : 'white')};
+  color: ${({ active }) => (active ? 'white' : 'black')};
+  font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
+  cursor: pointer;
+  font-size: 0.9rem;
+  
+  &:hover {
+    background-color: #f1f1f1;
+    border-color: #ccc;
+  }
 `;
 
-/* 운동 카드 */
 const ExerciseGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-`;
-
-const ExerciseCardBox = styled.div`
-  border-radius: 15px;
-  background: #f1f1f1;
-  text-align: center;
-  overflow: hidden;
-`;
-
-const ImagePlaceholder = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  width: 100%;
-  color: #333;
-  font-size: 2.5rem;
-  font-weight: bold;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 25px;
+  width: 100%; 
+  padding: 0 20px; 
+  box-sizing: border-box; 
 `;
 
 const ExerciseItems = () => {
+  // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedExercise, setSelectedExercise] =
-    useState<ExerciseDetail | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseDetail | null>(null);
+  
+  // 필터 및 정렬 상태
+  const [activeTab, setActiveTab] = useState('전체');
+  const [sortOrder, setSortOrder] = useState('latest');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const [activeTab, setActiveTab] = useState("전체");
-  const tabs = ["전체", "상체", "하체", "전신", "유산소"];
+  const tabs = ['전체', '상체', '하체', '전신', '유산소'];
 
+  // 모달 핸들러
   const handleCardClick = (exerciseId: number) => {
     const exercise = EXERCISE_DETAILS.find((ex) => ex.id === exerciseId);
     if (exercise) {
@@ -127,44 +131,88 @@ const ExerciseItems = () => {
     setSelectedExercise(null);
   };
 
+  // 1. 검색어 기준으로 1차 필터링
+  const searchedExercises = useMemo(() => {
+    if (!searchTerm) {
+      return EXERCISE_DETAILS;
+    }
+    return EXERCISE_DETAILS.filter(exercise =>
+      exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm]);
+
+  // 2. 카테고리 기준으로 2차 필터링
+  const filteredExercises = useMemo(() => {
+    if (activeTab === '전체') {
+      return searchedExercises;
+    }
+    return searchedExercises.filter(exercise => exercise.category === activeTab);
+  }, [searchedExercises, activeTab]);
+
+  // 3. 최종 정렬
+  const sortedExercises = useMemo(() => {
+    const sortableExercises = [...filteredExercises];
+    switch (sortOrder) {
+      case 'ascending':
+        return sortableExercises.sort((a, b) => a.name.localeCompare(b.name));
+      case 'descending':
+        return sortableExercises.sort((a, b) => b.name.localeCompare(a.name));
+      case 'popular':
+        return sortableExercises.sort((a, b) => b.popularity - a.popularity);
+      case 'latest':
+      default:
+        return sortableExercises.sort((a, b) => b.id - a.id);
+    }
+  }, [filteredExercises, sortOrder]);
+
+  const sortOptions = [
+    { key: 'latest', label: '최신순' },
+    { key: 'popular', label: '인기순' },
+    { key: 'ascending', label: '오름차순' },
+    { key: 'descending', label: '내림차순' },
+  ];
+
   return (
     <>
       <Header />
       <Container>
         <Main>
           <SearchBar>
-            <input type="text" placeholder="어떤 운동 자세가 궁금하신가요?" />
+            <input
+              type="text"
+              placeholder="어떤 운동 자세가 궁금하신가요?"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
             <button>🔍</button>
           </SearchBar>
 
           <FilterTabs>
             {tabs.map((tab) => (
-              <FilterButton
-                key={tab}
-                active={activeTab === tab}
-                onClick={() => setActiveTab(tab)}
-              >
+              <FilterButton key={tab} active={activeTab === tab} onClick={() => setActiveTab(tab)}>
                 {tab}
               </FilterButton>
             ))}
           </FilterTabs>
 
           <SortBar>
-            <SortLabel>정렬(오름차순, 내림차순, 최신순)</SortLabel>
+            {sortOptions.map(option => (
+              <SortButton key={option.key} active={sortOrder === option.key} onClick={() => setSortOrder(option.key)}>
+                {option.label}
+              </SortButton>
+            ))}
           </SortBar>
 
-          <CardContainer>
-            {EXERCISE_DETAILS.map((exercise) => (
+          <ExerciseGrid>
+            {sortedExercises.map((exercise) => (
               <ExerciseCard
                 key={exercise.id}
                 name={exercise.name}
+                imageUrl={exercise.imageUrl}
                 onClick={() => handleCardClick(exercise.id)}
               />
             ))}
-            <ExerciseCardBox>
-              <ImagePlaceholder>추가 예정</ImagePlaceholder>
-            </ExerciseCardBox>
-          </CardContainer>
+          </ExerciseGrid>
         </Main>
 
         <ExerciseModal

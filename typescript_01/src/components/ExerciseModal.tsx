@@ -1,69 +1,192 @@
 import React from 'react';
-import { type ExerciseDetail } from '../datas/data'; // 운동 상세 데이터 타입 불러오기
+import styled from 'styled-components';
+import { type ExerciseDetail } from '../datas/data';
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative; 
+  
+  display: grid;
+  grid-template-areas:
+    "image info"
+    "action action";
+  grid-template-columns: 1fr 1.2fr;
+  gap: 30px 40px;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none; 
+  border: none;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+`;
+
+const ImageSection = styled.div`
+  grid-area: image;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 0;
+  
+  h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    flex-shrink: 0; 
+  }
+
+  img {
+    width: 100%;
+    flex: 1;
+    max-width: 300px;
+    border-radius: 10px;
+    object-fit: contain;
+    min-height: 0; /* <<<--- 높이 문제 해결을 위한 최종 수정 */
+  }
+`;
+
+const InfoSection = styled.div`
+  grid-area: info;
+`;
+
+const DetailItem = styled.div`
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+
+  h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    line-height: 1.6;
+    color: #333;
+  }
+`;
+
+const ActionSection = styled.div`
+  grid-area: action;
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+`;
+
+const StartButton = styled.button`
+  background-color: #9d2020;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  width: 50%;
+  max-width: 300px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #7a1919;
+  }
+`;
 
 interface ExerciseModalProps {
-  isOpen: boolean; // 모달이 열려있는지 여부
-  onClose: () => void; // 모달을 닫는 함수
-  exercise: ExerciseDetail | null; // 현재 선택된 운동 상세 정보
+  isOpen: boolean;
+  onClose: () => void;
+  exercise: ExerciseDetail | null;
 }
 
 const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
   if (!isOpen || !exercise) {
-    return null; // 모달이 닫혀있거나 운동 정보가 없으면 아무것도 렌더링하지 않음
+    return null;
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {/* 모달 좌측: 운동 부위 사진 */}
-        <div className="modal-image-section">
-          <img src={exercise.image} alt={exercise.name} />
-        </div>
-
-        {/* 모달 우측: 상세 설명 */}
-        <div className="modal-details-section">
-          <button className="modal-close-button" onClick={onClose}>
-            &times;
-          </button>
+    <ModalOverlay onClick={onClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <CloseButton onClick={onClose}>&times;</CloseButton>
+        
+        <ImageSection>
           <h2>{exercise.name}</h2>
-          
-          {/* 자극 부위 */}
-          <div className="detail-item">
+          <img src={exercise.imageUrl} alt={exercise.name} />
+        </ImageSection>
+
+        <InfoSection>
+          <DetailItem>
             <h3>자극 부위</h3>
             <ul>
               {exercise.stimulationArea.map((area, index) => (
                 <li key={index}>{area}</li>
               ))}
             </ul>
-          </div>
-
-          {/* 효과 */}
-          <div className="detail-item">
+          </DetailItem>
+          <DetailItem>
             <h3>효과</h3>
             <ul>
               {exercise.effect.map((eff, index) => (
                 <li key={index}>{eff}</li>
               ))}
             </ul>
-          </div>
-
-          {/* 주의사항 */}
-          <div className="detail-item">
+          </DetailItem>
+          <DetailItem>
             <h3>주의사항</h3>
             <ul>
               {exercise.caution.map((cau, index) => (
                 <li key={index}>{cau}</li>
               ))}
             </ul>
-          </div>
+          </DetailItem>
+        </InfoSection>
 
-          {/* 하단 버튼 */}
-          <div className="modal-actions">
-            <button className="modal-start-button">운동 시작하기</button>
-          </div>
-        </div>
-      </div>
-    </div>
+        <ActionSection>
+          <StartButton onClick={() => alert(`${exercise.name} 운동을 시작합니다!`)}>
+            운동 시작하기
+          </StartButton>
+        </ActionSection>
+
+      </ModalContent>
+    </ModalOverlay>
   );
 };
 

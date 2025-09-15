@@ -1,10 +1,11 @@
+// src/components/ExerciseCard.tsx 또는 ExerciseCard.js
 import React from "react";
 import styled from "styled-components";
-
 
 interface ExerciseCardProps {
   name: string;
   onClick: () => void;
+  imageUrl?: string; // 이미지 URL prop 추가
 }
 
 // 카드 전체
@@ -15,20 +16,22 @@ const Card = styled.div`
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
-
+  width: 100%; 
   &:hover {
     transform: translateY(-5px);
   }
 `;
 
-const CardContainer = styled.div`
-  display: flex;         /* 가로 정렬 */
-  flex-wrap: wrap;       /* 공간이 부족하면 다음 줄로 넘김 */
-  gap: 20px;             /* 카드 사이의 간격 */
-  padding: 20px;         /* 컨테이너 안쪽 여백 */
+// 이미지 영역 (실제 이미지 렌더링)
+const CardImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover; 
+  display: block; 
+  background-color: #ddd; /
 `;
 
-// 이미지 영역
+// 이미지 없을 때 또는 로딩 중일 때 표시할 placeholder
 const ImagePlaceholder = styled.div`
   display: flex;
   align-items: center;
@@ -36,10 +39,10 @@ const ImagePlaceholder = styled.div`
   height: 200px;
   width: 100%;
   color: #333;
-  font-size: 2.5rem;
+  font-size: 1.5rem; /* 텍스트 크기 조정 */
   font-weight: bold;
   background-color: #ddd;
-`;
+`;  
 
 // 이름 영역
 const CardName = styled.p`
@@ -50,14 +53,17 @@ const CardName = styled.p`
   background-color: #ddd;
 `;
 
-const ExerciseCard = ({ name, onClick }: ExerciseCardProps) => {
+const ExerciseCard = ({ name, onClick, imageUrl }: ExerciseCardProps) => {
   return (
     <Card onClick={onClick}>
-      <ImagePlaceholder>사진</ImagePlaceholder>
+      {imageUrl ? (
+        <CardImage src={imageUrl} alt={name} />
+      ) : (
+        <ImagePlaceholder>사진 준비중</ImagePlaceholder> // 이미지가 없을 경우 표시
+      )}
       <CardName>{name}</CardName>
     </Card>
   );
 };
 
-export { CardContainer };
 export default ExerciseCard;
