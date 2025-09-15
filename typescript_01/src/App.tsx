@@ -1,8 +1,7 @@
-import React from 'react';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { BrowserRouter } from "react-router-dom";
 import { createGlobalStyle } from 'styled-components';
-import MainPage from './pages/MainPage';
-import Camera from './cameraPage/Camera';
+import Layout from "./components/Layout";
 
 // Global Styles
 const GlobalStyle = createGlobalStyle`
@@ -52,15 +51,16 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-function App() {
+const App = (props: any) => {
+  useEffect(() => {
+    // 초기화 로직
+  }, []);
+
   return (
     <>
       <GlobalStyle />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/camera" element={<Camera/>}/>
-        </Routes>
+      <BrowserRouter basename={props.basename}>
+        <Layout {...props} />
       </BrowserRouter>
     </>
   );
