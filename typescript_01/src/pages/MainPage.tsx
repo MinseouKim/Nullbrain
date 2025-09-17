@@ -189,11 +189,11 @@ const MainPage = () => {
   const navigate = useNavigate();
 
   const handleStartWorkout = () => {
-    navigate('/exercise');
+    navigate('/camera');
   };
 
   const handleCardClick = (exercise: string) => {
-    navigate('/exercise');
+    navigate('/camera');
   };
 
   return (

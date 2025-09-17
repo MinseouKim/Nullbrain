@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from "styled-components";
 import Layout from "./components/Layout";
 
 // Global Styles
@@ -8,6 +8,7 @@ const GlobalStyle = createGlobalStyle`
   /* 전역 스타일 리셋 */
   * {
     margin: 0;
+    
     padding: 0;
     box-sizing: border-box;
   }
@@ -64,6 +65,6 @@ const App = (props: any) => {
       </BrowserRouter>
     </>
   );
-}
+};
 
 export default App;

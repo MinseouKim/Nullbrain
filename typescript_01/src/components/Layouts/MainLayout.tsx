@@ -1,5 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
+import Footer from '../Footer';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,12 +18,48 @@ interface MainLayoutProps {
   } | null;
 }
 
+// 애니메이션 키프레임
+const fadeOut = keyframes`
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+`;
+
+const slideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const pulse = keyframes`
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+`;
+
 // Styled Components
-const MainLayoutContainer = styled.div`
+const MainLayoutContainer = styled.div<{ isTransitioning?: boolean }>`
   min-height: 100vh;
   background-color: white;
   color: #333;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  animation: ${props => props.isTransitioning ? fadeOut : slideIn} 0.3s ease-in-out;
 `;
 
 const Header = styled.header`
@@ -62,6 +100,35 @@ const HeaderLogo = styled.h1`
   font-weight: 700;
   color: #850000;
   text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    color: #6b0000;
+    transform: translateY(-2px);
+    text-shadow: 0 4px 8px rgba(133, 0, 0, 0.3);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    animation: ${pulse} 0.2s ease-in-out;
+  }
 `;
 
 const Navigation = styled.nav`
@@ -89,6 +156,25 @@ const NavItem = styled.span`
     color: #850000;
   }
 `;
+
+const AuthButton = styled.button`
+  background-color: white;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-weight: 500;
+
+  &:hover {
+    background-color: #f0f0f0;
+    border-color: #850000;
+    color: #850000;
+  }
+`;
+
 
 const ContentContainer = styled.div`
   display: flex;
@@ -118,23 +204,6 @@ const Sidebar = styled.aside`
   overflow-y: auto;
 `;
 
-const AuthButton = styled.button`
-  background-color: white;
-  color: #333;
-  border: 1px solid #ddd;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  font-weight: 500;
-
-  &:hover {
-    background-color: #f0f0f0;
-    border-color: #850000;
-    color: #850000;
-  }
-`;
 
 const EndWorkoutButton = styled.button`
   background-color: #850000;
@@ -377,6 +446,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   timer = "0:00",
   workoutData = null
 }) => {
+  const navigate = useNavigate();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleLogoClick = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      navigate('/main');
+    }, 300);
+  };
+
   // 운동 분류별 데이터
   const exerciseCategories = {
     '하체': ['스쿼트', '점프스쿼트', '런지', '월마운틴클라이머'],
@@ -389,13 +468,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     ? exerciseCategories[workoutData.category as keyof typeof exerciseCategories] || []
     : [];
   return (
-    <MainLayoutContainer>
+    <MainLayoutContainer isTransitioning={isTransitioning}>
       {/* 헤더 */}
       <Header>
         <HeaderContent>
           <HeaderLeft></HeaderLeft>
           <HeaderCenter>
-            <HeaderLogo>자세온</HeaderLogo>
+            <HeaderLogo onClick={handleLogoClick}>자세온</HeaderLogo>
           </HeaderCenter>
           <HeaderRight>
             <AuthButton>로그인</AuthButton>
@@ -489,6 +568,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </ExerciseSelection>
         </Sidebar>
       </ContentContainer>
+      
+      {/* 푸터 */}
+      <Footer />
     </MainLayoutContainer>
   );
 };
