@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import InjuryPieChart from "../components/InjuryPieChart";
 import InjuryCauseBarChart from "../components/InjuryCauseBarChart";
 import styled from "styled-components";
+
+const CARD_WIDTH = 400; // 카드 너비
+const CARD_HEIGHT = 400; // 카드 높이
+const CARD_GAP = 100;    // 카드 간격
+const VISIBLE_CARDS = 3; // 화면에 보여질 카드 수
 
 const Container = styled.div`
   margin: 0 auto;
@@ -11,24 +16,58 @@ const Container = styled.div`
   text-align: center;
 `;
 
-const CardContainer = styled.div`
+const CardSection = styled.div`
+  position: relative;
+  width: 80%; /* 화면에 보여질 카드 영역 */
+  height: 500px;
   display: flex;
-  gap: 24px;
   justify-content: center;
-  margin: 100px 0;
+  align-items: center;
+  overflow: hidden;
+  margin: 50px auto;
 `;
 
-const Card = styled.div`
-  background: #f2f2f2;
-  border-radius: 16px;
-  width: 400px;
-  height: 500px;
+const CardContainer = styled.div<{ activeIndex: number }>`
+  display: flex;
+  transition: transform 0.5s ease;
+  transform: ${({ activeIndex }) =>
+  `translateX(calc(50% - ${CARD_WIDTH / 2}px - ${(CARD_WIDTH + CARD_GAP) * activeIndex}px))`};
+  gap: ${CARD_GAP}px;
+  overflow: visible;
+`;
+
+const Card = styled.div<{ active: boolean }>`
+  flex: 0 0 200px;
+  height: 250px;
+  width: ${CARD_WIDTH}px;
+  height: ${CARD_HEIGHT}px;
+  background: #f0f0f0;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-size: 20px;
+  opacity: ${({ active }) => (active ? 1 : 0.6)};
+  transform: ${({ active }) => (active ? "scale(1.3)" : "scale(1)")};
+  transition: transform 0.3s ease, border-radius 0.3s ease, opacity 0.3s ease;
+`;
+
+const Button = styled.button<{ left?: boolean }>`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  ${({ left }) => (left ? "left: 10px;" : "right: 10px;")}
+  padding: 10px 15px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: #555;
+  }
 `;
 
 const MainHeader = styled.div`
@@ -164,6 +203,22 @@ const FeatureItemRitghtText = styled.p`
 `;
 
 const MainPage = () => {
+
+  const exercises = ["플랭크", "스쿼트", "푸쉬업"];
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const prevCard = () => {
+    setActiveIndex((prev) =>
+      prev === 0 ? exercises.length - 1 : prev - 1
+    );
+  };
+
+  const nextCard = () => {
+    setActiveIndex((prev) =>
+      prev === exercises.length - 1 ? 0 : prev + 1
+    );
+  };
+
   return (
     <Container>
       <Header />
@@ -171,11 +226,19 @@ const MainPage = () => {
         <p>언제나 어디서나,<br/>정확한 자세</p>
         <StartButton>운동 시작하기</StartButton>
       </MainHeader>
-      <CardContainer>
-        <Card>플랭크</Card>
-        <Card>스쿼트</Card>
-        <Card>푸쉬업</Card>
+
+      <CardSection>
+      <Button left onClick={prevCard}>◀</Button>
+      <CardContainer activeIndex={activeIndex}>
+        {exercises.map((exercise, index) => (
+          <Card key={index} active={index === activeIndex}>
+            {exercise}
+          </Card>
+        ))}
       </CardContainer>
+      <Button onClick={nextCard}>▶</Button>
+      </CardSection>
+
       <div style={{ width: '100%', height: 'auto' }}>
       <SectionTitle>부상원인</SectionTitle>
       <ChartRow>
