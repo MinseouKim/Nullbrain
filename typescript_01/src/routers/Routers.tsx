@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from "react-router";
 const MainPage = lazy(() => import("../pages/MainPage"));
 const ExerciseItems = lazy(() => import("../pages/ExerciseItems"));
 const Camera = lazy(() => import("../cameraPage/Camera"));
+const BodyTypeResult = lazy(() => import("../pages/BodyTypeResult"));
 
 const Routers = (props: any) => {
     return (
@@ -13,6 +14,7 @@ const Routers = (props: any) => {
                 <Route path='main' element={<MainPage {...props} />} />
                 <Route path='exercise' element={<ExerciseItems {...props} />} />
                 <Route path='camera' element={<Camera {...props} />} />
+                <Route path='bodyTypeResult' element={<BodyTypeResult {...props} />} />
             </Routes>
         </Suspense>
     )

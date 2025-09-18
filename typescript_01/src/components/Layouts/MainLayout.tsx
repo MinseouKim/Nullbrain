@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
+import Header from '../Header';
 import Footer from '../Footer';
 
 interface MainLayoutProps {
@@ -62,12 +63,12 @@ const MainLayoutContainer = styled.div<{ isTransitioning?: boolean }>`
   animation: ${props => props.isTransitioning ? fadeOut : slideIn} 0.3s ease-in-out;
 `;
 
-const Header = styled.header`
-  background-color: white;
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
+// const Header = styled.header`
+//   background-color: white;
+//   padding: 20px;
+//   border-bottom: 1px solid #e0e0e0;
+//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+// `;
 
 const HeaderContent = styled.div`
   display: flex;
@@ -470,7 +471,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   return (
     <MainLayoutContainer isTransitioning={isTransitioning}>
       {/* 헤더 */}
-      <Header>
+      <Header/>
+      {/* <Header>
         <HeaderContent>
           <HeaderLeft></HeaderLeft>
           <HeaderCenter>
@@ -483,14 +485,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </HeaderContent>
       </Header>
 
-      {/* 네비게이션 */}
+      {/* 네비게이션 
       <Navigation>
         <NavItems>
           <NavItem>Nav1</NavItem>
           <NavItem>Nav2</NavItem>
           <NavItem>Nav3</NavItem>
         </NavItems>
-      </Navigation>
+      </Navigation> */}
 
       {/* 메인 콘텐츠 영역 */}
       <ContentContainer>
