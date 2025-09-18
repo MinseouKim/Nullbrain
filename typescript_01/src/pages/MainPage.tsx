@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import InjuryPieChart from "../components/InjuryPieChart";
@@ -12,7 +13,7 @@ const VISIBLE_CARDS = 3; // 화면에 보여질 카드 수
 
 const Container = styled.div`
   margin: 0 auto;
-  padding:0;
+  padding: 0;
   text-align: center;
 `;
 
@@ -71,11 +72,11 @@ const Button = styled.button<{ left?: boolean }>`
 `;
 
 const MainHeader = styled.div`
-  background: #f2f2f2;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   height: 500px;
   border-radius: 20px;
   margin: 10px;
-  color: black;
+  color: white;
   padding: 100px 200px;
   font-size: 50px;
   font-weight: bold;
@@ -84,30 +85,44 @@ const MainHeader = styled.div`
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 `;
 
 const StartButton = styled.button`
-  background-color: #860000;
+  background: linear-gradient(135deg, #850000 0%, #a00000 100%);
   color: white;
   border: none;
-  padding: 10px 30px;
+  padding: 15px 40px;
   border-radius: 50px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: bold;
   margin-top: 30px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(133, 0, 0, 0.3);
+
+  &:hover {
+    background: linear-gradient(135deg, #6b0000 0%, #8b0000 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(133, 0, 0, 0.4);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
 `;
 
 const SectionTitle = styled.h2`
   font-size: 35px;
   text-align: center;
   margin-bottom: 50px;
-  margin-top: 300px;
+  margin-top: 100px;
+  color: #333;
 `;
 
 const ChartRow = styled.div`
   display: flex;
-  flex-direction: row; /* 가로 정렬 */
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 40px;
@@ -122,7 +137,7 @@ const ChartBox = styled.div`
 
   p {
     width: 90%;
-    }
+  }
 `;
 
 const ChartRightBox = styled.div`
@@ -162,7 +177,7 @@ const FeatureItemLeft = styled.div`
   display: flex;
   flex-direction: column;
   text-align: left;
-  padding : 20px;
+  padding: 20px;
   border-radius: 0 100px 100px 0;
   width: 80%;
   height: 130px;
@@ -175,7 +190,7 @@ const FeatureItemRight = styled.div`
   display: flex;
   flex-direction: column;
   text-align: right;
-  padding : 20px;
+  padding: 20px;
   border-radius: 100px 0 0 100px;
   width: 80%;
   height: 130px;
@@ -195,7 +210,7 @@ const FeatureItemLeftText = styled.p`
   width: 90%;
 `;
 
-const FeatureItemRitghtText = styled.p`
+const FeatureItemRightText = styled.p`
   margin: 0;
   font-size: 16px;
   width: 90%;
@@ -203,6 +218,16 @@ const FeatureItemRitghtText = styled.p`
 `;
 
 const MainPage = () => {
+  const navigate = useNavigate();
+
+  const handleStartWorkout = () => {
+    navigate('/camera');
+  };
+
+  const handleCardClick = (exercise: string) => {
+    navigate('/camera');
+  };
+
 
   const exercises = ["플랭크", "스쿼트", "푸쉬업"];
   const [activeIndex, setActiveIndex] = useState(0);
@@ -224,14 +249,18 @@ const MainPage = () => {
       <Header />
       <MainHeader>
         <p>언제나 어디서나,<br/>정확한 자세</p>
-        <StartButton>운동 시작하기</StartButton>
+        <StartButton onClick={handleStartWorkout}>운동 시작하기</StartButton>
       </MainHeader>
-
+      
       <CardSection>
       <Button left onClick={prevCard}>◀</Button>
       <CardContainer activeIndex={activeIndex}>
         {exercises.map((exercise, index) => (
-          <Card key={index} active={index === activeIndex}>
+          <Card 
+            key={index} 
+            active={index === activeIndex}
+            onClick={() => handleCardClick(exercise)}
+          >
             {exercise}
           </Card>
         ))}
@@ -240,33 +269,33 @@ const MainPage = () => {
       </CardSection>
 
       <div style={{ width: '100%', height: 'auto' }}>
-      <SectionTitle>부상원인</SectionTitle>
-      <ChartRow>
-        <ChartBox>
-          <InjuryPieChart />
-        </ChartBox>
-        <ChartRightBox>
-          <p>
-            스포츠안전재단의 연구에 따르면, 운동을 하는 사람 중 약 60%가 한 번 이상 부상을 경험한 것으로 나타났습니다. 
-            이러한 부상은 잘못된 자세나 과도한 운동 등 다양한 원인으로 발생하며, 꾸준한 자세 교정과 안전한 운동 습관이 중요함을 보여줍니다. 
-            우리 프로그램은 이러한 부상을 예방하고, 안전하게 운동할 수 있도록 돕습니다.
-          </p>
-        </ChartRightBox>
-      </ChartRow>
+        <SectionTitle>부상원인</SectionTitle>
+        <ChartRow>
+          <ChartBox>
+            <InjuryPieChart />
+          </ChartBox>
+          <ChartRightBox>
+            <p>
+              스포츠안전재단의 연구에 따르면, 운동을 하는 사람 중 약 60%가 한 번 이상 부상을 경험한 것으로 나타났습니다. 
+              이러한 부상은 잘못된 자세나 과도한 운동 등 다양한 원인으로 발생하며, 꾸준한 자세 교정과 안전한 운동 습관이 중요함을 보여줍니다. 
+              우리 프로그램은 이러한 부상을 예방하고, 안전하게 운동할 수 있도록 돕습니다.
+            </p>
+          </ChartRightBox>
+        </ChartRow>
 
-      <ChartRow>
-        <ChartLeftBox>
-          <p> 
-            특히 '무리한 동작'과 '충돌'로 인한 부상이 전체 부상의 절반 이상을 차지하며, 
-            운동 중 부상의 위험이 매우 높다는 것을 보여줍니다. 
-            따라서 실시간 자세 교정과 안전한 운동 습관을 지원하는 우리 프로그램은 
-            사용자가 부상을 예방하고 더욱 효과적으로 운동할 수 있도록 꼭 필요한 도구입니다.
-          </p>
-        </ChartLeftBox>
-        <ChartBox>
-          <InjuryCauseBarChart />
-        </ChartBox>
-      </ChartRow>
+        <ChartRow>
+          <ChartLeftBox>
+            <p> 
+              특히 '무리한 동작'과 '충돌'로 인한 부상이 전체 부상의 절반 이상을 차지하며, 
+              운동 중 부상의 위험이 매우 높다는 것을 보여줍니다. 
+              따라서 실시간 자세 교정과 안전한 운동 습관을 지원하는 우리 프로그램은 
+              사용자가 부상을 예방하고 더욱 효과적으로 운동할 수 있도록 꼭 필요한 도구입니다.
+            </p>
+          </ChartLeftBox>
+          <ChartBox>
+            <InjuryCauseBarChart />
+          </ChartBox>
+        </ChartRow>
       </div>
 
       <div>
@@ -288,10 +317,10 @@ const MainPage = () => {
           </FeatureItemLeft>
           <FeatureItemRight>
             <FeatureItemTitle>운동별 자세 가이드</FeatureItemTitle>
-            <FeatureItemRitghtText>
+            <FeatureItemRightText>
               각 운동 종목마다 단계별로 올바른 자세와 주의해야 할 점을 상세하게 안내합니다. 텍스트, 이미지, 영상 등 다양한 방식으로 구성되어 있어 초보자도 쉽게 따라할 수 있으며, 올바른 동작 습관을 빠르게 익힐 수 있습니다. 
               또한 반복 학습을 통해 자신만의 정확한 자세를 구축할 수 있습니다.
-            </FeatureItemRitghtText>
+            </FeatureItemRightText>
           </FeatureItemRight>
           <FeatureItemLeft>
             <FeatureItemTitle>체형 분석</FeatureItemTitle>
@@ -302,10 +331,10 @@ const MainPage = () => {
           </FeatureItemLeft>
           <FeatureItemRight>
             <FeatureItemTitle>개인 맞춤 루틴 추천</FeatureItemTitle>
-            <FeatureItemRitghtText>
+            <FeatureItemRightText>
               사용자의 운동 목표, 현재 체형, 운동 난이도, 이전 운동 기록 등을 종합적으로 분석하여 최적화된 맞춤형 운동 루틴을 제공합니다. 
               초보자부터 전문가까지 수준에 맞는 계획을 제시하며, 꾸준한 운동을 위한 일정 관리와 목표 달성 피드백도 포함되어 있어 장기적인 운동 습관 형성에 도움을 줍니다.
-            </FeatureItemRitghtText>
+            </FeatureItemRightText>
           </FeatureItemRight>
         </FeatureList>
       </div>

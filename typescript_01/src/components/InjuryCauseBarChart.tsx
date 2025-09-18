@@ -53,7 +53,7 @@ const InjuryCauseBarChart = () => (
         axisLine={false}
         tickLine={false}
         tick = {false}
-        tickFormatter={(name) => (name === "무리한 동작" ? name : "")}
+        tickFormatter={(name: string) => (name === "무리한 동작" ? name : "")}
       />
       <Tooltip />
       <Bar dataKey="value">
