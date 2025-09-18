@@ -39,34 +39,6 @@ const Logo = styled.div`
   top: 50%;
   transform: translate(-50%, -50%);
   cursor: pointer;
-  transition: all 0.3s ease;
-  overflow: hidden;
-  white-space: nowrap;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover {
-    color: #850000;
-    transform: translate(-50%, -50%) translateY(-2px);
-    text-shadow: 0 4px 8px rgba(133, 0, 0, 0.3);
-
-    &::before {
-      left: 100%;
-    }
-  }
-
-  &:active {
-    animation: ${pulse} 0.2s ease-in-out;
-  }
 `;
 
 const LeftBar = styled.div`

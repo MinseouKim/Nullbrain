@@ -102,34 +102,6 @@ const HeaderLogo = styled.h1`
   color: #850000;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover {
-    color: #6b0000;
-    transform: translateY(-2px);
-    text-shadow: 0 4px 8px rgba(133, 0, 0, 0.3);
-
-    &::before {
-      left: 100%;
-    }
-  }
-
-  &:active {
-    animation: ${pulse} 0.2s ease-in-out;
-  }
 `;
 
 const Navigation = styled.nav`
