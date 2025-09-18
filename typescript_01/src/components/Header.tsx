@@ -56,8 +56,7 @@ const Logo = styled.div`
 
   &:hover {
     color: #850000;
-    transform: translate(-50%, -50%) translateY(-2px);
-    text-shadow: 0 4px 8px rgba(133, 0, 0, 0.3);
+    text-shadow: 0 1px 1px rgba(133, 0, 0, 0.3);
 
     &::before {
       left: 100%;
