@@ -1,5 +1,6 @@
-import React from "react";
-import styled from "styled-components";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
 
 const HeaderContainer = styled.header`
   margin: 0 auto;
@@ -7,8 +8,10 @@ const HeaderContainer = styled.header`
 	display: flex;
 	flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 	padding: 10px 20px;
   position: relative;
+  min-height: 60px;
 `;
 
 const RightBar = styled.div`
@@ -16,12 +19,54 @@ const RightBar = styled.div`
   gap: 30px;
 `;
 
+const pulse = keyframes`
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+`;
+
 const Logo = styled.div`
   font-weight: bold;
   font-size: 24px;
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    color: #850000;
+    transform: translate(-50%, -50%) translateY(-2px);
+    text-shadow: 0 4px 8px rgba(133, 0, 0, 0.3);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    animation: ${pulse} 0.2s ease-in-out;
+  }
 `;
 
 const LeftBar = styled.div`
@@ -47,6 +92,16 @@ const Signup = styled.button`
 `;
 
 const Header = () => {
+  const navigate = useNavigate();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleLogoClick = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      navigate('/main');
+    }, 300);
+  };
+
 	return (
 		<HeaderContainer>
       <LeftBar>
@@ -54,7 +109,7 @@ const Header = () => {
         <span>후기</span>
         <span>운동</span>
       </LeftBar>
-      <Logo>
+      <Logo onClick={handleLogoClick}>
         자세ON
       </Logo>
       <RightBar>
