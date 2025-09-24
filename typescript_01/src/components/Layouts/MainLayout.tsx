@@ -322,23 +322,24 @@ const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
   };
   color: white;
   border: none;
-  padding: 18px 24px;
+  padding: 15px 25px;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   transition: all 0.3s ease;
   box-shadow: ${props => props.isPaused 
     ? '0 6px 16px rgba(40, 167, 69, 0.3)' 
     : '0 6px 16px rgba(133, 0, 0, 0.3)'
   };
-  min-height: 56px;
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1;
   position: relative;
   overflow: hidden;
+  margin: 10px 8px;
 
   &::before {
     content: '';
