@@ -33,7 +33,7 @@ const renderCustomLabel = (props: any) => {
       fontWeight="bold"
       fontSize={30}
     >
-      {`${entry.name}  ${value}`} 
+      {`${entry.name}  ${value}`}
     </text>
   );
 };
@@ -52,7 +52,7 @@ const InjuryCauseBarChart = () => (
         orientation="left"
         axisLine={false}
         tickLine={false}
-        tick = {false}
+        tick={false}
         tickFormatter={(name: string) => (name === "무리한 동작" ? name : "")}
       />
       <Tooltip />
