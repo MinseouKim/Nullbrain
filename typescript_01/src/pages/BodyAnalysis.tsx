@@ -157,46 +157,48 @@ const BodyAnalysis = () => {
     };
 
     return (
-        <AppWrapper>
-            <Header />
-            <Main>
-                <MainContent>
-                    <BodyAnalysisCamera />
-                </MainContent>
-                <Sidebar>
-                    <ControlBox>
-                        <span>음성 안내</span>
-                        <StyledToggleSwitch>
-                            <ToggleSwitchLabel>
-                                <HiddenCheckbox
-                                    checked={isVoiceOn}
-                                    onChange={() => setIsVoiceOn(!isVoiceOn)}
-                                />
-                                <SliderSpan />
-                            </ToggleSwitchLabel>
-                        </StyledToggleSwitch>
-                    </ControlBox>
-                    <GuideBox>
-                        <h3>[ 의상 가이드 ]</h3>
-                        <ul>
-                            <li>밝은 조명 아래에서 촬영해주세요</li>
-                            <li>헐렁하지 않은 옷을 착용해주세요</li>
-                            <li>어두운 배경에 밝은 옷이 좋아요</li>
-                        </ul>
-                    </GuideBox>
-                    <PosePreview>
-                        <PoseImage src="https://i.pinimg.com/236x/a3/87/33/a3873380fad4d9bd5062e5418eaffe4e.jpg" alt="분석 자세 가이드" />
-                    </PosePreview>
-                    <StopButton>체형 분석 중단하기</StopButton>
-                </Sidebar>
-            </Main>
-            <Footer />
-            <BodyAnalysisModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onStart={handleStartAnalysis}
-            />
-        </AppWrapper>
+        <>
+        <Header />
+            <AppWrapper>
+                <Main>
+                    <MainContent>
+                        <BodyAnalysisCamera />
+                    </MainContent>
+                    <Sidebar>
+                        <ControlBox>
+                            <span>음성 안내</span>
+                            <StyledToggleSwitch>
+                                <ToggleSwitchLabel>
+                                    <HiddenCheckbox
+                                        checked={isVoiceOn}
+                                        onChange={() => setIsVoiceOn(!isVoiceOn)}
+                                    />
+                                    <SliderSpan />
+                                </ToggleSwitchLabel>
+                            </StyledToggleSwitch>
+                        </ControlBox>
+                        <GuideBox>
+                            <h3>[ 의상 가이드 ]</h3>
+                            <ul>
+                                <li>밝은 조명 아래에서 촬영해주세요</li>
+                                <li>헐렁하지 않은 옷을 착용해주세요</li>
+                                <li>어두운 배경에 밝은 옷이 좋아요</li>
+                            </ul>
+                        </GuideBox>
+                        <PosePreview>
+                            <PoseImage src="https://i.pinimg.com/236x/a3/87/33/a3873380fad4d9bd5062e5418eaffe4e.jpg" alt="분석 자세 가이드" />
+                        </PosePreview>
+                        <StopButton>체형 분석 중단하기</StopButton>
+                    </Sidebar>
+                </Main>
+                <BodyAnalysisModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onStart={handleStartAnalysis}
+                />
+            </AppWrapper>
+        <Footer />
+    </>
     );
 };
 

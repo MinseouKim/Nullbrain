@@ -6,9 +6,9 @@ import InjuryPieChart from "../components/InjuryPieChart";
 import InjuryCauseBarChart from "../components/InjuryCauseBarChart";
 import styled from "styled-components";
 
-const CARD_WIDTH = 400; // 카드 너비
+const CARD_WIDTH = 300; // 카드 너비
 const CARD_HEIGHT = 400; // 카드 높이
-const CARD_GAP = 100;    // 카드 간격
+const CARD_GAP = 50;    // 카드 간격
 const VISIBLE_CARDS = 3; // 화면에 보여질 카드 수
 
 const Container = styled.div`
@@ -19,27 +19,34 @@ const Container = styled.div`
 
 const CardSection = styled.div`
   position: relative;
-  width: 80%; /* 화면에 보여질 카드 영역 */
-  height: 500px;
+  width: 60%; /* 화면에 보여질 카드 영역 */
+  height: 600px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   overflow: hidden;
   margin: 50px auto;
 `;
 
-const CardContainer = styled.div<{ activeIndex: number }>`
+interface CardContainerProps {
+  activeIndex: number;
+}
+
+const CardContainer = styled.div<{ activeIndex: number; transitionEnabled: boolean }>`
   display: flex;
-  transition: transform 0.5s ease;
+  align-items: center;
+  justify-content: center;
+  transition: ${({ transitionEnabled }) => (transitionEnabled ? "transform 0.8s ease" : "none")};
   transform: ${({ activeIndex }) =>
-  `translateX(calc(50% - ${CARD_WIDTH / 2}px - ${(CARD_WIDTH + CARD_GAP) * activeIndex}px))`};
+    `translateX(calc(50% - ${CARD_WIDTH / 2}px - ${(CARD_WIDTH + CARD_GAP) * activeIndex}px))`};
   gap: ${CARD_GAP}px;
   overflow: visible;
 `;
 
+
 const Card = styled.div<{ active: boolean }>`
-  flex: 0 0 200px;
-  height: 250px;
+  flex: 0 0 ${CARD_WIDTH}px;
   width: ${CARD_WIDTH}px;
   height: ${CARD_HEIGHT}px;
   background: #f0f0f0;
@@ -49,21 +56,27 @@ const Card = styled.div<{ active: boolean }>`
   justify-content: center;
   font-weight: bold;
   font-size: 20px;
+  /* 부드러운 scale, opacity 전환 */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+
   opacity: ${({ active }) => (active ? 1 : 0.6)};
-  transform: ${({ active }) => (active ? "scale(1.3)" : "scale(1)")};
-  transition: transform 0.3s ease, border-radius 0.3s ease, opacity 0.3s ease;
+  transform: ${({ active }) => `scale(${active ? 1.1 : 1})`};
 `;
 
-const Button = styled.button<{ left?: boolean }>`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  ${({ left }) => (left ? "left: 10px;" : "right: 10px;")}
+const ButtonSection = styled.div`
+  margin-top: 70px;
+  display: flex;
+  justify-content: center; /* 왼쪽 정렬 */
+  width: 100%;
+  gap: 100px; /* 버튼 사이 간격 */
+`;
+
+const ButtonLeft = styled.button`
   padding: 10px 15px;
   background: #333;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 100%;
   cursor: pointer;
 
   &:hover {
@@ -71,8 +84,22 @@ const Button = styled.button<{ left?: boolean }>`
   }
 `;
 
+const ButtonRight = styled.button`
+  padding: 10px 15px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 100%;
+  cursor: pointer;
+
+  &:hover {
+    background: #555;
+  }
+`;
+
+
 const MainHeader = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #d9d9d9;
   height: 500px;
   border-radius: 20px;
   margin: 10px;
@@ -85,11 +112,10 @@ const MainHeader = styled.div`
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 `;
 
 const StartButton = styled.button`
-  background: linear-gradient(135deg, #850000 0%, #a00000 100%);
+  background: linear-gradient(135deg, #860000 0%, #a00000 100%);
   color: white;
   border: none;
   padding: 15px 40px;
@@ -99,12 +125,10 @@ const StartButton = styled.button`
   font-weight: bold;
   margin-top: 30px;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(133, 0, 0, 0.3);
+  box-shadow: 0 5px 5px rgba(133, 0, 0, 0.3);
 
   &:hover {
     background: linear-gradient(135deg, #6b0000 0%, #8b0000 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 25px rgba(133, 0, 0, 0.4);
   }
 
   &:active {
@@ -116,8 +140,13 @@ const SectionTitle = styled.h2`
   font-size: 35px;
   text-align: center;
   margin-bottom: 50px;
-  margin-top: 100px;
   color: #333;
+`;
+
+const SectionDiv = styled.div`
+  width: 100%;
+  height: auto;
+  margin-top: 500px;
 `;
 
 const ChartRow = styled.div`
@@ -156,6 +185,11 @@ const ChartLeftBox = styled.div`
   text-align: left;
 `;
 
+const ExerciseVidoe = styled.div`
+  background: #d9d9d9;
+  padding: 100px 0;
+`;
+
 const Video = styled.video`
   width: 800px;
   height: 500px;
@@ -167,7 +201,7 @@ const FeatureList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 40px;
-  margin: 20px 0 100px 0;
+  margin: 30px 0 100px 0;
 `;
 
 const FeatureItemLeft = styled.div`
@@ -180,7 +214,7 @@ const FeatureItemLeft = styled.div`
   padding: 20px;
   border-radius: 0 100px 100px 0;
   width: 80%;
-  height: 130px;
+  height: 160px;
   align-self: flex-start;
 `;
 
@@ -193,7 +227,7 @@ const FeatureItemRight = styled.div`
   padding: 20px;
   border-radius: 100px 0 0 100px;
   width: 80%;
-  height: 130px;
+  height: 160px;
   align-self: flex-end;
   align-items: flex-end;
 `;
@@ -218,31 +252,51 @@ const FeatureItemRightText = styled.p`
 `;
 
 const MainPage = () => {
+  
+  const exercises = ["플랭크", "스쿼트", "푸쉬업","런지","버피테스트"];
+
+
+const [cards, setCards] = useState(exercises);
+const [activeIndex, setActiveIndex] = useState(1); // 가운데 카드
+const [isAnimating, setIsAnimating] = useState(false);
+const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+
   const navigate = useNavigate();
 
   const handleStartWorkout = () => {
     navigate('/camera');
   };
 
-  const handleCardClick = (exercise: string) => {
-    navigate('/camera');
-  };
+  // 카드 클릭
+const handleCardClick = (index: number) => {
+  setCards((prev) => {
+    const newArr = [...prev];
+    // 클릭한 카드가 가운데(activeIndex=1)가 되도록 회전
+    while (index !== activeIndex) {
+      if (index < activeIndex) {
+        const last = newArr.pop()!;
+        newArr.unshift(last);
+        index++;
+      } else {
+        const first = newArr.shift()!;
+        newArr.push(first);
+        index--;
+      }
+    }
+    return newArr;
+  });
 
+  navigate('/camera');
+};
 
-  const exercises = ["플랭크", "스쿼트", "푸쉬업"];
-  const [activeIndex, setActiveIndex] = useState(0);
+const prevCard = () => {
+  setActiveIndex(prev => (prev === 0 ? exercises.length - 1 : prev - 1));
+};
 
-  const prevCard = () => {
-    setActiveIndex((prev) =>
-      prev === 0 ? exercises.length - 1 : prev - 1
-    );
-  };
+const nextCard = () => {
+  setActiveIndex(prev => (prev === exercises.length - 1 ? 0 : prev + 1));
+};
 
-  const nextCard = () => {
-    setActiveIndex((prev) =>
-      prev === exercises.length - 1 ? 0 : prev + 1
-    );
-  };
 
   return (
     <Container>
@@ -252,23 +306,26 @@ const MainPage = () => {
         <StartButton onClick={handleStartWorkout}>운동 시작하기</StartButton>
       </MainHeader>
       
-      <CardSection>
-      <Button left onClick={prevCard}>◀</Button>
-      <CardContainer activeIndex={activeIndex}>
-        {exercises.map((exercise, index) => (
-          <Card 
-            key={index} 
-            active={index === activeIndex}
-            onClick={() => handleCardClick(exercise)}
-          >
-            {exercise}
-          </Card>
-        ))}
-      </CardContainer>
-      <Button onClick={nextCard}>▶</Button>
-      </CardSection>
+<CardSection>
+<CardContainer activeIndex={activeIndex} transitionEnabled={isTransitionEnabled}>
+  {cards.map((exercise, index) => (
+    <Card 
+      key={index} 
+      active={index === activeIndex} // 중앙 카드만 active
+    >
+      {exercise}
+    </Card>
+  ))}
+</CardContainer>
 
-      <div style={{ width: '100%', height: 'auto' }}>
+  <ButtonSection>
+    <ButtonLeft onClick={prevCard}>◀</ButtonLeft>
+    <ButtonRight onClick={nextCard}>▶</ButtonRight>
+  </ButtonSection>
+</CardSection>
+
+
+      <SectionDiv style={{ width: '100%', height: 'auto' }}>
         <SectionTitle>부상원인</SectionTitle>
         <ChartRow>
           <ChartBox>
@@ -296,16 +353,19 @@ const MainPage = () => {
             <InjuryCauseBarChart />
           </ChartBox>
         </ChartRow>
-      </div>
+      </SectionDiv>
 
-      <div>
+      <SectionDiv>
+        <ExerciseVidoe>
         <SectionTitle>자세 분석 영상</SectionTitle>
         <Video controls>
           <source src="your-video-file.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </Video>
-      </div>
-      <div>
+        </ExerciseVidoe>
+      </SectionDiv>
+
+      <SectionDiv>
         <SectionTitle>주요기능</SectionTitle>
         <FeatureList>
           <FeatureItemLeft>
@@ -337,7 +397,7 @@ const MainPage = () => {
             </FeatureItemRightText>
           </FeatureItemRight>
         </FeatureList>
-      </div>
+      </SectionDiv>
       <Footer />
     </Container>
   );
