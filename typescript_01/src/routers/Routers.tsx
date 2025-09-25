@@ -6,6 +6,7 @@ const ExerciseItems = lazy(() => import("../pages/ExerciseItems"));
 const Camera = lazy(() => import("../cameraPage/Camera"));
 const BodyTypeResult = lazy(() => import("../pages/BodyTypeResult"));
 const ExerciseResult = lazy(() => import("../components/ExerciseResult"));
+const BodyAnalysis = lazy(() => import("../pages/BodyAnalysis"));
 
 const Routers = (props: any) => {
   return (
@@ -17,6 +18,7 @@ const Routers = (props: any) => {
         <Route path="camera" element={<Camera {...props} />} />
         <Route path="bodyTypeResult" element={<BodyTypeResult {...props} />} />
         <Route path="result" element={<ExerciseResult {...props} />} />
+        <Route path="bodyAnalysis" element={<BodyAnalysis {...props} />} />
       </Routes>
     </Suspense>
   );
