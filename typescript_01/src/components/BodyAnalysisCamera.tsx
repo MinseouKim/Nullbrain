@@ -1,10 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-interface CameraSectionProps {
-    // workoutData prop is no longer needed for a generic body analysis view
-}
-
 // Styled Components
 const CameraSectionContainer = styled.div`
     width: 100%;
@@ -38,7 +34,7 @@ const FeedbackMessage = styled.div`
 
 const CameraContainer = styled.div`
     width: 100%;
-    flex: 1;
+    flex: 1; /* 남은 공간을 모두 차지하도록 설정 */
     background-color: #f8f9fa;
     border-radius: 12px;
     border: 2px solid #e0e0e0;
@@ -48,7 +44,7 @@ const CameraContainer = styled.div`
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-height: 630px;
+    /* min-height 속성을 제거하여 유연성을 확보 */
 `;
 
 const CameraPlaceholder = styled.div`
@@ -78,20 +74,17 @@ const CameraSubtitle = styled.div`
 `;
 
 const BodyAnalysisCamera: React.FC = () => {
-    // The message is now static and relates to starting the analysis.
     const feedbackMessage = "체형 분석을 시작하겠습니다!";
 
     return (
         <CameraSectionContainer>
-            {/* 피드백 섹션 */}
             <FeedbackSection>
                 <FeedbackMessage>{feedbackMessage}</FeedbackMessage>
             </FeedbackSection>
 
-            {/* 카메라 영역 */}
             <CameraContainer>
                 <CameraPlaceholder>
-                    <CameraIcon>📹</CameraIcon>
+                    <CameraIcon>📷</CameraIcon>
                     <CameraText>카메라 영역</CameraText>
                     <CameraSubtitle>체형 분석 중...</CameraSubtitle>
                 </CameraPlaceholder>

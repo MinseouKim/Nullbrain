@@ -4,12 +4,12 @@ import styled, { keyframes } from "styled-components";
 
 const HeaderContainer = styled.header`
   margin: 0 auto;
-	background: #fff;
-	display: flex;
-	flex-direction: row;
+  background: #fff;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-	padding: 10px 20px;
+  padding: 10px 20px;
   position: relative;
   min-height: 60px;
 `;
@@ -71,6 +71,17 @@ const Logo = styled.div`
 const LeftBar = styled.div`
   display: flex;
   gap: 30px;
+  align-items: center; 
+`;
+
+const NavItem = styled.span`
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: #850000;
+  }
 `;
 
 const Login = styled.button`
@@ -101,12 +112,12 @@ const Header = () => {
     }, 300);
   };
 
-	return (
-		<HeaderContainer>
+  return (
+    <HeaderContainer>
       <LeftBar>
-        <span>체형 분석</span>
-        <span>후기</span>
-        <span>운동</span>
+        <NavItem onClick={() => navigate('/bodyAnalysis')}>체형 분석</NavItem>
+        <NavItem>후기</NavItem>
+        <NavItem onClick={() => navigate('/camera')}>운동</NavItem>
       </LeftBar>
       <Logo onClick={handleLogoClick}>
         자세ON
@@ -115,8 +126,8 @@ const Header = () => {
         <Login>로그인</Login>
         <Signup>회원가입</Signup>
       </RightBar>
-		</HeaderContainer>
-	);
+    </HeaderContainer>
+  );
 }
 
 export default Header;

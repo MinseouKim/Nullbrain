@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { type ExerciseDetail } from '../datas/data';
+import { useNavigate } from "react-router-dom";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -74,7 +75,7 @@ const ImageSection = styled.div`
     max-width: 300px;
     border-radius: 10px;
     object-fit: contain;
-    min-height: 0; /* <<<--- 높이 문제 해결을 위한 최종 수정 */
+    min-height: 0;
   }
 `;
 
@@ -138,10 +139,16 @@ interface ExerciseModalProps {
 }
 
 const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
+  const navigate = useNavigate(); 
+  
   if (!isOpen || !exercise) {
     return null;
   }
 
+  const handleStart = () => {
+    navigate("/camera");
+  };
+  
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -156,7 +163,7 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
           <DetailItem>
             <h3>자극 부위</h3>
             <ul>
-              {exercise.stimulationArea.map((area, index) => (
+              {exercise.stimulationArea && exercise.stimulationArea.map((area, index) => (
                 <li key={index}>{area}</li>
               ))}
             </ul>
@@ -164,7 +171,7 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
           <DetailItem>
             <h3>효과</h3>
             <ul>
-              {exercise.effect.map((eff, index) => (
+              {exercise.effect && exercise.effect.map((eff, index) => (
                 <li key={index}>{eff}</li>
               ))}
             </ul>
@@ -172,7 +179,7 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
           <DetailItem>
             <h3>주의사항</h3>
             <ul>
-              {exercise.caution.map((cau, index) => (
+              {exercise.caution && exercise.caution.map((cau, index) => (
                 <li key={index}>{cau}</li>
               ))}
             </ul>
@@ -180,7 +187,7 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
         </InfoSection>
 
         <ActionSection>
-          <StartButton onClick={() => alert(`${exercise.name} 운동을 시작합니다!`)}>
+          <StartButton onClick={handleStart}>
             운동 시작하기
           </StartButton>
         </ActionSection>
