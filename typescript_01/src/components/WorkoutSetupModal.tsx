@@ -32,17 +32,40 @@ const ModalOverlay = styled.div<{ isOpen: boolean }>`
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  overflow-y: auto;
 `;
 
 const ModalContainer = styled.div`
   background-color: white;
   border-radius: 16px;
-  padding: 40px;
-  max-width: 500px;
+  padding: 30px;
+  max-width: 90vw;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   position: relative;
   animation: modalSlideIn 0.3s ease-out;
+  margin: auto;
+
+  /* 노트북 화면 크기 대응 */
+  @media (min-width: 1024px) and (max-width: 1440px) {
+    max-width: 600px;
+    padding: 35px;
+  }
+
+  /* 데스크톱 화면 크기 대응 */
+  @media (min-width: 1441px) {
+    max-width: 700px;
+    padding: 40px;
+  }
+
+  /* 태블릿 화면 크기 대응 */
+  @media (max-width: 768px) {
+    max-width: 95vw;
+    padding: 20px;
+    max-height: 95vh;
+  }
 
   @keyframes modalSlideIn {
     from {
@@ -66,6 +89,10 @@ const ModalTitle = styled.h2`
   font-weight: 700;
   color: #333;
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
 `;
 
 const Instructions = styled.div`
@@ -73,12 +100,20 @@ const Instructions = styled.div`
   font-size: 21px;
   line-height: 1.6;
   margin-bottom: 8px;
+
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
 `;
 
 const RedText = styled.div`
   color: #dc3545;
   font-size: 16px;
   margin-bottom: 30px;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
 `;
 
 const ExerciseSetup = styled.div`
@@ -95,6 +130,10 @@ const ExerciseName = styled.h3`
   color: #333;
   margin-bottom: 20px;
   text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 22px;
+  }
 `;
 
 const InputRow = styled.div`
@@ -103,6 +142,10 @@ const InputRow = styled.div`
   justify-content: center;
   gap: 15px;
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    gap: 10px;
+  }
 `;
 
 const InputContainer = styled.div`
@@ -116,6 +159,10 @@ const InputLabel = styled.label`
   font-size: 19px;
   color: #666;
   font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
 `;
 
 const NumberInput = styled.input`
@@ -129,10 +176,21 @@ const NumberInput = styled.input`
   color: #333;
   transition: all 0.2s;
 
+  @media (max-width: 768px) {
+    width: 70px;
+    height: 45px;
+    font-size: 16px;
+  }
+
   &:focus {
     outline: none;
     border-color: #850000;
     box-shadow: 0 0 0 3px rgba(133, 0, 0, 0.1);
+  }
+
+  &[type="text"] {
+    text-align: left;
+    padding: 0 10px;
   }
 `;
 
@@ -157,81 +215,16 @@ const InfoText = styled.div`
   line-height: 1.5;
 `;
 
-const ExerciseSelection = styled.div`
-  margin-bottom: 30px;
-`;
-
-const ExerciseTitle = styled.h3`
-  font-size: 23px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const CategoryTabs = styled.div`
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 15px;
-`;
-
-const CategoryTab = styled.button<{ isActive: boolean }>`
-  background-color: ${props => props.isActive ? '#850000' : 'transparent'};
-  color: ${props => props.isActive ? 'white' : '#666'};
-  border: 2px solid ${props => props.isActive ? '#850000' : '#ddd'};
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s;
-  flex: 1;
-
-  &:hover {
-    background-color: ${props => props.isActive ? '#6b0000' : '#f0f0f0'};
-    border-color: #850000;
-    color: ${props => props.isActive ? 'white' : '#850000'};
-  }
-`;
-
-const ExerciseGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
-`;
-
-const ExerciseButton = styled.button<{ isSelected: boolean }>`
-  background-color: ${props => props.isSelected ? '#850000' : 'white'};
-  color: ${props => props.isSelected ? 'white' : '#333'};
-  border: 2px solid ${props => props.isSelected ? '#850000' : '#ddd'};
-  padding: 12px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  min-height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    background-color: ${props => props.isSelected ? '#6b0000' : '#f0f0f0'};
-    border-color: #850000;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-`;
 
 const ButtonContainer = styled.div`
   display: flex;
   gap: 15px;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    gap: 10px;
+    flex-direction: column;
+  }
 `;
 
 const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
@@ -243,6 +236,12 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
   transition: all 0.2s;
   border: none;
   min-width: 140px;
+
+  @media (max-width: 768px) {
+    padding: 12px 20px;
+    font-size: 14px;
+    min-width: 120px;
+  }
 
   ${props => props.variant === 'primary' ? `
     background-color: #850000;
@@ -310,30 +309,9 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
     }
   ];
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('하체');
   const [selectedExercise, setSelectedExercise] = useState<Exercise>(exerciseCategories[0].exercises[0]);
   const [reps, setReps] = useState(exerciseCategories[0].exercises[0].defaultReps);
   const [sets, setSets] = useState(exerciseCategories[0].exercises[0].defaultSets);
-
-  const handleCategorySelect = (categoryName: string) => {
-    setSelectedCategory(categoryName);
-    const category = exerciseCategories.find(cat => cat.name === categoryName);
-    if (category && category.exercises.length > 0) {
-      const firstExercise = category.exercises[0];
-      setSelectedExercise(firstExercise);
-      setReps(firstExercise.defaultReps);
-      setSets(firstExercise.defaultSets);
-    }
-  };
-
-  const handleExerciseSelect = (exercise: Exercise) => {
-    setSelectedExercise(exercise);
-    setReps(exercise.defaultReps);
-    setSets(exercise.defaultSets);
-  };
-
-  const currentCategory = exerciseCategories.find(cat => cat.name === selectedCategory);
-  const currentExercises = currentCategory?.exercises || [];
 
   const handleStartWorkout = () => {
     onStartWorkout({
@@ -371,37 +349,20 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
           </RedText>
         </ModalHeader>
 
-        <ExerciseSelection>
-          <ExerciseTitle>운동 선택</ExerciseTitle>
-          
-          <CategoryTabs>
-            {exerciseCategories.map((category) => (
-              <CategoryTab
-                key={category.name}
-                isActive={selectedCategory === category.name}
-                onClick={() => handleCategorySelect(category.name)}
-              >
-                {category.name}
-              </CategoryTab>
-            ))}
-          </CategoryTabs>
-
-          <ExerciseGrid>
-            {currentExercises.map((exercise) => (
-              <ExerciseButton
-                key={exercise.name}
-                isSelected={selectedExercise.name === exercise.name}
-                onClick={() => handleExerciseSelect(exercise)}
-              >
-                {exercise.name}
-              </ExerciseButton>
-            ))}
-          </ExerciseGrid>
-        </ExerciseSelection>
 
         <ExerciseSetup>
-          <ExerciseName>{selectedExercise.name}</ExerciseName>
           <InputRow>
+            <InputContainer>
+              <InputLabel>운동명</InputLabel>
+              <NumberInput
+                type="text"
+                value={selectedExercise.name}
+                onChange={(e) => setSelectedExercise({...selectedExercise, name: e.target.value})}
+                placeholder="운동명 입력"
+                style={{width: '120px'}}
+              />
+            </InputContainer>
+            <MultiplySign>×</MultiplySign>
             <InputContainer>
               <InputLabel>횟수</InputLabel>
               <NumberInput

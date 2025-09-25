@@ -102,34 +102,6 @@ const HeaderLogo = styled.h1`
   color: #850000;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover {
-    color: #6b0000;
-    transform: translateY(-2px);
-    text-shadow: 0 4px 8px rgba(133, 0, 0, 0.3);
-
-    &::before {
-      left: 100%;
-    }
-  }
-
-  &:active {
-    animation: ${pulse} 0.2s ease-in-out;
-  }
 `;
 
 const Navigation = styled.nav`
@@ -323,23 +295,24 @@ const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
   };
   color: white;
   border: none;
-  padding: 18px 24px;
+  padding: 15px 25px;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   transition: all 0.3s ease;
   box-shadow: ${props => props.isPaused 
     ? '0 6px 16px rgba(40, 167, 69, 0.3)' 
     : '0 6px 16px rgba(133, 0, 0, 0.3)'
   };
-  min-height: 56px;
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1;
   position: relative;
   overflow: hidden;
+  margin: 10px 8px;
 
   &::before {
     content: '';
