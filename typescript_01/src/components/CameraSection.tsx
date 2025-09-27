@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import AITrainer from "./AITrainer";
 
 interface CameraSectionProps {
   workoutData?: {
@@ -82,27 +83,25 @@ const CameraSubtitle = styled.div`
 `;
 
 const CameraSection: React.FC<CameraSectionProps> = ({ workoutData }) => {
-  const getFeedbackMessage = () => {
-    if (!workoutData) {
-      return "운동을 시작해주세요!";
-    }
-    return `${workoutData.name} ${workoutData.reps}회 × ${workoutData.sets}세트를 시작하겠습니다!`;
+  const exerciseForAI = (name: string): "squat" | "pushup" => {
+    const lowerCaseName = name.toLowerCase();
+    if (lowerCaseName.includes("squat")) return "squat";
+    if (lowerCaseName.includes("pushup")) return "pushup";
+    return "squat";
   };
 
   return (
     <CameraSectionContainer>
-      {/* 피드백 섹션 */}
-      <FeedbackSection>
-        <FeedbackMessage>{getFeedbackMessage()}</FeedbackMessage>
-      </FeedbackSection>
+      <FeedbackSection>{/* ... */}</FeedbackSection>
 
-      {/* 카메라 영역 */}
       <CameraContainer>
-        <CameraPlaceholder>
-          <CameraIcon>📹</CameraIcon>
-          <CameraText>카메라 영역</CameraText>
-          <CameraSubtitle>운동 자세 분석 중...</CameraSubtitle>
-        </CameraPlaceholder>
+        {workoutData ? (
+          // 운동 데이터가 있으면 AITrainer를 렌더링
+          <AITrainer exercise={exerciseForAI(workoutData.name)} />
+        ) : (
+          // 운동 데이터가 없으면 플레이스홀더를 렌더링
+          <CameraPlaceholder>{/* ... */}</CameraPlaceholder>
+        )}
       </CameraContainer>
     </CameraSectionContainer>
   );
