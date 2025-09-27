@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
-import Header from '../Header';
-import Footer from '../Footer';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
+import Header from "../Header";
+import Footer from "../Footer";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -59,8 +59,10 @@ const MainLayoutContainer = styled.div<{ isTransitioning?: boolean }>`
   min-height: 100vh;
   background-color: white;
   color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  animation: ${props => props.isTransitioning ? fadeOut : slideIn} 0.3s ease-in-out;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
+  animation: ${(props) => (props.isTransitioning ? fadeOut : slideIn)} 0.3s
+    ease-in-out;
 `;
 
 // const Header = styled.header`
@@ -148,7 +150,6 @@ const AuthButton = styled.button`
   }
 `;
 
-
 const ContentContainer = styled.div`
   display: flex;
   height: calc(100vh - 140px);
@@ -176,7 +177,6 @@ const Sidebar = styled.aside`
   height: 100%;
   overflow-y: auto;
 `;
-
 
 const EndWorkoutButton = styled.button`
   background-color: #850000;
@@ -216,9 +216,9 @@ const TimerSection = styled.div`
 const TimerDisplay = styled.div`
   font-size: 36px;
   font-weight: 700;
-  
+
   color: #333;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 `;
 
 const WorkoutStats = styled.div`
@@ -237,7 +237,7 @@ const WorkoutStats = styled.div`
   padding-bottom: 27px;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -285,14 +285,14 @@ const StatValue = styled.div`
   font-weight: 800;
   color: #850000;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 `;
 
 const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
-  background: ${props => props.isPaused 
-    ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' 
-    : 'linear-gradient(135deg, #850000 0%, #a00000 100%)'
-  };
+  background: ${(props) =>
+    props.isPaused
+      ? "linear-gradient(135deg, #28a745 0%, #20c997 100%)"
+      : "linear-gradient(135deg, #850000 0%, #a00000 100%)"};
   color: white;
   border: none;
   padding: 15px 25px;
@@ -301,10 +301,10 @@ const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
   font-size: 14px;
   font-weight: 700;
   transition: all 0.3s ease;
-  box-shadow: ${props => props.isPaused 
-    ? '0 6px 16px rgba(40, 167, 69, 0.3)' 
-    : '0 6px 16px rgba(133, 0, 0, 0.3)'
-  };
+  box-shadow: ${(props) =>
+    props.isPaused
+      ? "0 6px 16px rgba(40, 167, 69, 0.3)"
+      : "0 6px 16px rgba(133, 0, 0, 0.3)"};
   min-height: 50px;
   display: flex;
   align-items: center;
@@ -315,26 +315,31 @@ const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
   margin: 10px 8px;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
     transition: left 0.5s;
   }
 
   &:hover:not(:disabled) {
-    background: ${props => props.isPaused 
-      ? 'linear-gradient(135deg, #218838 0%, #1ea085 100%)' 
-      : 'linear-gradient(135deg, #6b0000 0%, #8b0000 100%)'
-    };
+    background: ${(props) =>
+      props.isPaused
+        ? "linear-gradient(135deg, #218838 0%, #1ea085 100%)"
+        : "linear-gradient(135deg, #6b0000 0%, #8b0000 100%)"};
     transform: translateY(-3px);
-    box-shadow: ${props => props.isPaused 
-      ? '0 8px 20px rgba(40, 167, 69, 0.4)' 
-      : '0 8px 20px rgba(133, 0, 0, 0.4)'
-    };
+    box-shadow: ${(props) =>
+      props.isPaused
+        ? "0 8px 20px rgba(40, 167, 69, 0.4)"
+        : "0 8px 20px rgba(133, 0, 0, 0.4)"};
 
     &::before {
       left: 100%;
@@ -409,16 +414,14 @@ const OtherExercises = styled.div`
   }
 `;
 
-
-
-const MainLayout: React.FC<MainLayoutProps> = ({ 
-  children, 
-  isWorkoutActive = false, 
+const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  isWorkoutActive = false,
   isWorkoutPaused = false,
-  onToggleWorkout, 
+  onToggleWorkout,
   onEndWorkout,
   timer = "0:00",
-  workoutData = null
+  workoutData = null,
 }) => {
   const navigate = useNavigate();
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -426,25 +429,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const handleLogoClick = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      navigate('/main');
+      navigate("/main");
     }, 300);
   };
 
   // 운동 분류별 데이터
   const exerciseCategories = {
-    '하체': ['스쿼트', '점프스쿼트', '런지', '월마운틴클라이머'],
-    '상체': ['푸쉬업', '플랭크', '사이드플랭크', '마운틴클라이머'],
-    '어깨': ['숄더프레스', '레터럴레이즈', '프론트레이즈', '리어델트플라이'],
-    '팔': ['버피', '트라이셉딥', '바이셉컬', '해머컬']
+    하체: ["스쿼트", "점프스쿼트", "런지", "월마운틴클라이머"],
+    상체: ["푸쉬업", "플랭크", "사이드플랭크", "마운틴클라이머"],
+    어깨: ["숄더프레스", "레터럴레이즈", "프론트레이즈", "리어델트플라이"],
+    팔: ["버피", "트라이셉딥", "바이셉컬", "해머컬"],
   };
 
-  const currentCategoryExercises = workoutData?.category 
-    ? exerciseCategories[workoutData.category as keyof typeof exerciseCategories] || []
+  const currentCategoryExercises = workoutData?.category
+    ? exerciseCategories[
+        workoutData.category as keyof typeof exerciseCategories
+      ] || []
     : [];
   return (
     <MainLayoutContainer isTransitioning={isTransitioning}>
       {/* 헤더 */}
-      <Header/>
+      <Header />
       {/* <Header>
         <HeaderContent>
           <HeaderLeft></HeaderLeft>
@@ -469,14 +474,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
       {/* 메인 콘텐츠 영역 */}
       <ContentContainer>
-        <MainContent>
-          {children}
-        </MainContent>
+        <MainContent>{children}</MainContent>
 
         {/* 사이드바 */}
         <Sidebar>
           {/* 운동 끝내기 버튼 */}
-          <EndWorkoutButton onClick={onEndWorkout}>운동 끝내기</EndWorkoutButton>
+          <EndWorkoutButton onClick={onEndWorkout}>
+            운동 끝내기
+          </EndWorkoutButton>
 
           {/* 타이머 */}
           <TimerSection>
@@ -495,13 +500,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 <StatValue>{workoutData?.sets || 0}</StatValue>
               </StatItem>
             </StatsRow>
-            <StopExerciseButton 
+            <StopExerciseButton
               onClick={onToggleWorkout}
               disabled={!isWorkoutActive}
               isPaused={isWorkoutPaused}
             >
-              {!isWorkoutActive ? '운동 대기 중' : 
-               isWorkoutPaused ? '운동 다시시작' : '운동 정지'}
+              {!isWorkoutActive
+                ? "운동 대기 중"
+                : isWorkoutPaused
+                ? "운동 다시시작"
+                : "운동 정지"}
             </StopExerciseButton>
           </WorkoutStats>
 
@@ -511,12 +519,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               <>
                 <ExerciseGrid>
                   {currentCategoryExercises.slice(0, 4).map((exercise) => (
-                    <ExerciseButton 
+                    <ExerciseButton
                       key={exercise}
-                      style={{ 
-                        backgroundColor: workoutData?.name === exercise ? '#850000' : 'white',
-                        color: workoutData?.name === exercise ? 'white' : '#333',
-                        borderColor: workoutData?.name === exercise ? '#850000' : '#ddd'
+                      style={{
+                        backgroundColor:
+                          workoutData?.name === exercise ? "#850000" : "white",
+                        color:
+                          workoutData?.name === exercise ? "white" : "#333",
+                        borderColor:
+                          workoutData?.name === exercise ? "#850000" : "#ddd",
                       }}
                     >
                       {exercise}
@@ -543,7 +554,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </ExerciseSelection>
         </Sidebar>
       </ContentContainer>
-      
+
       {/* 푸터 */}
       <Footer />
     </MainLayoutContainer>
