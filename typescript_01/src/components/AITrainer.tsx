@@ -35,6 +35,35 @@ const AITrainer: React.FC<AITrainerProps> = ({
   const cameraRef = useRef<any>(null);
   const isInitialized = useRef(false);
 
+  const getCameraErrorMessage = (e: any): string => {
+    const name: string | undefined = e?.name;
+    const isLocalhost =
+      typeof window !== "undefined" &&
+      ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+
+    if (
+      typeof window !== "undefined" &&
+      window.location.protocol !== "https:" &&
+      !isLocalhost
+    ) {
+      return "카메라는 HTTPS 또는 localhost 환경에서만 동작합니다. 주소창의 보안(https) 여부를 확인해주세요.";
+    }
+    if (name === "NotAllowedError" || name === "SecurityError") {
+      return "카메라 권한이 차단되었습니다. 브라우저의 사이트 권한 설정에서 ‘허용’으로 바꿔주세요.";
+    }
+    if (name === "NotFoundError" || name === "OverconstrainedError") {
+      return "사용 가능한 카메라 장치를 찾지 못했습니다.";
+    }
+    if (name === "NotReadableError") {
+      return "다른 앱이 카메라를 사용 중입니다.";
+    }
+    if (name === "AbortError") {
+      return "카메라 초기화가 중단되었습니다. 다시 시도해주세요.";
+    }
+    return "카메라 초기화에 실패했습니다. 권한/장치 상태를 확인해주세요.";
+  };
+
+
   useEffect(() => {
     if (isInitialized.current) {
       return;
@@ -86,6 +115,25 @@ const AITrainer: React.FC<AITrainerProps> = ({
       const videoElement = videoRef.current;
       const canvasElement = canvasRef.current;
       const canvasCtx = canvasElement.getContext("2d")!;
+
+      try {
+        const preStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false,
+        });
+        try {
+          videoElement.srcObject = preStream;
+          await videoElement.play().catch(() => {});
+        } finally {
+          preStream.getTracks().forEach((t) => t.stop());
+          videoElement.srcObject = null;
+        }
+      } catch (e: any) {
+        const msg = getCameraErrorMessage(e);
+        setFeedbackFromAI(msg);
+        window.alert(msg);
+        return;
+      }
 
       const wsURL = `ws://${backendAddress}:8000/ws/${exercise}`;
       ws.current = new WebSocket(wsURL);
@@ -146,7 +194,17 @@ const AITrainer: React.FC<AITrainerProps> = ({
         width: 1280,
         height: 720,
       });
-      cameraRef.current.start();
+
+      try {
+        await cameraRef.current.start();
+      } catch (e: any) {
+        console.error("Camera start failed:", e);
+        const msg = getCameraErrorMessage(e);
+        setFeedbackFromAI(msg);
+        window.alert(msg);
+        if (ws.current && ws.current.readyState === WebSocket.OPEN) ws.current.close();
+        return;
+      }
     };
 
     initializeMediaPipe();
@@ -167,7 +225,7 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <video ref={videoRef} style={{ display: "none" }}></video>
+      <video ref={videoRef} style={{ display: "none" }} muted playsInline></video>
       <canvas
         ref={canvasRef}
         width="1280px"
