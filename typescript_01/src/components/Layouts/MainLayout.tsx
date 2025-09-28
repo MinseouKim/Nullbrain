@@ -72,39 +72,39 @@ const MainLayoutContainer = styled.div<{ isTransitioning?: boolean }>`
 //   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 // `;
 
-const HeaderContent = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
+// const HeaderContent = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   max-width: 1200px;
+//   margin: 0 auto;
+// `;
 
-const HeaderLeft = styled.div`
-  flex: 1;
-`;
+// const HeaderLeft = styled.div`
+//   flex: 1;
+// `;
 
-const HeaderCenter = styled.div`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-`;
+// const HeaderCenter = styled.div`
+//   flex: 1;
+//   display: flex;
+//   justify-content: center;
+// `;
 
-const HeaderRight = styled.div`
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-`;
+// const HeaderRight = styled.div`
+//   flex: 1;
+//   display: flex;
+//   justify-content: flex-end;
+//   gap: 10px;
+// `;
 
-const HeaderLogo = styled.h1`
-  margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-  color: #850000;
-  text-align: center;
-  cursor: pointer;
-`;
+// const HeaderLogo = styled.h1`
+//   margin: 0;
+//   font-size: 28px;
+//   font-weight: 700;
+//   color: #850000;
+//   text-align: center;
+//   cursor: pointer;
+// `;
 
 const Navigation = styled.nav`
   background-color: #f8f9fa;
@@ -508,7 +508,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               {!isWorkoutActive
                 ? "운동 대기 중"
                 : isWorkoutPaused
-                ? "운동 다시시작"
+                ? "운동 다시 시작"
                 : "운동 정지"}
             </StopExerciseButton>
           </WorkoutStats>

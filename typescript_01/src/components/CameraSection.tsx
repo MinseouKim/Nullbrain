@@ -1,3 +1,5 @@
+// src/components/CameraSection.tsx
+
 import React from "react";
 import styled from "styled-components";
 import AITrainer from "./AITrainer";
@@ -7,10 +9,12 @@ interface CameraSectionProps {
     name: string;
     reps: number;
     sets: number;
+    category: string;
   } | null;
+  isWorkoutPaused: boolean;
 }
 
-// Styled Components
+// Styled Components (기존 디자인 코드 복원)
 const CameraSectionContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -82,25 +86,45 @@ const CameraSubtitle = styled.div`
   font-style: italic;
 `;
 
-const CameraSection: React.FC<CameraSectionProps> = ({ workoutData }) => {
+const CameraSection: React.FC<CameraSectionProps> = ({
+  workoutData,
+  isWorkoutPaused,
+}) => {
   const exerciseForAI = (name: string): "squat" | "pushup" => {
     const lowerCaseName = name.toLowerCase();
-    if (lowerCaseName.includes("squat")) return "squat";
-    if (lowerCaseName.includes("pushup")) return "pushup";
-    return "squat";
+    if (lowerCaseName.includes("squat") || lowerCaseName.includes("스쿼트")) {
+      return "squat";
+    }
+    if (lowerCaseName.includes("pushup") || lowerCaseName.includes("푸쉬업")) {
+      return "pushup";
+    }
+    return "squat"; // 기본값
   };
 
   return (
     <CameraSectionContainer>
-      <FeedbackSection>{/* ... */}</FeedbackSection>
+      <FeedbackSection>
+        <FeedbackMessage>
+          {workoutData
+            ? `${workoutData.name} 운동을 시작합니다!`
+            : "운동을 설정하고 시작해주세요!"}
+        </FeedbackMessage>
+      </FeedbackSection>
 
       <CameraContainer>
         {workoutData ? (
           // 운동 데이터가 있으면 AITrainer를 렌더링
-          <AITrainer exercise={exerciseForAI(workoutData.name)} />
+          <AITrainer
+            exercise={exerciseForAI(workoutData.name)}
+            isWorkoutPaused={isWorkoutPaused}
+          />
         ) : (
           // 운동 데이터가 없으면 플레이스홀더를 렌더링
-          <CameraPlaceholder>{/* ... */}</CameraPlaceholder>
+          <CameraPlaceholder>
+            <CameraIcon>📹</CameraIcon>
+            <CameraText>운동 시작 대기 중</CameraText>
+            <CameraSubtitle>모달에서 운동을 설정해주세요.</CameraSubtitle>
+          </CameraPlaceholder>
         )}
       </CameraContainer>
     </CameraSectionContainer>

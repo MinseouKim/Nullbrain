@@ -92,7 +92,10 @@ function Camera() {
       timer={formatTime(timer)}
       workoutData={workoutData}
     >
-      <CameraSection workoutData={workoutData} />
+      <CameraSection
+        workoutData={workoutData}
+        isWorkoutPaused={isWorkoutPaused}
+      />
       <WorkoutSetupModal
         isOpen={showModal}
         onClose={handleCloseModal}
