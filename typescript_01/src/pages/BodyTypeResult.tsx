@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import BodyTypeLineChart from "../components/BodyTypeLineChart";
@@ -224,7 +225,7 @@ const DownDiv = styled.div`
   align-items: center;
   flex-direction: column;
   margin-top: 20px;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 `;
 
 const SolText = styled.div`
@@ -308,8 +309,62 @@ const RecoBtn = styled.button`
   }
 `;
 
+const BtnRow = styled.div`
+  width:100%;
+  padding:20px;
+  border-radius:10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+`;
+
+const GoHome = styled.button`
+  border: 2px solid #850000;
+    color: #850000;
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  background: #850000;
+    color: #fff;
+  }
+`;
+
+const GoExercise = styled.button`
+  border: 2px solid #850000;
+  background: #850000;
+    color: #fff;
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  border: 2px solid #850000;
+    color: #850000;
+  background: #fff;
+  }
+`;
 
 const BodyTypeResult = () => {
+  
+    const navigate = useNavigate();
+  
+    const handleExercise= () => {
+      navigate('/exercise');
+    };
+  
+    const handleHome = () => {
+      navigate('/');
+    };
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const openModal: React.MouseEventHandler<HTMLButtonElement> = () => {
@@ -416,6 +471,10 @@ const bodyData = [
             <RecoBtn>푸쉬업</RecoBtn>
           </RecoRow>
     </DownDiv>
+          <BtnRow>
+            <GoHome onClick={handleHome}>홈으로</GoHome>
+            <GoExercise onClick={handleExercise}>운동하러가기</GoExercise>
+          </BtnRow>
   </Container>
   <Footer />
         {/* 모달 */}

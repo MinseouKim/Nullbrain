@@ -70,14 +70,24 @@ const Logo = styled.div`
 
 const LeftBar = styled.div`
   display: flex;
-  gap: 30px;
+  gap: 20px;
 `;
 
 const Login = styled.button`
-  background-color: transparent;
-  border: none;
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #000;
+  padding: 5px 20px;
+  border-radius: 50px;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.2s ease;
+
+  &:hover{
+    background-color: #fff;
+    border: 2px solid #860000;
+    color: #860000;
+  }
 `;
 
 const Signup = styled.button`
@@ -88,6 +98,22 @@ const Signup = styled.button`
   border-radius: 50px;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.2s ease;
+  
+  &:hover{
+    background-color: #860000;
+    color: #fff;
+  }
+`;
+
+const HeaderSpan = styled.span`
+  cursor:pointer;
+  font-weight:500;
+  font-size: 16px;
+
+  &:hover{
+    color:#860000;
+  }
 `;
 
 const Header = () => {
@@ -101,12 +127,19 @@ const Header = () => {
     }, 300);
   };
 
+  const handleBodyType = () => {
+    navigate('/bodyAnalysis');
+  };
+  const handleExerciseItems = () => {
+    navigate('/exercise');
+  };
+
 	return (
 		<HeaderContainer>
       <LeftBar>
-        <span>체형 분석</span>
-        <span>후기</span>
-        <span>운동</span>
+        <HeaderSpan onClick={handleBodyType}>체형 분석</HeaderSpan>
+        <HeaderSpan onClick={handleLogoClick}>후기</HeaderSpan> {/* 추후에 onclick 주소 수정 */}
+        <HeaderSpan onClick={handleExerciseItems}>운동</HeaderSpan>
       </LeftBar>
       <Logo onClick={handleLogoClick}>
         자세ON

@@ -323,7 +323,7 @@ const MainPage = () => {
   const navigate = useNavigate();
 
   const handleStartWorkout = () => {
-    navigate('/camera');
+    navigate('/bodyAnalysis');
   };
 
   // 카드 클릭
