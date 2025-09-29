@@ -30,7 +30,6 @@ const MainLayoutContainer = styled.div`
     flex-direction: column;
 `;
 
-// 🔥🔥🔥 min-height와 margin을 수정하여 높이와 위치를 조정합니다. 🔥🔥🔥
 const ContentContainer = styled.div`
     display: flex;
     flex: 1; /* 헤더와 푸터 사이의 모든 공간을 차지 */
