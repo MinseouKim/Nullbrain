@@ -19,8 +19,6 @@ interface BodyData {
     category: string;
 }
 
-// --- 스타일 컴포넌트 ---
-
 const MainLayoutContainer = styled.div`
     min-height: 100vh;
     background-color: white;
