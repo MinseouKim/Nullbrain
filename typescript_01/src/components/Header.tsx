@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
+import { AuthContext } from "../context/AuthContext";
 
 const HeaderContainer = styled.header`
   margin: 0 auto;
@@ -119,6 +120,7 @@ const HeaderSpan = styled.span`
 const Header = () => {
   const navigate = useNavigate();
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { isLoggedIn, logout } = useContext(AuthContext);
 
   const handleLogoClick = () => {
     setIsTransitioning(true);
@@ -127,12 +129,12 @@ const Header = () => {
     }, 300);
   };
 
-  const handleBodyType = () => {
-    navigate('/bodyAnalysis');
-  };
-  const handleExerciseItems = () => {
-    navigate('/exercise');
-  };
+  const handleBodyType = () => navigate("/bodyAnalysis");
+  const handleExerciseItems = () => navigate("/exercise");
+  const handleLogin = () => navigate("/login");
+  const handleSignUp = () => navigate("/signUp");
+  const handleMyPage = () => navigate("/mypage");
+  const handleAdmin = () => navigate("/admin");
 
 	return (
 		<HeaderContainer>
@@ -145,8 +147,18 @@ const Header = () => {
         자세ON
       </Logo>
       <RightBar>
-        <Login>로그인</Login>
-        <Signup>회원가입</Signup>
+        {isLoggedIn ? (
+          <>
+            <Login onClick={handleAdmin}>관리자페이지</Login>
+            <Login onClick={handleMyPage}>마이페이지</Login>
+            <Signup onClick={logout}>로그아웃</Signup>
+          </>
+        ) : (
+          <>
+            <Login onClick={handleLogin}>로그인</Login>
+            <Signup onClick={handleSignUp}>회원가입</Signup>
+          </>
+        )}
       </RightBar>
 		</HeaderContainer>
 	);
