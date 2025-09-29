@@ -10,6 +10,7 @@ const BodyAnalysis = lazy(() => import("../pages/BodyAnalysis"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 const SignUpPage = lazy(() => import("../pages/SignUpPage"));
 const AdminPage = lazy(() => import("../pages/AdminPage"));
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 const Routers = (props: any) => {
   return (
@@ -25,6 +26,7 @@ const Routers = (props: any) => {
         <Route path="login" element={<LoginPage {...props} />} />
         <Route path="signUp" element={<SignUpPage {...props} />} />
         <Route path="admin" element={<AdminPage {...props} />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );
