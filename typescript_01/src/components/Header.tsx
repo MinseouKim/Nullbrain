@@ -45,13 +45,18 @@ const Logo = styled.div`
   white-space: nowrap;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
     transition: left 0.5s;
   }
 
@@ -72,7 +77,7 @@ const Logo = styled.div`
 const LeftBar = styled.div`
   display: flex;
   gap: 30px;
-  align-items: center; 
+  align-items: center;
 `;
 
 const NavItem = styled.span`
@@ -95,7 +100,7 @@ const Login = styled.button`
   font-size: 16px;
   transition: all 0.2s ease;
 
-  &:hover{
+  &:hover {
     background-color: #fff;
     border: 2px solid #860000;
     color: #860000;
@@ -111,20 +116,20 @@ const Signup = styled.button`
   cursor: pointer;
   font-size: 16px;
   transition: all 0.2s ease;
-  
-  &:hover{
+
+  &:hover {
     background-color: #860000;
     color: #fff;
   }
 `;
 
 const HeaderSpan = styled.span`
-  cursor:pointer;
-  font-weight:500;
+  cursor: pointer;
+  font-weight: 500;
   font-size: 16px;
 
-  &:hover{
-    color:#860000;
+  &:hover {
+    color: #860000;
   }
 `;
 
@@ -136,7 +141,7 @@ const Header = () => {
   const handleLogoClick = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      navigate('/main');
+      navigate("/main");
     }, 300);
   };
 
@@ -154,9 +159,7 @@ const Header = () => {
         <NavItem onClick={handleLogoClick}>후기</NavItem>
         <NavItem onClick={handleExerciseItems}>운동</NavItem>
       </LeftBar>
-      <Logo onClick={handleLogoClick}>
-        자세ON
-      </Logo>
+      <Logo onClick={handleLogoClick}>자세ON</Logo>
       <RightBar>
         {isLoggedIn ? (
           <>
@@ -173,6 +176,6 @@ const Header = () => {
       </RightBar>
     </HeaderContainer>
   );
-}
+};
 
 export default Header;
