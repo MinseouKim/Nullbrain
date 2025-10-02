@@ -198,7 +198,7 @@ const BodyAnalysis = () => {
                 />
             </AppWrapper>
         <Footer />
-    </>
+        </>
     );
 };
 

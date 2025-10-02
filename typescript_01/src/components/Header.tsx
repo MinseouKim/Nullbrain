@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
+import { AuthContext } from "../context/AuthContext";
 
 const HeaderContainer = styled.header`
   margin: 0 auto;
@@ -70,14 +71,24 @@ const Logo = styled.div`
 
 const LeftBar = styled.div`
   display: flex;
-  gap: 30px;
+  gap: 20px;
 `;
 
 const Login = styled.button`
-  background-color: transparent;
-  border: none;
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #000;
+  padding: 5px 20px;
+  border-radius: 50px;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.2s ease;
+
+  &:hover{
+    background-color: #fff;
+    border: 2px solid #860000;
+    color: #860000;
+  }
 `;
 
 const Signup = styled.button`
@@ -88,11 +99,28 @@ const Signup = styled.button`
   border-radius: 50px;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.2s ease;
+  
+  &:hover{
+    background-color: #860000;
+    color: #fff;
+  }
+`;
+
+const HeaderSpan = styled.span`
+  cursor:pointer;
+  font-weight:500;
+  font-size: 16px;
+
+  &:hover{
+    color:#860000;
+  }
 `;
 
 const Header = () => {
   const navigate = useNavigate();
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { isLoggedIn, logout } = useContext(AuthContext);
 
   const handleLogoClick = () => {
     setIsTransitioning(true);
@@ -101,19 +129,36 @@ const Header = () => {
     }, 300);
   };
 
+  const handleBodyType = () => navigate("/bodyAnalysis");
+  const handleExerciseItems = () => navigate("/exercise");
+  const handleLogin = () => navigate("/login");
+  const handleSignUp = () => navigate("/signUp");
+  const handleMyPage = () => navigate("/mypage");
+  const handleAdmin = () => navigate("/admin");
+
 	return (
 		<HeaderContainer>
       <LeftBar>
-        <span>체형 분석</span>
-        <span>후기</span>
-        <span>운동</span>
+        <HeaderSpan onClick={handleBodyType}>체형 분석</HeaderSpan>
+        <HeaderSpan onClick={handleLogoClick}>후기</HeaderSpan> {/* 추후에 onclick 주소 수정 */}
+        <HeaderSpan onClick={handleExerciseItems}>운동</HeaderSpan>
       </LeftBar>
       <Logo onClick={handleLogoClick}>
         자세ON
       </Logo>
       <RightBar>
-        <Login>로그인</Login>
-        <Signup>회원가입</Signup>
+        {isLoggedIn ? (
+          <>
+            <Login onClick={handleAdmin}>관리자페이지</Login>
+            <Login onClick={handleMyPage}>마이페이지</Login>
+            <Signup onClick={logout}>로그아웃</Signup>
+          </>
+        ) : (
+          <>
+            <Login onClick={handleLogin}>로그인</Login>
+            <Signup onClick={handleSignUp}>회원가입</Signup>
+          </>
+        )}
       </RightBar>
 		</HeaderContainer>
 	);

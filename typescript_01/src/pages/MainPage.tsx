@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import InjuryPieChart from "../components/InjuryPieChart";
 import InjuryCauseBarChart from "../components/InjuryCauseBarChart";
-import styled from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 const CARD_WIDTH = 300; // 카드 너비
 const CARD_HEIGHT = 400; // 카드 높이
@@ -160,6 +161,7 @@ const ChartRow = styled.div`
 
 const ChartBox = styled.div`
   width: 80%;
+  height:500px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,8 +253,34 @@ const FeatureItemRightText = styled.p`
   text-align: right;
 `;
 
+// 애니메이션 정의
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const ChartRowAnimated = styled.div<{ inview: boolean }>`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin: 50px 0;
+  opacity: 0;
+  transform: translateY(50px);
+  min-width: 300px; /* 최소 width 추가 */
+  ${({ inview }) =>
+    inview &&
+    css` 
+      animation: ${fadeIn} 1s forwards;
+    `}
+`;
+
 const MainPage = () => {
   
+  const { ref: pieRef, inView: pieInView } = useInView({ triggerOnce: true, threshold: 0.3 });
+  const { ref: barRef, inView: barInView } = useInView({ triggerOnce: true, threshold: 0.3 });
+
   const exercises = ["플랭크", "스쿼트", "푸쉬업","런지","버피테스트"];
 
 
@@ -327,10 +355,11 @@ const nextCard = () => {
 
       <SectionDiv style={{ width: '100%', height: 'auto' }}>
         <SectionTitle>부상원인</SectionTitle>
-        <ChartRow>
+        <ChartRowAnimated ref={pieRef} inview={pieInView}>
           <ChartBox>
-            <InjuryPieChart />
+            {pieInView && <InjuryPieChart />}
           </ChartBox>
+        </ChartRowAnimated>
           <ChartRightBox>
             <p>
               스포츠안전재단의 연구에 따르면, 운동을 하는 사람 중 약 60%가 한 번 이상 부상을 경험한 것으로 나타났습니다. 
@@ -338,7 +367,7 @@ const nextCard = () => {
               우리 프로그램은 이러한 부상을 예방하고, 안전하게 운동할 수 있도록 돕습니다.
             </p>
           </ChartRightBox>
-        </ChartRow>
+
 
         <ChartRow>
           <ChartLeftBox>
@@ -349,9 +378,11 @@ const nextCard = () => {
               사용자가 부상을 예방하고 더욱 효과적으로 운동할 수 있도록 꼭 필요한 도구입니다.
             </p>
           </ChartLeftBox>
-          <ChartBox>
-            <InjuryCauseBarChart />
-          </ChartBox>
+          <ChartRowAnimated ref={barRef} inview={barInView}>
+            <ChartBox>
+              { barInView && <InjuryCauseBarChart /> }
+            </ChartBox>
+          </ChartRowAnimated>
         </ChartRow>
       </SectionDiv>
 
