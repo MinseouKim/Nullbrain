@@ -17,8 +17,8 @@ const Btn1 = styled.button`
     padding: 12px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #fff;
-    border: 1px solid #ccc;
+    background-color: #f2f2f2;
+    border: 2px solid #e0e0e0;
     border-radius: 100%;
     &:hover {
       background-color: #860000;
@@ -28,8 +28,8 @@ const Btn2 = styled.button`
     padding: 12px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #fff;
-    border: 1px solid #ccc;
+    background-color: #f2f2f2;
+  border: 2px solid #e0e0e0;
     border-radius: 100%;
     &:hover {
       background-color: #860000;
@@ -39,8 +39,8 @@ const Btn3 = styled.button`
     padding: 12px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #fff;
-    border: 1px solid #ccc;
+    background-color: #f2f2f2;
+  border: 2px solid #e0e0e0;
     border-radius: 100%;
     &:hover {
       background-color: #860000;
@@ -50,7 +50,8 @@ const Btn3 = styled.button`
 const BodyPhoto = styled.div`
   width: 300px;
   height: 400px;
-  background-color: #fff;
+  background-color: #f2f2f2;
+  border: 2px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,6 +72,19 @@ const SectionHeader = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+`;
+
+const SectionContent = styled.div`
+  width:100%;
+  display: flex; 
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 20px;
+  border: 2px solid #e0e0e0;
+  padding: 30px 100px;
+  margin: 30px 0;
+  gap:80px;
 `;
 
 const bodyData = [
@@ -157,42 +171,41 @@ const BodyChart = () => {
   return (
     <div>
       <SectionTitle>지난 체형 기록</SectionTitle>
+      <div style={{borderRadius: 10, backgroundColor:"#e0e0e0", padding:20, marginTop:20}}>
       <ResponsiveContainer width="100%" height={300}>
-<LineChart data={bodyData}>
-  <XAxis dataKey="name" />
-  <YAxis />
-  <Tooltip />
+      <LineChart data={bodyData}
+          margin={{ top: 20, right: 50, left: 0, bottom: 20 }}
+        >
+        <XAxis dataKey="name" dy={25} tick={{ fill: "#626262ff", fontWeight:500, fontSize: 15 }} />
+        <YAxis />
+        <Tooltip />
+        <Line
+          type="monotone"
+          dataKey="value"
+          stroke="#860000"
+          dot={(props: any) => {
+            const { index } = props;
+            const isSelected = selected === bodyData[index];
 
-<Line
-  type="monotone"
-  dataKey="value"
-  stroke="#860000"
-  dot={(props: any) => {
-    const { index } = props;
-    const isSelected = selected === bodyData[index];
-
-    return (
-      <Dot
-        {...props}                // cx, cy, r 등 기본 Dot props 그대로 사용
-        r={10}
-        fill={isSelected ? "#860000" : "#fff"}
-        stroke="#860000"
-        strokeWidth={1}
-        style={{ cursor: "pointer" }}
-        onClick={() => setSelected(bodyData[index])}
-      />
-    );
-  }}
-  activeDot={{ r: 1, fill: "#860000" }}
-/>
-
-
-</LineChart>
-
-
+            return (
+              <Dot
+                {...props}                // cx, cy, r 등 기본 Dot props 그대로 사용
+                r={10}
+                fill={isSelected ? "#860000" : "#fff"}
+                stroke="#860000"
+                strokeWidth={1}
+                style={{ cursor: "pointer" }}
+                onClick={() => setSelected(bodyData[index])}
+              />
+            );
+          }}
+          activeDot={{ r: 1, fill: "#860000" }}
+        />
+      </LineChart>
       </ResponsiveContainer>
+</div>
 
-      <div style={{ display: "flex", margin: 60, gap:30 }}>
+      <SectionContent>
         {/* 사진 */}
         <PhotoSection>
           <BodyPhoto>
@@ -209,7 +222,7 @@ const BodyChart = () => {
           </PhotoSection>
 
         {/* 부위별 note */}
-        <div style={{ flex: 1}}>
+        <div style={{ flex: 1,}}>
           <SectionHeader>
           <h3>{selected.name} 
             </h3>
@@ -217,17 +230,18 @@ const BodyChart = () => {
           </SectionHeader>
           {Object.entries(selected.note).map(([part, text]) => (
             <div key={part} style={{
-              backgroundColor: "#fff",
+              backgroundColor: "#f2f2f2",
               marginBottom: 8,
               padding: 8,
               fontSize: 12,
-              borderRadius: 4
+              borderRadius: 4,
+              border: "2px solid #e0e0e0"
             }}>
               <strong>{part}:</strong> {text}
             </div>
           ))}
         </div>
-      </div>
+      </SectionContent>
     </div>
   );
 };

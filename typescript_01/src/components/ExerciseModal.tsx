@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { type ExerciseDetail } from '../datas/data';
 import { useNavigate } from "react-router-dom";
+import { type ExerciseDetail } from '../datas/data';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -139,11 +139,21 @@ interface ExerciseModalProps {
 }
 
 const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
+<<<<<<< HEAD
   const navigate = useNavigate(); 
   
+=======
+    
+      const navigate = useNavigate();
+    
+      const handleStartWorkout= () => {
+        navigate('/camera');
+      };
+>>>>>>> c77701aca674398021810ca3dcfa8a0e8a4fd48b
   if (!isOpen || !exercise) {
     return null;
   }
+    
 
   const handleStart = () => {
     navigate("/camera");
@@ -187,7 +197,11 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
         </InfoSection>
 
         <ActionSection>
+<<<<<<< HEAD
           <StartButton onClick={handleStart}>
+=======
+          <StartButton onClick={handleStartWorkout}>
+>>>>>>> c77701aca674398021810ca3dcfa8a0e8a4fd48b
             운동 시작하기
           </StartButton>
         </ActionSection>

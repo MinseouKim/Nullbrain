@@ -137,6 +137,7 @@ const ActionButton = styled.button<{ isStopped?: boolean }>`
   }
 `;
 
+<<<<<<< HEAD
 const ToggleSwitchLabel = styled.label`
   position: relative;
   display: inline-block;
