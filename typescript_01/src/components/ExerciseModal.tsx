@@ -139,17 +139,12 @@ interface ExerciseModalProps {
 }
 
 const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
-<<<<<<< HEAD
-  const navigate = useNavigate(); 
-  
-=======
     
       const navigate = useNavigate();
     
       const handleStartWorkout= () => {
         navigate('/camera');
       };
->>>>>>> c77701aca674398021810ca3dcfa8a0e8a4fd48b
   if (!isOpen || !exercise) {
     return null;
   }
@@ -197,11 +192,7 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
         </InfoSection>
 
         <ActionSection>
-<<<<<<< HEAD
-          <StartButton onClick={handleStart}>
-=======
           <StartButton onClick={handleStartWorkout}>
->>>>>>> c77701aca674398021810ca3dcfa8a0e8a4fd48b
             운동 시작하기
           </StartButton>
         </ActionSection>

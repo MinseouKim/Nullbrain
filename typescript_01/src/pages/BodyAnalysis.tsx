@@ -69,6 +69,7 @@ const GuideBox = styled.div`
     margin: 0 0 15px 0;
     font-size: 16px;
     color: #850000;
+  
   }
   ul {
     margin: 0;
@@ -137,7 +138,6 @@ const ActionButton = styled.button<{ isStopped?: boolean }>`
   }
 `;
 
-<<<<<<< HEAD
 const ToggleSwitchLabel = styled.label`
   position: relative;
   display: inline-block;
