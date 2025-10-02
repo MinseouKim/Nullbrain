@@ -1,7 +1,7 @@
 // src/components/BodyAnalysisCamera.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { KP, Size } from "../lib/poseTypes";
-import type { SegMask } from "../lib/segmentation";
+import { KP, Size } from "../poseLib/poseTypes";
+import type { SegMask } from "../poseLib/segmentation";
 
 type Props = {
   running: boolean;

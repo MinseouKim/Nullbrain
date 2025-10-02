@@ -1,10 +1,10 @@
 // src/measure/MeasureOrchestrator.tsx
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import BodyAnalysisCamera from "../components/BodyAnalysisCamera";
-import { KP, Size } from "../lib/poseTypes";
+import { KP, Size } from "../poseLib/poseTypes";
 import { EMA, MedianBuffer } from "./filters";
-import { SegMask, estimateCircumferencesFromMask } from "../lib/segmentation";
-import { runSegmentationToMask } from "../lib/segModel"; // <-- 세그 모델 연동
+import { SegMask, estimateCircumferencesFromMask } from "../poseLib/segmentation";
+import { runSegmentationToMask } from "../poseLib/segModel"; // <-- 세그 모델 연동
 
 /** 결과 타입 */
 export type MeasureResult = {
