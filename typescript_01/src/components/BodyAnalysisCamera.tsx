@@ -9,7 +9,9 @@ type Props = {
   focusRoi?: { x1: number; y1: number; x2: number; y2: number } | null;
   mirrored?: boolean;
   /** (선택) 세그멘테이션 함수 - 비디오/캔버스를 받아 마스크 반환 */
-  getSegmentation?: (source: HTMLCanvasElement | HTMLVideoElement) => Promise<SegMask | null>;
+  getSegmentation?: (
+    source: HTMLCanvasElement | HTMLVideoElement
+  ) => Promise<SegMask | null>;
   /** (선택) 마스크 콜백 */
   onSegMask?: (mask: SegMask) => void;
 };
@@ -47,13 +49,21 @@ const BodyAnalysisCamera: React.FC<Props> = ({
     });
 
   useEffect(() => {
-    setFeedback(running ? "체형 분석 중... 자세를 유지해주세요." : "분석이 일시정지 되었습니다.");
+    setFeedback(
+      running
+        ? "체형 분석 중... 자세를 유지해주세요."
+        : "분석이 일시정지 되었습니다."
+    );
   }, [running]);
 
   useEffect(() => {
     (async () => {
       try {
-        await Promise.all([loadScript(CDN.cam), loadScript(CDN.draw), loadScript(CDN.pose)]);
+        await Promise.all([
+          loadScript(CDN.cam),
+          loadScript(CDN.draw),
+          loadScript(CDN.pose),
+        ]);
       } catch (err) {
         console.error("MediaPipe 스크립트 로딩 실패:", err);
         setFeedback("AI 모델 로딩에 실패했습니다.");
@@ -69,7 +79,8 @@ const BodyAnalysisCamera: React.FC<Props> = ({
       if (!Pose || !Camera || !videoRef.current || !canvasRef.current) return;
 
       const pose = new Pose({
-        locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`,
+        locateFile: (f: string) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`,
       });
       pose.setOptions({
         modelComplexity: 1,
@@ -88,19 +99,35 @@ const BodyAnalysisCamera: React.FC<Props> = ({
 
         // 1) 프레임
         ctx.save();
-        if (mirrored) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+        if (mirrored) {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+        }
         ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
         ctx.restore();
 
         // 2) 포즈 콜백
         const kp: KP = results.poseLandmarks ? results.poseLandmarks : [];
-        onPose?.({ kp, size: { w: canvas.width, h: canvas.height } });
+        onPose?.({
+          kp,
+          size: {
+            width: canvas.width,
+            height: canvas.height,
+            w: canvas.width,
+            h: canvas.height,
+          },
+        });
 
         // 3) 스켈레톤
         if (results.poseLandmarks) {
           ctx.save();
-          if (mirrored) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-          drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { lineWidth: 3 });
+          if (mirrored) {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+          }
+          drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
+            lineWidth: 3,
+          });
           drawLandmarks(ctx, results.poseLandmarks, { lineWidth: 1 });
           ctx.restore();
         }
@@ -109,7 +136,10 @@ const BodyAnalysisCamera: React.FC<Props> = ({
         if (focusRoi) {
           const { x1, y1, x2, y2 } = focusRoi;
           ctx.save();
-          if (mirrored) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+          if (mirrored) {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+          }
           ctx.setLineDash([6, 4]);
           ctx.lineWidth = 2;
           ctx.strokeStyle = "#39b3ff";
@@ -151,12 +181,25 @@ const BodyAnalysisCamera: React.FC<Props> = ({
       <video ref={videoRef} style={{ display: "none" }} muted playsInline />
       <canvas
         ref={canvasRef}
-        style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#000", borderRadius: 12 }}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          backgroundColor: "#000",
+          borderRadius: 12,
+        }}
       />
       <p
         style={{
-          position: "absolute", top: 10, left: 10, background: "rgba(0,0,0,0.7)",
-          color: running ? "#0f0" : "#FFFF00", padding: "10px", borderRadius: 5, fontSize: 18, margin: 0,
+          position: "absolute",
+          top: 10,
+          left: 10,
+          background: "rgba(0,0,0,0.7)",
+          color: running ? "#0f0" : "#FFFF00",
+          padding: "10px",
+          borderRadius: 5,
+          fontSize: 18,
+          margin: 0,
         }}
       >
         {feedback}
