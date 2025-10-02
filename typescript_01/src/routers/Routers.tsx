@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import LoadingPage from "../pages/LoadingPage"; // 로딩페이지 import
 
 const MainPage = lazy(() => import("../pages/MainPage"));
 const ExerciseItems = lazy(() => import("../pages/ExerciseItems"));
@@ -14,7 +15,7 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 const Routers = (props: any) => {
   return (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<LoadingPage />}> {/* 로딩페이지 적용 */}
       <Routes>
         <Route path="/" element={<Navigate replace to="/main" {...props} />} />
         <Route path="main" element={<MainPage {...props} />} />
