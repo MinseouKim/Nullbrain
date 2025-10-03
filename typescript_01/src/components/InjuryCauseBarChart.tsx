@@ -8,6 +8,7 @@ import {
   LabelList,
   Cell,
 } from "recharts";
+import styled from "styled-components";
 
 const causeData = [
   { name: "무리한 동작", value: 35.8 },
@@ -20,30 +21,53 @@ const causeData = [
 const renderCustomLabel = (props: any) => {
   const { x, y, width, height, value, index } = props;
   const entry = causeData[index];
-
+  const isMobile = width < 768;
+  const fontSize = entry.name === "무리한 동작" ? (isMobile ? 20 : 36) : (isMobile ? 15 : 18);
   if (entry.name !== "무리한 동작") return null;
 
   return (
     <text
-      x={x + width - 220}
+      x={x + width - 170}
       y={y + height / 2}
       fill="#860000"
       textAnchor="start"
       dominantBaseline="middle"
       fontWeight="bold"
-      fontSize={30}
+      fontSize={fontSize}
     >
       {`${entry.name}  ${value}`}
     </text>
   );
 };
 
+// Chart 감싸는 반응형 컨테이너
+const ChartWrapper = styled.div`
+  width: 100%;
+  max-width: 800px;
+  height: 500px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    height: 400px;
+    max-width: 450px;
+  }
+
+  @media (max-width: 480px) {
+    height: 300px;
+  }
+
+  @media (max-width: 320px) {
+    height: 250px;
+  }
+`;
+
 const InjuryCauseBarChart = () => (
-  <ResponsiveContainer width="100%" height={500}>
+  <ChartWrapper>
+  <ResponsiveContainer>
     <BarChart
       data={causeData}
       layout="vertical"
-      margin={{ top: 20, right: 50, left: 160, bottom: 20 }}
+      margin={{ top: 20, right: 0, left: 160, bottom: 20 }}
     >
       <XAxis type="number" reversed axisLine={false} tickLine={false} />
       <YAxis
@@ -67,6 +91,7 @@ const InjuryCauseBarChart = () => (
       </Bar>
     </BarChart>
   </ResponsiveContainer>
+</ChartWrapper>
 );
 
 export default InjuryCauseBarChart;
