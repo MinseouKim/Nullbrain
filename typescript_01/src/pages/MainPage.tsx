@@ -406,12 +406,40 @@ const FeatureItemTitle = styled.h1`
   margin: 10px 200px 10px 200px;
   font-size: 30px;
   font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+    margin: 0px 50px 10px 50px;
+  }
+  @media (max-width: 480px) {
+    font-size: 20px;
+    margin: 0px 30px 10px 30px;
+  }
+  @media (max-width: 320px) {
+    font-size: 18px;
+    margin: 0px 20px 10px 20px;
+  }
 `;
 
 const FeatureItemLeftText = styled.p`
   margin: 0 0 0 200px;
   font-size: 16px;
   width: 80%;
+
+  @media (max-width: 768px) {
+    margin: 0 0 0 50px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    margin: 0 0 0 30px;
+    font-size: 11px;
+  }
+
+  @media (max-width: 320px) {
+    margin: 0 0 0 20px;
+    font-size: 10px;
+  }
 `;
 
 const FeatureItemRightText = styled.p`
@@ -419,6 +447,20 @@ const FeatureItemRightText = styled.p`
   font-size: 16px;
   width: 80%;
   text-align: right;
+
+  @media (max-width: 768px) {
+    margin: 0 50px 0 0;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    margin: 0 30px 0 0;
+    font-size: 11px;
+  }
+  @media (max-width: 320px) {
+    margin: 0 20px 0 0;
+    font-size: 10px;
+  }
 `;
 
 // 애니메이션 정의
