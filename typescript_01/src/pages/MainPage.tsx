@@ -292,7 +292,7 @@ const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const navigate = useNavigate();
 
   const handleStartWorkout = () => {
-    navigate('/camera');
+    navigate('/bodyAnalysis');
   };
 
   // 카드 클릭
@@ -378,11 +378,11 @@ const nextCard = () => {
               사용자가 부상을 예방하고 더욱 효과적으로 운동할 수 있도록 꼭 필요한 도구입니다.
             </p>
           </ChartLeftBox>
-          <ChartRowAnimated ref={barRef} inview={barInView}>
-            <ChartBox>
-              { barInView && <InjuryCauseBarChart /> }
-            </ChartBox>
-          </ChartRowAnimated>
+  <ChartRowAnimated ref={barRef} inview={barInView} style={{ minWidth: "500px", minHeight: "500px" }}>
+    <ChartBox style={{ minHeight: "500px" }}>
+      { barInView && <InjuryCauseBarChart /> }
+    </ChartBox>
+  </ChartRowAnimated>
         </ChartRow>
       </SectionDiv>
 
