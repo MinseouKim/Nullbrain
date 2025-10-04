@@ -10,7 +10,7 @@ const SignUpContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: #fafafa;
+  background: #fff;
 `;
 
 const SignUpBox = styled.div`

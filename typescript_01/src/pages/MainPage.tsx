@@ -20,7 +20,7 @@ const Container = styled.div`
 
 const CardSection = styled.div`
   position: relative;
-  width: 60%; /* 화면에 보여질 카드 영역 */
+  width: 60%;
   height: 600px;
   display: flex;
   flex-direction: column;
@@ -59,19 +59,22 @@ const CardContainer = styled.div<{ activeIndex: number; transitionEnabled: boole
   overflow: visible;
 `;
 
-
 const Card = styled.div<{ active: boolean }>`
   flex: 0 0 ${CARD_WIDTH}px;
   width: ${CARD_WIDTH}px;
   height: ${CARD_HEIGHT}px;
-  background: #f0f0f0;
+  background: #fff;
   border-radius: 20px;
+  overflow: hidden;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-weight: bold;
   font-size: 20px;
-  /* 부드러운 scale, opacity 전환 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+
   transition: transform 0.3s ease, opacity 0.3s ease;
 
   opacity: ${({ active }) => (active ? 1 : 0.6)};
@@ -92,6 +95,33 @@ const Card = styled.div<{ active: boolean }>`
   @media (max-width: 320px) {
     width: 150px;
     height: 200px;
+    font-size: 14px;
+  }
+`;
+
+const CardImage = styled.img`
+  width: 100%;
+  height: 90%;
+  object-fit: cover;
+`;
+
+/* ✅ 카드 제목 */
+const CardTitle = styled.div`
+  height: 20%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #860000;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
     font-size: 14px;
   }
 `;
@@ -158,13 +188,17 @@ const ButtonRight = styled.button`
   }
 `;
 
+const underline = keyframes`
+  from { width: 0; }
+  to { width: 150%; }
+`;
 
 const MainHeader = styled.div`
-  background: #d9d9d9;
+  background: #f2f2f2;
   height: 500px;
   border-radius: 20px;
   margin: 10px;
-  color: white;
+  color: #000;
   padding: 100px 200px;
   font-size: 50px;
   font-weight: bold;
@@ -174,22 +208,50 @@ const MainHeader = styled.div`
   align-items: flex-start;
   justify-content: center;
 
-  @media (max-width: 768px) {
+  /* ✅ 밑줄 애니메이션 적용 */
+  p {
+    position: relative;
+    display: inline-block; /* after 요소가 텍스트 크기에 맞게 */
+  }
+
+  p::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;                  /* 텍스트 아래 위치 */
+    left: 0;
+    width: 0;                        /* 시작은 0 */
+    height: 5px;                      /* 밑줄 두께 */
+    background: linear-gradient(210deg, #860000, #e1e1e1ff);
+    border-radius: 3px;
+    animation: ${underline} 1s ease forwards; /* 로드 시 밑줄 그려짐 */
+  }
+
+  @media (max-width: 1200px) {
     height: 400px;
     padding: 80px 100px;
     font-size: 36px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     height: 300px;
     padding: 60px 50px;
     font-size: 28px;
+
+    p::after {
+      height: 4px;
+      bottom: -8px;
+    }
   }
 
   @media (max-width: 320px) {
     height: 250px;
     padding: 40px 30px;
     font-size: 22px;
+
+    p::after {
+      height: 3px;
+      bottom: -6px;
+    }
   }
 `;
 
@@ -407,15 +469,15 @@ const FeatureItemTitle = styled.h1`
   font-size: 30px;
   font-weight: bold;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1200px) {
     font-size: 24px;
     margin: 0px 50px 10px 50px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 714px) {
     font-size: 20px;
     margin: 0px 30px 10px 30px;
   }
-  @media (max-width: 320px) {
+  @media (max-width: 480px) {
     font-size: 18px;
     margin: 0px 20px 10px 20px;
   }
@@ -426,17 +488,17 @@ const FeatureItemLeftText = styled.p`
   font-size: 16px;
   width: 80%;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1200px) {
     margin: 0 0 0 50px;
     font-size: 13px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 714px) {
     margin: 0 0 0 30px;
     font-size: 11px;
   }
 
-  @media (max-width: 320px) {
+  @media (max-width: 480px) {
     margin: 0 0 0 20px;
     font-size: 10px;
   }
@@ -448,16 +510,16 @@ const FeatureItemRightText = styled.p`
   width: 80%;
   text-align: right;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1200px) {
     margin: 0 50px 0 0;
     font-size: 13px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 714px) {
     margin: 0 30px 0 0;
     font-size: 11px;
   }
-  @media (max-width: 320px) {
+  @media (max-width: 480px) {
     margin: 0 20px 0 0;
     font-size: 10px;
   }
@@ -506,8 +568,15 @@ const MainPage = () => {
   const { ref: pieRef, inView: pieInView } = useInView({ triggerOnce: true, threshold: 0.3 });
   const { ref: barRef, inView: barInView } = useInView({ triggerOnce: true, threshold: 0.3 });
 
-  const exercises = ["플랭크", "스쿼트", "푸쉬업","런지","버피테스트"];
-
+  const exercises = [
+    { name: "플랭크", image: "/images/plank.png" },
+    { name: "스쿼트", image: "/images/squat.png" },
+    { name: "풀업", image: "/images/pullup.png" },
+    { name: "런지", image: "/images/lunge.png" },
+    { name: "벤치프레스", image: "/images/benchPress.png" },
+    { name: "데드리프트", image: "/images/deadlift.png" },
+    { name: "달리기", image: "/images/running.png" },
+  ];
 
 const [cards, setCards] = useState(exercises);
 const [activeIndex, setActiveIndex] = useState(1); // 가운데 카드
@@ -554,28 +623,30 @@ const nextCard = () => {
   return (
     <Container>
       <Header />
-      <MainHeader>
+      <MainHeader style={{ background: `url('/images/main6.png') center/cover no-repeat` }}>
         <p>언제나 어디서나,<br/>정확한 자세</p>
         <StartButton onClick={handleStartWorkout}>운동 시작하기</StartButton>
       </MainHeader>
       
 <CardSection>
-<CardContainer activeIndex={activeIndex} transitionEnabled={isTransitionEnabled}>
-  {cards.map((exercise, index) => (
-    <Card 
-      key={index} 
-      active={index === activeIndex} // 중앙 카드만 active
-    >
-      {exercise}
-    </Card>
-  ))}
-</CardContainer>
+        <CardContainer activeIndex={activeIndex} transitionEnabled={isTransitionEnabled}>
+          {cards.map((exercise, index) => (
+            <Card
+              key={index}
+              active={index === activeIndex}
+              onClick={() => handleCardClick(index)}
+            >
+              <CardImage src={exercise.image} alt={exercise.name} />
+              <CardTitle>{exercise.name}</CardTitle>
+            </Card>
+          ))}
+        </CardContainer>
 
-  <ButtonSection>
-    <ButtonLeft onClick={prevCard}>◀</ButtonLeft>
-    <ButtonRight onClick={nextCard}>▶</ButtonRight>
-  </ButtonSection>
-</CardSection>
+        <ButtonSection>
+          <ButtonLeft onClick={prevCard}>◀</ButtonLeft>
+          <ButtonRight onClick={nextCard}>▶</ButtonRight>
+        </ButtonSection>
+      </CardSection>
 
 
       <SectionDiv style={{ width: '70%', height: 'auto', margin: '0 auto' }}>
