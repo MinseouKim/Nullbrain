@@ -3,6 +3,7 @@
 import React from "react";
 import styled from "styled-components";
 import AITrainer from "./AITrainer";
+import { Landmark } from "../types/Landmark";
 
 interface CameraSectionProps {
   workoutData?: {
@@ -12,6 +13,11 @@ interface CameraSectionProps {
     category: string;
   } | null;
   isWorkoutPaused: boolean;
+  targetReps: number;
+  onSetComplete: (data: {
+    landmarkHistory: Landmark[][];
+    repCount: number;
+  }) => Promise<void>;
 }
 
 // Styled Components (기존 디자인 코드 복원)
@@ -89,6 +95,8 @@ const CameraSubtitle = styled.div`
 const CameraSection: React.FC<CameraSectionProps> = ({
   workoutData,
   isWorkoutPaused,
+  targetReps,
+  onSetComplete,
 }) => {
   const exerciseForAI = (name: string): "squat" | "pushup" => {
     const lowerCaseName = name.toLowerCase();
@@ -117,6 +125,8 @@ const CameraSection: React.FC<CameraSectionProps> = ({
           <AITrainer
             exercise={exerciseForAI(workoutData.name)}
             isWorkoutPaused={isWorkoutPaused}
+            targetReps={targetReps}
+            onSetComplete={onSetComplete}
           />
         ) : (
           // 운동 데이터가 없으면 플레이스홀더를 렌더링
