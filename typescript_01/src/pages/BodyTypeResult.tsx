@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import BodyTypeLineChart from "../components/BodyTypeLineChart";
@@ -17,7 +18,7 @@ const Container = styled.div`
 
 const HeaderSection = styled.div`
   margin-bottom: 20px;
-  margin-top: 100px;
+  margin-top: 30px;
   width: 100%;
   font-size: 30px;
   font-weight: bold;
@@ -99,8 +100,9 @@ const BodyTypeChart = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #f2f2f2;
   border-radius: 8px;
+  border:1px solid #e0e0e0;
 `;
 
 const ChartHeader = styled.div`
@@ -134,7 +136,7 @@ const ChartSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 30px 50px;
   font-size: 20px;
   color: #333;
 `;
@@ -145,22 +147,11 @@ const ChartContent = styled.div`
   align-items: center;
   justify-content: flex-start; /* 내용 위쪽부터 쌓이도록 */
   margin: 0 20px;
-  padding: 10px;
-  background-color: #d9d9d9;
+  padding: 20px;
+  background-color: #f2f2f2;
   border-radius: 8px;
   overflow-y: auto;    /* 내용이 넘치면 스크롤 */
   width:100%;
-`;
-
-const ChartText = styled.div`
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #860000;
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 4px;
-  width: 100%;
 `;
 
 const BodyPhotoSection = styled.div`
@@ -175,9 +166,10 @@ const BodyPhotoSection = styled.div`
 
 const BodyPhoto = styled.div`
   margin: 0 auto;
-  width: 500px;
-  height: 650px;
+  width: 450px;
+  height: 550px;
   background-color: #fff;
+  border:2px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,7 +188,7 @@ const Btn1 = styled.button`
     font-size: 16px;
     cursor: pointer;
     background-color: #fff;
-    border: 1px solid #ccc;
+    border:2px solid #e0e0e0;
     border-radius: 100%;
     &:hover {
       background-color: #860000;
@@ -207,7 +199,7 @@ const Btn2 = styled.button`
     font-size: 16px;
     cursor: pointer;
     background-color: #fff;
-    border: 1px solid #ccc;
+    border:2px solid #e0e0e0;
     border-radius: 100%;
     &:hover {
       background-color: #860000;
@@ -218,7 +210,7 @@ const Btn3 = styled.button`
     font-size: 16px;
     cursor: pointer;
     background-color: #fff;
-    border: 1px solid #ccc;
+    border:2px solid #e0e0e0;
     border-radius: 100%;
     &:hover {
       background-color: #860000;
@@ -229,15 +221,15 @@ const DownDiv = styled.div`
   width: 100%;
   height: 50%;
   display: flex;
-  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
-  justify-content: center;
+  flex-direction: column;
   margin-top: 20px;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 `;
 
 const SolText = styled.div`
-  font-size: 30px;
+  font-size: 25px;
   font-weight: bold;
   margin-bottom: 20px;
   width: 100%;
@@ -252,8 +244,9 @@ const SolContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #d9d9d9;
+  background-color: #f2f2f2;
   border-radius: 8px;
+  border:2px solid #e0e0e0;
 `;
 
 const ModalOverlay = styled.div`
@@ -273,7 +266,7 @@ const ModalOverlay = styled.div`
 
 const ModalContent = styled.div`
   width:80%;
-  background: #d9d9d9;
+  background: #f2f2f2;
   padding: 30px;
   border-radius: 12px;
   max-height: 80vh;
@@ -291,7 +284,87 @@ const CloseBtn = styled.button`
   cursor: pointer;
 `;
 
+const RecoRow = styled.div`
+  background-color:#f2f2f2;
+  width:100%;
+  padding:20px;
+  border-radius:10px;
+  display: flex;
+  gap: 20px;
+`;
+
+const RecoBtn = styled.button`
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: #850000;
+    color: #850000;
+  }
+`;
+
+const BtnRow = styled.div`
+  width:100%;
+  padding:20px;
+  border-radius:10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+`;
+
+const GoHome = styled.button`
+  border: 2px solid #850000;
+    color: #850000;
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  background: #850000;
+    color: #fff;
+  }
+`;
+
+const GoExercise = styled.button`
+  border: 2px solid #850000;
+  background: #850000;
+    color: #fff;
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  border: 2px solid #850000;
+    color: #850000;
+  background: #fff;
+  }
+`;
+
 const BodyTypeResult = () => {
+  
+    const navigate = useNavigate();
+  
+    const handleExercise= () => {
+      navigate('/exercise');
+    };
+  
+    const handleHome = () => {
+      navigate('/');
+    };
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const openModal: React.MouseEventHandler<HTMLButtonElement> = () => {
@@ -371,11 +444,13 @@ const bodyData = [
           style={{
             backgroundColor: "#fff",
             marginBottom: 8,
-            padding: 15,
-            fontSize: 20,
+            padding:12,
+            paddingLeft:30,
+            fontSize: 16,
             borderRadius: 4,
             width: "100%",
-            height: "100%"
+            height: "100%",
+            border: "2px solid #e0e0e0"
           }}
         >
           <strong>{part}:</strong> {text}
@@ -391,10 +466,15 @@ const bodyData = [
       <SolText>
           추천 솔루션
       </SolText>
-      <SolContent>
-          추천 운동
-      </SolContent>
+          <RecoRow>
+            <RecoBtn>플랭크</RecoBtn>
+            <RecoBtn>푸쉬업</RecoBtn>
+          </RecoRow>
     </DownDiv>
+          <BtnRow>
+            <GoHome onClick={handleHome}>홈으로</GoHome>
+            <GoExercise onClick={handleExercise}>운동하러가기</GoExercise>
+          </BtnRow>
   </Container>
   <Footer />
         {/* 모달 */}

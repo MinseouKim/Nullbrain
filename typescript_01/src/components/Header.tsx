@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
+import { AuthContext } from "../context/AuthContext";
 
 const HeaderContainer = styled.header`
   margin: 0 auto;
-	background: #fff;
-	display: flex;
-	flex-direction: row;
+  background: #fff;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-	padding: 10px 20px;
+  padding: 10px 20px;
   position: relative;
   min-height: 60px;
 `;
@@ -44,13 +45,18 @@ const Logo = styled.div`
   white-space: nowrap;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
     transition: left 0.5s;
   }
 
@@ -71,13 +77,34 @@ const Logo = styled.div`
 const LeftBar = styled.div`
   display: flex;
   gap: 30px;
+  align-items: center;
+`;
+
+const NavItem = styled.span`
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: #850000;
+  }
 `;
 
 const Login = styled.button`
-  background-color: transparent;
-  border: none;
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #000;
+  padding: 5px 20px;
+  border-radius: 50px;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #fff;
+    border: 2px solid #860000;
+    color: #860000;
+  }
 `;
 
 const Signup = styled.button`
@@ -88,35 +115,67 @@ const Signup = styled.button`
   border-radius: 50px;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #860000;
+    color: #fff;
+  }
+`;
+
+const HeaderSpan = styled.span`
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 16px;
+
+  &:hover {
+    color: #860000;
+  }
 `;
 
 const Header = () => {
   const navigate = useNavigate();
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { isLoggedIn, logout } = useContext(AuthContext);
 
   const handleLogoClick = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      navigate('/main');
+      navigate("/main");
     }, 300);
   };
 
-	return (
-		<HeaderContainer>
+  const handleBodyType = () => navigate("/bodyAnalysis");
+  const handleExerciseItems = () => navigate("/exercise");
+  const handleLogin = () => navigate("/login");
+  const handleSignUp = () => navigate("/signUp");
+  const handleMyPage = () => navigate("/mypage");
+  const handleAdmin = () => navigate("/admin");
+
+  return (
+    <HeaderContainer>
       <LeftBar>
-        <span>체형 분석</span>
-        <span>후기</span>
-        <span>운동</span>
+        <NavItem onClick={handleBodyType}>체형 분석</NavItem>
+        <NavItem onClick={handleLogoClick}>후기</NavItem>
+        <NavItem onClick={handleExerciseItems}>운동</NavItem>
       </LeftBar>
-      <Logo onClick={handleLogoClick}>
-        자세ON
-      </Logo>
+      <Logo onClick={handleLogoClick}>자세ON</Logo>
       <RightBar>
-        <Login>로그인</Login>
-        <Signup>회원가입</Signup>
+        {isLoggedIn ? (
+          <>
+            <Login onClick={handleAdmin}>관리자페이지</Login>
+            <Login onClick={handleMyPage}>마이페이지</Login>
+            <Signup onClick={logout}>로그아웃</Signup>
+          </>
+        ) : (
+          <>
+            <Login onClick={handleLogin}>로그인</Login>
+            <Signup onClick={handleSignUp}>회원가입</Signup>
+          </>
+        )}
       </RightBar>
-		</HeaderContainer>
-	);
-}
+    </HeaderContainer>
+  );
+};
 
 export default Header;
