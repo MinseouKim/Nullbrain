@@ -117,14 +117,19 @@ const ExerciseItems = () => {
 
   const tabs = ['전체', '상체', '하체', '전신', '유산소'];
 
-  // 모달 핸들러
-  const handleCardClick = (exerciseId: number) => {
-    const exercise = EXERCISE_DETAILS.find((ex) => ex.id === exerciseId);
-    if (exercise) {
+ //현재 스쿼트 운동만 열고, 나머지는 미구현 서비스 알림
+const handleCardClick = (exerciseId: number) => {
+  const exercise = EXERCISE_DETAILS.find((ex) => ex.id === exerciseId);
+
+  if (exercise) {
+    if (exercise.name === '스쿼트') {
       setSelectedExercise(exercise);
       setIsModalOpen(true);
+    } else {
+      alert('미구현 서비스입니다.');
     }
-  };
+  }
+};
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -222,6 +227,8 @@ const ExerciseItems = () => {
         />
       </Container>
       <Footer />
+
+      
     </>
   );
 };

@@ -20,19 +20,33 @@ const Container = styled.div`
 
 const CardSection = styled.div`
   position: relative;
-  width: 60%; /* 화면에 보여질 카드 영역 */
+  width: 60%;
   height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  margin: 50px auto;
-`;
+  margin: 250px auto 500px auto;
 
-interface CardContainerProps {
-  activeIndex: number;
-}
+  @media (max-width: 768px) {
+    width: 80%;
+    height: 500px;
+    margin: 150px auto 300px auto;
+  }
+
+  @media (max-width: 480px) {
+    width: 90%;
+    height: 400px;
+    margin: 100px auto 200px auto;
+  }
+
+  @media (max-width: 320px) {
+    width: 95%;
+    height: 350px;
+    margin: 80px auto 150px auto;
+  }
+`;
 
 const CardContainer = styled.div<{ activeIndex: number; transitionEnabled: boolean }>`
   display: flex;
@@ -45,23 +59,71 @@ const CardContainer = styled.div<{ activeIndex: number; transitionEnabled: boole
   overflow: visible;
 `;
 
-
 const Card = styled.div<{ active: boolean }>`
   flex: 0 0 ${CARD_WIDTH}px;
   width: ${CARD_WIDTH}px;
   height: ${CARD_HEIGHT}px;
-  background: #f0f0f0;
+  background: #fff;
   border-radius: 20px;
+  overflow: hidden;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-weight: bold;
   font-size: 20px;
-  /* 부드러운 scale, opacity 전환 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+
   transition: transform 0.3s ease, opacity 0.3s ease;
 
   opacity: ${({ active }) => (active ? 1 : 0.6)};
   transform: ${({ active }) => `scale(${active ? 1.1 : 1})`};
+
+  @media (max-width: 768px) {
+    width: 220px;
+    height: 320px;
+    font-size: 18px;
+  }
+
+  @media (max-width: 480px) {
+    width: 180px;
+    height: 250px;
+    font-size: 16px;
+  }
+
+  @media (max-width: 320px) {
+    width: 150px;
+    height: 200px;
+    font-size: 14px;
+  }
+`;
+
+const CardImage = styled.img`
+  width: 100%;
+  height: 90%;
+  object-fit: cover;
+`;
+
+/* ✅ 카드 제목 */
+const CardTitle = styled.div`
+  height: 20%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #860000;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
 
 const ButtonSection = styled.div`
@@ -70,6 +132,18 @@ const ButtonSection = styled.div`
   justify-content: center; /* 왼쪽 정렬 */
   width: 100%;
   gap: 100px; /* 버튼 사이 간격 */
+
+  @media (max-width: 768px) {
+    gap: 60px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 40px;
+  }
+
+  @media (max-width: 320px) {
+    gap: 25px;
+  }
 `;
 
 const ButtonLeft = styled.button`
@@ -82,6 +156,14 @@ const ButtonLeft = styled.button`
 
   &:hover {
     background: #555;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+  }
+
+  @media (max-width: 320px) {
+    padding: 6px 10px;
   }
 `;
 
@@ -96,15 +178,27 @@ const ButtonRight = styled.button`
   &:hover {
     background: #555;
   }
+
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+  }
+
+  @media (max-width: 320px) {
+    padding: 6px 10px;
+  }
 `;
 
+const underline = keyframes`
+  from { width: 0; }
+  to { width: 150%; }
+`;
 
 const MainHeader = styled.div`
-  background: #d9d9d9;
+  background: #f2f2f2;
   height: 500px;
   border-radius: 20px;
   margin: 10px;
-  color: white;
+  color: #000;
   padding: 100px 200px;
   font-size: 50px;
   font-weight: bold;
@@ -113,6 +207,52 @@ const MainHeader = styled.div`
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+
+  /* ✅ 밑줄 애니메이션 적용 */
+  p {
+    position: relative;
+    display: inline-block; /* after 요소가 텍스트 크기에 맞게 */
+  }
+
+  p::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;                  /* 텍스트 아래 위치 */
+    left: 0;
+    width: 0;                        /* 시작은 0 */
+    height: 5px;                      /* 밑줄 두께 */
+    background: linear-gradient(210deg, #860000, #e1e1e1ff);
+    border-radius: 3px;
+    animation: ${underline} 1s ease forwards; /* 로드 시 밑줄 그려짐 */
+  }
+
+  @media (max-width: 1200px) {
+    height: 400px;
+    padding: 80px 100px;
+    font-size: 36px;
+  }
+
+  @media (max-width: 768px) {
+    height: 300px;
+    padding: 60px 50px;
+    font-size: 28px;
+
+    p::after {
+      height: 4px;
+      bottom: -8px;
+    }
+  }
+
+  @media (max-width: 320px) {
+    height: 250px;
+    padding: 40px 30px;
+    font-size: 22px;
+
+    p::after {
+      height: 3px;
+      bottom: -6px;
+    }
+  }
 `;
 
 const StartButton = styled.button`
@@ -135,6 +275,21 @@ const StartButton = styled.button`
   &:active {
     transform: translateY(-1px);
   }
+
+  @media (max-width: 768px) {
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 25px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 320px) {
+    padding: 8px 20px;
+    font-size: 12px;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -142,12 +297,36 @@ const SectionTitle = styled.h2`
   text-align: center;
   margin-bottom: 50px;
   color: #333;
+  
+  @media (max-width: 768px) {
+    font-size: 28px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 24px;
+  }
+
+  @media (max-width: 320px) {
+    font-size: 20px;
+  }
 `;
 
 const SectionDiv = styled.div`
   width: 100%;
   height: auto;
   margin-top: 500px;
+
+  @media (max-width: 768px) {
+    margin-top: 300px;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 200px;
+  }
+
+  @media (max-width: 320px) {
+    margin-top: 150px;
+  }
 `;
 
 const ChartRow = styled.div`
@@ -155,36 +334,71 @@ const ChartRow = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 100px;
   margin: 50px 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 30px;
+  }
 `;
 
 const ChartBox = styled.div`
-  width: 80%;
-  height:500px;
+  width: 100%;
+  height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 1000;
 
   p {
     width: 90%;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 300px;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    height: 300px;
+  }
+
+  @media (max-width: 320px) {
+    height: 250px;
+  }
 `;
 
 const ChartRightBox = styled.div`
-  width: 80%;
+  width: 60%;
   display: flex;
-  margin-right: 50px;
   align-items: center;
   text-align: right;
+
+  @media (max-width: 768px) {
+    width: 90%;
+    text-align: left;      /* 가운데 정렬 */
+    order: 2;                /* ✅ 차트 아래로 이동 */
+
+  }
 `;
 
 const ChartLeftBox = styled.div`
-  width: 80%;
+  width: 60%;
   display: flex;
-  margin-left: 50px;
   align-items: center;
   text-align: left;
+
+  @media (max-width: 768px) {
+    width: 90%;
+    text-align: left;      /* 가운데 정렬 */
+    order: 2;                /* ✅ 차트 아래로 이동 */
+  }
 `;
 
 const ExerciseVidoe = styled.div`
@@ -193,14 +407,30 @@ const ExerciseVidoe = styled.div`
 `;
 
 const Video = styled.video`
-  width: 800px;
+  width: 60%;
   height: 500px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+
+  @media (max-width: 768px) {
+    width: 80%;
+    height: 400px;
+  }
+
+  @media (max-width: 480px) {
+    width: 90%;
+    height: 300px;
+  }
+
+  @media (max-width: 320px) {
+    width: 95%;
+    height: 250px;
+  }
 `;
 
 const FeatureList = styled.div`
   display: flex;
+  width: 100%;
   flex-direction: column;
   gap: 40px;
   margin: 30px 0 100px 0;
@@ -235,22 +465,64 @@ const FeatureItemRight = styled.div`
 `;
 
 const FeatureItemTitle = styled.h1`
-  margin: 10px 0;
+  margin: 10px 200px 10px 200px;
   font-size: 30px;
   font-weight: bold;
+
+  @media (max-width: 1200px) {
+    font-size: 24px;
+    margin: 0px 50px 10px 50px;
+  }
+  @media (max-width: 714px) {
+    font-size: 20px;
+    margin: 0px 30px 10px 30px;
+  }
+  @media (max-width: 480px) {
+    font-size: 18px;
+    margin: 0px 20px 10px 20px;
+  }
 `;
 
 const FeatureItemLeftText = styled.p`
-  margin: 0;
+  margin: 0 0 0 200px;
   font-size: 16px;
-  width: 90%;
+  width: 80%;
+
+  @media (max-width: 1200px) {
+    margin: 0 0 0 50px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 714px) {
+    margin: 0 0 0 30px;
+    font-size: 11px;
+  }
+
+  @media (max-width: 480px) {
+    margin: 0 0 0 20px;
+    font-size: 10px;
+  }
 `;
 
 const FeatureItemRightText = styled.p`
-  margin: 0;
+  margin: 0 200px 0 0;
   font-size: 16px;
-  width: 90%;
+  width: 80%;
   text-align: right;
+
+  @media (max-width: 1200px) {
+    margin: 0 50px 0 0;
+    font-size: 13px;
+  }
+
+  @media (max-width: 714px) {
+    margin: 0 30px 0 0;
+    font-size: 11px;
+  }
+  @media (max-width: 480px) {
+    margin: 0 20px 0 0;
+    font-size: 10px;
+  }
 `;
 
 // 애니메이션 정의
@@ -268,12 +540,27 @@ const ChartRowAnimated = styled.div<{ inview: boolean }>`
   margin: 50px 0;
   opacity: 0;
   transform: translateY(50px);
-  min-width: 300px; /* 최소 width 추가 */
+
+  width: 50%;      /* 또는 500px ~ 600px 정도 */
+  height: 500px;
   ${({ inview }) =>
     inview &&
     css` 
       animation: ${fadeIn} 1s forwards;
     `}
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 300px;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    height: 300px;
+  }
+
+  @media (max-width: 320px) {
+    height: 250px;
+  }
 `;
 
 const MainPage = () => {
@@ -281,8 +568,15 @@ const MainPage = () => {
   const { ref: pieRef, inView: pieInView } = useInView({ triggerOnce: true, threshold: 0.3 });
   const { ref: barRef, inView: barInView } = useInView({ triggerOnce: true, threshold: 0.3 });
 
-  const exercises = ["플랭크", "스쿼트", "푸쉬업","런지","버피테스트"];
-
+  const exercises = [
+    { name: "플랭크", image: "/images/plank.png" },
+    { name: "스쿼트", image: "/images/squat.png" },
+    { name: "풀업", image: "/images/pullup.png" },
+    { name: "런지", image: "/images/lunge.png" },
+    { name: "벤치프레스", image: "/images/benchPress.png" },
+    { name: "데드리프트", image: "/images/deadlift.png" },
+    { name: "달리기", image: "/images/running.png" },
+  ];
 
 const [cards, setCards] = useState(exercises);
 const [activeIndex, setActiveIndex] = useState(1); // 가운데 카드
@@ -292,7 +586,7 @@ const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const navigate = useNavigate();
 
   const handleStartWorkout = () => {
-    navigate('/camera');
+    navigate('/bodyAnalysis');
   };
 
   // 카드 클릭
@@ -329,32 +623,35 @@ const nextCard = () => {
   return (
     <Container>
       <Header />
-      <MainHeader>
+      <MainHeader style={{ background: `url('/images/main6.png') center/cover no-repeat` }}>
         <p>언제나 어디서나,<br/>정확한 자세</p>
         <StartButton onClick={handleStartWorkout}>운동 시작하기</StartButton>
       </MainHeader>
       
 <CardSection>
-<CardContainer activeIndex={activeIndex} transitionEnabled={isTransitionEnabled}>
-  {cards.map((exercise, index) => (
-    <Card 
-      key={index} 
-      active={index === activeIndex} // 중앙 카드만 active
-    >
-      {exercise}
-    </Card>
-  ))}
-</CardContainer>
+        <CardContainer activeIndex={activeIndex} transitionEnabled={isTransitionEnabled}>
+          {cards.map((exercise, index) => (
+            <Card
+              key={index}
+              active={index === activeIndex}
+              onClick={() => handleCardClick(index)}
+            >
+              <CardImage src={exercise.image} alt={exercise.name} />
+              <CardTitle>{exercise.name}</CardTitle>
+            </Card>
+          ))}
+        </CardContainer>
 
-  <ButtonSection>
-    <ButtonLeft onClick={prevCard}>◀</ButtonLeft>
-    <ButtonRight onClick={nextCard}>▶</ButtonRight>
-  </ButtonSection>
-</CardSection>
+        <ButtonSection>
+          <ButtonLeft onClick={prevCard}>◀</ButtonLeft>
+          <ButtonRight onClick={nextCard}>▶</ButtonRight>
+        </ButtonSection>
+      </CardSection>
 
 
-      <SectionDiv style={{ width: '100%', height: 'auto' }}>
+      <SectionDiv style={{ width: '70%', height: 'auto', margin: '0 auto' }}>
         <SectionTitle>부상원인</SectionTitle>
+        <ChartRow>
         <ChartRowAnimated ref={pieRef} inview={pieInView}>
           <ChartBox>
             {pieInView && <InjuryPieChart />}
@@ -367,6 +664,7 @@ const nextCard = () => {
               우리 프로그램은 이러한 부상을 예방하고, 안전하게 운동할 수 있도록 돕습니다.
             </p>
           </ChartRightBox>
+        </ChartRow>
 
 
         <ChartRow>
@@ -378,11 +676,11 @@ const nextCard = () => {
               사용자가 부상을 예방하고 더욱 효과적으로 운동할 수 있도록 꼭 필요한 도구입니다.
             </p>
           </ChartLeftBox>
-          <ChartRowAnimated ref={barRef} inview={barInView}>
-            <ChartBox>
-              { barInView && <InjuryCauseBarChart /> }
-            </ChartBox>
-          </ChartRowAnimated>
+  <ChartRowAnimated ref={barRef} inview={barInView} style={{ width: "100%", minHeight: "100px" }}>
+    <ChartBox>
+      { barInView && <InjuryCauseBarChart /> }
+    </ChartBox>
+  </ChartRowAnimated>
         </ChartRow>
       </SectionDiv>
 
@@ -416,7 +714,7 @@ const nextCard = () => {
           <FeatureItemLeft>
             <FeatureItemTitle>체형 분석</FeatureItemTitle>
             <FeatureItemLeftText>
-              사용자의 신체 구조와 체형을 분석하여, 개인에게 가장 적합한 운동 방법과 자세를 추천합니다. 예를 들어 상체가 발달한 사람과 하체가 발달한 사람에게 맞는 운동 루틴과 자세 포인트를 제시하여, 보다 효율적으로 목표를 달성할 수 있도록 도와줍니다. 
+              사용자의 신체 구조와 체형을 분석하여, 개인에게 가장 적합한 운동 방법과 자세를 추천합니다. 상체가 발달한 사람과 하체가 발달한 사람에게 맞는 운동 루틴과 자세를 제시하여, 보다 효율적으로 목표를 달성할 수 있도록 도와줍니다. 
               이 기능은 운동의 효율성을 높이고 부상 가능성을 최소화하는 데 큰 역할을 합니다.
             </FeatureItemLeftText>
           </FeatureItemLeft>

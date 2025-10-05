@@ -13,11 +13,41 @@ const HeaderContainer = styled.header`
   padding: 10px 20px;
   position: relative;
   min-height: 60px;
+
+  /* 768px 이하 */
+  @media (max-width: 768px) {
+    padding: 8px 16px;
+    min-height: 55px;
+  }
+
+  /* 480px 이하 */
+  @media (max-width: 480px) {
+    padding: 6px 12px;
+    min-height: 50px;
+  }
+
+  /* 320px 이하 */
+  @media (max-width: 320px) {
+    padding: 4px 8px;
+    min-height: 45px;
+  }
 `;
 
 const RightBar = styled.div`
   display: flex;
   gap: 30px;
+
+  @media (max-width: 768px) {
+    gap: 20px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
+
+  @media (max-width: 320px) {
+    gap: 8px;
+  }
 `;
 
 const pulse = keyframes`
@@ -72,12 +102,37 @@ const Logo = styled.div`
   &:active {
     animation: ${pulse} 0.2s ease-in-out;
   }
+
+  /* 반응형 폰트 크기 */
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 18px;
+  }
+
+  @media (max-width: 320px) {
+    font-size: 16px;
+  }
 `;
 
 const LeftBar = styled.div`
   display: flex;
   gap: 30px;
   align-items: center;
+
+  @media (max-width: 768px) {
+    gap: 20px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
+
+  @media (max-width: 320px) {
+    gap: 8px;
+  }
 `;
 
 const NavItem = styled.span`
@@ -87,6 +142,18 @@ const NavItem = styled.span`
 
   &:hover {
     color: #850000;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 15px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
+
+  @media (max-width: 320px) {
+    font-size: 13px;
   }
 `;
 
@@ -105,6 +172,21 @@ const Login = styled.button`
     border: 2px solid #860000;
     color: #860000;
   }
+
+  @media (max-width: 768px) {
+    padding: 4px 14px;
+    font-size: 15px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 4px 10px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 320px) {
+    padding: 3px 8px;
+    font-size: 12px;
+  }
 `;
 
 const Signup = styled.button`
@@ -121,15 +203,20 @@ const Signup = styled.button`
     background-color: #860000;
     color: #fff;
   }
-`;
 
-const HeaderSpan = styled.span`
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 16px;
+  @media (max-width: 768px) {
+    padding: 4px 14px;
+    font-size: 15px;
+  }
 
-  &:hover {
-    color: #860000;
+  @media (max-width: 480px) {
+    padding: 4px 10px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 320px) {
+    padding: 3px 8px;
+    font-size: 12px;
   }
 `;
 
@@ -145,32 +232,27 @@ const Header = () => {
     }, 300);
   };
 
-  const handleBodyType = () => navigate("/bodyAnalysis");
-  const handleExerciseItems = () => navigate("/exercise");
-  const handleLogin = () => navigate("/login");
-  const handleSignUp = () => navigate("/signUp");
-  const handleMyPage = () => navigate("/mypage");
-  const handleAdmin = () => navigate("/admin");
-
   return (
     <HeaderContainer>
       <LeftBar>
-        <NavItem onClick={handleBodyType}>체형 분석</NavItem>
-        <NavItem onClick={handleLogoClick}>후기</NavItem>
-        <NavItem onClick={handleExerciseItems}>운동</NavItem>
+        <NavItem onClick={() => navigate("/bodyAnalysis")}>체형 분석</NavItem>
+        <NavItem onClick={() => navigate("/review")}>후기</NavItem>
+        <NavItem onClick={() => navigate("/exercise")}>운동</NavItem>
       </LeftBar>
+
       <Logo onClick={handleLogoClick}>자세ON</Logo>
+
       <RightBar>
         {isLoggedIn ? (
           <>
-            <Login onClick={handleAdmin}>관리자페이지</Login>
-            <Login onClick={handleMyPage}>마이페이지</Login>
+            <Login onClick={() => navigate("/admin")}>관리자페이지</Login>
+            <Login onClick={() => navigate("/mypage")}>마이페이지</Login>
             <Signup onClick={logout}>로그아웃</Signup>
           </>
         ) : (
           <>
-            <Login onClick={handleLogin}>로그인</Login>
-            <Signup onClick={handleSignUp}>회원가입</Signup>
+            <Login onClick={() => navigate("/login")}>로그인</Login>
+            <Signup onClick={() => navigate("/signUp")}>회원가입</Signup>
           </>
         )}
       </RightBar>
