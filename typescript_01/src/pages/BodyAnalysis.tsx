@@ -20,7 +20,7 @@ const MainLayoutContainer = styled.div`
   display: flex;
   flex-direction: column;
 `;
-
+// 콘텐츠 영역
 const ContentContainer = styled.div`
   display: flex;
   flex: 1;
