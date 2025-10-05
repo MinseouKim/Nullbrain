@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { type ExerciseDetail } from '../datas/data';
+import { type ExerciseDetail } from "../datas/data";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -26,8 +26,8 @@ const ModalContent = styled.div`
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  position: relative; 
-  
+  position: relative;
+
   display: grid;
   grid-template-areas:
     "image info"
@@ -40,7 +40,7 @@ const CloseButton = styled.button`
   position: absolute;
   top: 20px;
   right: 20px;
-  background: none; 
+  background: none;
   border: none;
   font-size: 2rem;
   font-weight: bold;
@@ -62,11 +62,11 @@ const ImageSection = styled.div`
   align-items: center;
   text-align: center;
   min-height: 0;
-  
+
   h2 {
     margin-top: 0;
     margin-bottom: 20px;
-    flex-shrink: 0; 
+    flex-shrink: 0;
   }
 
   img {
@@ -139,31 +139,24 @@ interface ExerciseModalProps {
 }
 
 const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
-<<<<<<< HEAD
-  const navigate = useNavigate(); 
-  
-=======
-    
-      const navigate = useNavigate();
-    
-      const handleStartWorkout= () => {
-        navigate('/camera');
-      };
->>>>>>> c77701aca674398021810ca3dcfa8a0e8a4fd48b
+  const navigate = useNavigate();
+
+  const handleStartWorkout = () => {
+    navigate("/camera");
+  };
   if (!isOpen || !exercise) {
     return null;
   }
-    
 
   const handleStart = () => {
     navigate("/camera");
   };
-  
+
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose}>&times;</CloseButton>
-        
+
         <ImageSection>
           <h2>{exercise.name}</h2>
           <img src={exercise.imageUrl} alt={exercise.name} />
@@ -173,39 +166,33 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
           <DetailItem>
             <h3>자극 부위</h3>
             <ul>
-              {exercise.stimulationArea && exercise.stimulationArea.map((area, index) => (
-                <li key={index}>{area}</li>
-              ))}
+              {exercise.stimulationArea &&
+                exercise.stimulationArea.map((area, index) => (
+                  <li key={index}>{area}</li>
+                ))}
             </ul>
           </DetailItem>
           <DetailItem>
             <h3>효과</h3>
             <ul>
-              {exercise.effect && exercise.effect.map((eff, index) => (
-                <li key={index}>{eff}</li>
-              ))}
+              {exercise.effect &&
+                exercise.effect.map((eff, index) => <li key={index}>{eff}</li>)}
             </ul>
           </DetailItem>
           <DetailItem>
             <h3>주의사항</h3>
             <ul>
-              {exercise.caution && exercise.caution.map((cau, index) => (
-                <li key={index}>{cau}</li>
-              ))}
+              {exercise.caution &&
+                exercise.caution.map((cau, index) => (
+                  <li key={index}>{cau}</li>
+                ))}
             </ul>
           </DetailItem>
         </InfoSection>
 
         <ActionSection>
-<<<<<<< HEAD
-          <StartButton onClick={handleStart}>
-=======
-          <StartButton onClick={handleStartWorkout}>
->>>>>>> c77701aca674398021810ca3dcfa8a0e8a4fd48b
-            운동 시작하기
-          </StartButton>
+          <StartButton onClick={handleStartWorkout}>운동 시작하기</StartButton>
         </ActionSection>
-
       </ModalContent>
     </ModalOverlay>
   );

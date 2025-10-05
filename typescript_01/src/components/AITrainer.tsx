@@ -63,7 +63,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
     return "카메라 초기화에 실패했습니다. 권한/장치 상태를 확인해주세요.";
   };
 
-
   useEffect(() => {
     if (isInitialized.current) {
       return;
@@ -156,17 +155,24 @@ const AITrainer: React.FC<AITrainerProps> = ({
       });
 
       pose.onResults((results: PoseResults) => {
-        canvasElement.width = results.image.width;
-        canvasElement.height = results.image.height;
-        canvasCtx.save();
-        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-        canvasCtx.drawImage(
-          results.image,
-          0,
-          0,
-          canvasElement.width,
-          canvasElement.height
-        );
+        if (!results || !results.image || !canvasElement || !canvasCtx) return;
+
+        try {
+          canvasElement.width = results.image.width || 640;
+          canvasElement.height = results.image.height || 480;
+          canvasCtx.save();
+          canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+          canvasCtx.drawImage(
+            results.image,
+            0,
+            0,
+            canvasElement.width,
+            canvasElement.height
+          );
+        } catch (error) {
+          console.warn("Canvas drawing failed:", error);
+          return;
+        }
 
         if (results.poseLandmarks) {
           drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
@@ -202,7 +208,8 @@ const AITrainer: React.FC<AITrainerProps> = ({
         const msg = getCameraErrorMessage(e);
         setFeedbackFromAI(msg);
         window.alert(msg);
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) ws.current.close();
+        if (ws.current && ws.current.readyState === WebSocket.OPEN)
+          ws.current.close();
         return;
       }
     };
@@ -225,7 +232,12 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <video ref={videoRef} style={{ display: "none" }} muted playsInline></video>
+      <video
+        ref={videoRef}
+        style={{ display: "none" }}
+        muted
+        playsInline
+      ></video>
       <canvas
         ref={canvasRef}
         width="1280px"
