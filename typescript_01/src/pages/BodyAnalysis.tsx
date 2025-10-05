@@ -25,9 +25,6 @@ const ContentContainer = styled.div`
   display: flex;
   flex: 1;
   width: 100%;
-  padding: 24px;
-  box-sizing: border-box;
-  gap: 32px;
 `;
 
 const MainContent = styled.main`
@@ -35,6 +32,7 @@ const MainContent = styled.main`
   display: flex;
   flex-direction: column;
   min-width: 0;
+  padding: 20px;
   gap: 20px;
 `;
 
