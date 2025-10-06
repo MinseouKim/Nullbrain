@@ -1,5 +1,3 @@
-// src/components/AITrainer.tsx
-
 import React, { useEffect, useRef, useState } from "react";
 import { Landmark } from "../types/Landmark";
 
@@ -12,6 +10,8 @@ interface AITrainerProps {
     landmarkHistory: Landmark[][];
     repCount: number;
   }) => Promise<void>;
+  currentSet: number;
+  totalSets: number;
 }
 
 const CDN = {
@@ -25,6 +25,8 @@ const AITrainer: React.FC<AITrainerProps> = ({
   isWorkoutPaused,
   targetReps,
   onSetComplete,
+  currentSet,
+  totalSets,
 }) => {
   const [repCount, setRepCount] = useState(0);
 
@@ -38,7 +40,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
   const stage = useRef<"up" | "down">("up");
   const landmarkHistory = useRef<Landmark[][]>([]);
 
-  // ★ 1. 최신 props 값을 추적하기 위한 Ref 객체
   // onResults 콜백에서 'stale closure' 문제를 피하기 위함
   const stateRef = useRef({ isWorkoutPaused, targetReps });
 
@@ -61,19 +62,26 @@ const AITrainer: React.FC<AITrainerProps> = ({
     return angle;
   };
 
-  // ★ 2. props가 변경될 때마다 stateRef를 업데이트하는 가벼운 useEffect
   useEffect(() => {
     stateRef.current = { isWorkoutPaused, targetReps };
   }, [isWorkoutPaused, targetReps]);
 
-  // ★ 3. 운동 종류가 바뀔 때 횟수와 상태를 초기화하는 useEffect
   useEffect(() => {
     setRepCount(0);
     stage.current = "up";
     landmarkHistory.current = [];
-  }, [exercise]);
+  }, [exercise, currentSet]);
 
-  // ★ 4. Mediapipe 초기화 및 설정을 담당하는 무거운 useEffect
+  useEffect(() => {
+    if (repCount >= targetReps && targetReps > 0) {
+      onSetComplete({
+        exerciseName: exercise,
+        landmarkHistory: landmarkHistory.current,
+        repCount: targetReps,
+      });
+    }
+  }, [repCount, targetReps, exercise, onSetComplete]);
+
   // 이 훅은 exercise가 변경될 때만 다시 실행됨
   useEffect(() => {
     let isActive = true;
@@ -150,6 +158,7 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
                   setRepCount((prev) => {
                     const newRep = prev + 1;
+                    console.log(`[AITrainer] Rep Count: ${prev} -> ${newRep}`);
                     // prop 대신 stateRef의 최신 값을 사용!
                     if (newRep >= stateRef.current.targetReps) {
                       onSetComplete({
@@ -191,11 +200,11 @@ const AITrainer: React.FC<AITrainerProps> = ({
       cameraRef.current?.stop?.();
       poseRef.current?.close?.();
     };
-  }, [exercise]); // 의존성 배열에서 isWorkoutPaused, targetReps 제거!
+  }, [exercise]);
 
-  const displayedFeedback = isWorkoutPaused
-    ? `일시정지 | ${repCount} / ${targetReps} 회`
-    : `${repCount} / ${targetReps} 회`;
+  const setInfo = `Set ${currentSet} / ${totalSets}`;
+  const repInfo = `Reps ${repCount} / ${targetReps}`;
+  const displayedStatus = isWorkoutPaused ? "일시정지" : "운동 중";
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -209,6 +218,7 @@ const AITrainer: React.FC<AITrainerProps> = ({
           backgroundColor: "#000",
         }}
       />
+      {/* 상태 표시 (일시정지/운동 중) */}
       <p
         style={{
           position: "absolute",
@@ -222,7 +232,24 @@ const AITrainer: React.FC<AITrainerProps> = ({
           margin: 0,
         }}
       >
-        {displayedFeedback}
+        {displayedStatus}
+      </p>
+      {/* 세트와 횟수 표시 */}
+      <p
+        style={{
+          position: "absolute",
+          bottom: 10, // 화면 하단으로 위치 변경
+          left: 10,
+          background: "rgba(0,0,0,0.7)",
+          color: "#fff",
+          padding: "10px",
+          borderRadius: 5,
+          fontSize: 22, // 폰트 크기 키움
+          fontWeight: "bold",
+          margin: 0,
+        }}
+      >
+        {`${setInfo} | ${repInfo}`}
       </p>
     </div>
   );
