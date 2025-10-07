@@ -5,12 +5,12 @@ import { useNavigate } from "react-router-dom";
 // 레이아웃 컨테이너
 const Page = styled.div`
   width: 100%;
-  height: calc(100vh - 140px);
+  min-height: calc(100vh - 140px);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 12px 12px 16px;
+  padding: 12px 12px 40px;
   box-sizing: border-box;
 `;
 
@@ -107,6 +107,7 @@ const VideoBox = styled.div`
   flex: 1;
   border-radius: 10px;
   border: 1px solid #dcdcdc;
+  margin-bottom: 20px;
 `;
 
 const Timeline = styled.div`
@@ -202,6 +203,7 @@ const RecoBtn = styled.button`
 const FeedbackCard = styled(Card)`
   max-width: 1200px;
   width: 100%;
+  margin-top: 20px;
 `;
 
 // 추천 운동 카드가 상단의 "운동 결과" 카드와 동일한 가로 폭을 갖도록

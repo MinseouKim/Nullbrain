@@ -165,7 +165,7 @@ const ChartRow = styled.div`
 
 const ChartBox = styled.div`
   width: 80%;
-  height:500px;
+  height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -275,14 +275,20 @@ const ChartRowAnimated = styled.div<{ inview: boolean }>`
   min-width: 300px; /* 최소 width 추가 */
   ${({ inview }) =>
     inview &&
-    css` 
+    css`
       animation: ${fadeIn} 1s forwards;
     `}
 `;
 
 const MainPage = () => {
-  const { ref: pieRef, inView: pieInView } = useInView({ triggerOnce: true, threshold: 0.3 });
-  const { ref: barRef, inView: barInView } = useInView({ triggerOnce: true, threshold: 0.3 });
+  const { ref: pieRef, inView: pieInView } = useInView({
+    triggerOnce: true,
+    threshold: 0.3,
+  });
+  const { ref: barRef, inView: barInView } = useInView({
+    triggerOnce: true,
+    threshold: 0.3,
+  });
 
   const exercises = ["플랭크", "스쿼트", "푸쉬업", "런지", "버피테스트"];
 
@@ -363,20 +369,17 @@ const MainPage = () => {
       <SectionDiv style={{ width: "100%", height: "auto" }}>
         <SectionTitle>부상원인</SectionTitle>
         <ChartRowAnimated ref={pieRef} inview={pieInView}>
-          <ChartBox>
-            {pieInView && <InjuryPieChart />}
-          </ChartBox>
+          <ChartBox>{pieInView && <InjuryPieChart />}</ChartBox>
         </ChartRowAnimated>
-          <ChartRightBox>
-            <p>
-              스포츠안전재단의 연구에 따르면, 운동을 하는 사람 중 약 60%가 한 번
-              이상 부상을 경험한 것으로 나타났습니다. 이러한 부상은 잘못된
-              자세나 과도한 운동 등 다양한 원인으로 발생하며, 꾸준한 자세 교정과
-              안전한 운동 습관이 중요함을 보여줍니다. 우리 프로그램은 이러한
-              부상을 예방하고, 안전하게 운동할 수 있도록 돕습니다.
-            </p>
-          </ChartRightBox>
-
+        <ChartRightBox>
+          <p>
+            스포츠안전재단의 연구에 따르면, 운동을 하는 사람 중 약 60%가 한 번
+            이상 부상을 경험한 것으로 나타났습니다. 이러한 부상은 잘못된 자세나
+            과도한 운동 등 다양한 원인으로 발생하며, 꾸준한 자세 교정과 안전한
+            운동 습관이 중요함을 보여줍니다. 우리 프로그램은 이러한 부상을
+            예방하고, 안전하게 운동할 수 있도록 돕습니다.
+          </p>
+        </ChartRightBox>
 
         <ChartRow>
           <ChartLeftBox>
@@ -389,9 +392,7 @@ const MainPage = () => {
             </p>
           </ChartLeftBox>
           <ChartRowAnimated ref={barRef} inview={barInView}>
-            <ChartBox>
-              { barInView && <InjuryCauseBarChart /> }
-            </ChartBox>
+            <ChartBox>{barInView && <InjuryCauseBarChart />}</ChartBox>
           </ChartRowAnimated>
         </ChartRow>
       </SectionDiv>

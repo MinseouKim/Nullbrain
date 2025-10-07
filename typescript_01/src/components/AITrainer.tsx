@@ -63,7 +63,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
     return "카메라 초기화에 실패했습니다. 권한/장치 상태를 확인해주세요.";
   };
 
-
   useEffect(() => {
     if (isInitialized.current) {
       return;
@@ -116,18 +115,26 @@ const AITrainer: React.FC<AITrainerProps> = ({
       const canvasElement = canvasRef.current;
       const canvasCtx = canvasElement.getContext("2d")!;
 
+      let stream: MediaStream | null = null;
       try {
-        const preStream = await navigator.mediaDevices.getUserMedia({
+        stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user" },
           audio: false,
         });
-        try {
-          videoElement.srcObject = preStream;
-          await videoElement.play().catch(() => {});
-        } finally {
-          preStream.getTracks().forEach((t) => t.stop());
-          videoElement.srcObject = null;
-        }
+        videoElement.srcObject = stream;
+        await videoElement.play().catch(() => {});
+
+        // 비디오가 로드될 때까지 기다림
+        await new Promise((resolve) => {
+          videoElement.onloadedmetadata = () => {
+            console.log(
+              "Video loaded, dimensions:",
+              videoElement.videoWidth,
+              videoElement.videoHeight
+            );
+            resolve(void 0);
+          };
+        });
       } catch (e: any) {
         const msg = getCameraErrorMessage(e);
         setFeedbackFromAI(msg);
@@ -156,6 +163,18 @@ const AITrainer: React.FC<AITrainerProps> = ({
       });
 
       pose.onResults((results: PoseResults) => {
+        // results.image가 null이 아닌지 확인
+        if (!results.image) {
+          console.warn("MediaPipe pose results image is null");
+          return;
+        }
+
+        // 비디오 요소가 유효한지 확인
+        if (!videoElement.videoWidth || !videoElement.videoHeight) {
+          console.warn("Video element not ready");
+          return;
+        }
+
         canvasElement.width = results.image.width;
         canvasElement.height = results.image.height;
         canvasCtx.save();
@@ -187,8 +206,16 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
       cameraRef.current = new Camera(videoElement, {
         onFrame: async () => {
-          if (videoElement) {
-            await pose.send({ image: videoElement });
+          if (
+            videoElement &&
+            videoElement.videoWidth > 0 &&
+            videoElement.videoHeight > 0
+          ) {
+            try {
+              await pose.send({ image: videoElement });
+            } catch (error) {
+              console.warn("Pose processing error:", error);
+            }
           }
         },
         width: 1280,
@@ -202,7 +229,8 @@ const AITrainer: React.FC<AITrainerProps> = ({
         const msg = getCameraErrorMessage(e);
         setFeedbackFromAI(msg);
         window.alert(msg);
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) ws.current.close();
+        if (ws.current && ws.current.readyState === WebSocket.OPEN)
+          ws.current.close();
         return;
       }
     };
@@ -225,7 +253,12 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <video ref={videoRef} style={{ display: "none" }} muted playsInline></video>
+      <video
+        ref={videoRef}
+        style={{ display: "none" }}
+        muted
+        playsInline
+      ></video>
       <canvas
         ref={canvasRef}
         width="1280px"
