@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../components/Layouts/MainLayout";
 import CameraSection from "../components/CameraSection";
 import WorkoutSetupModal from "../components/WorkoutSetupModal";
 
 function Camera() {
   const navigate = useNavigate();
+  const location = useLocation() as any;
   const [showModal, setShowModal] = useState(true);
   const [workoutData, setWorkoutData] = useState<{
     name: string;
@@ -31,6 +32,36 @@ function Camera() {
       if (interval) clearInterval(interval);
     };
   }, [isWorkoutActive, isWorkoutPaused]);
+
+  // ExerciseItems -> ExerciseModal에서 전달된 선택 값으로 초기화
+  useEffect(() => {
+    const preset = location?.state as
+      | { name?: string; reps?: number; sets?: number; category?: string }
+      | undefined;
+    if (preset && preset.name) {
+      // 이름 기준으로 기본 reps/sets 추정
+      const lower = preset.name.toLowerCase();
+      const defaults =
+        lower.includes("스쿼트") || lower.includes("squat")
+          ? { reps: 10, sets: 3 }
+          : lower.includes("푸쉬업") || lower.includes("push")
+          ? { reps: 10, sets: 3 }
+          : lower.includes("플랭크") || lower.includes("plank")
+          ? { reps: 30, sets: 3 }
+          : lower.includes("런지") || lower.includes("lunge")
+          ? { reps: 12, sets: 3 }
+          : { reps: 10, sets: 3 };
+
+      setWorkoutData({
+        name: preset.name,
+        reps: typeof preset.reps === "number" ? preset.reps : defaults.reps,
+        sets: typeof preset.sets === "number" ? preset.sets : defaults.sets,
+        category: preset.category || "전신",
+      });
+      // 모달 자동 표시
+      setShowModal(true);
+    }
+  }, [location?.state]);
 
   const handleStartWorkout = (exerciseData: {
     name: string;
@@ -100,6 +131,16 @@ function Camera() {
         isOpen={showModal}
         onClose={handleCloseModal}
         onStartWorkout={handleStartWorkout}
+        preset={
+          workoutData
+            ? {
+                name: workoutData.name,
+                reps: workoutData.reps,
+                sets: workoutData.sets,
+                category: workoutData.category,
+              }
+            : undefined
+        }
       />
     </MainLayout>
   );

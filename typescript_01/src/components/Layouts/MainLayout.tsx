@@ -233,18 +233,8 @@ const WorkoutStats = styled.div`
   flex: 1;
   min-height: 180px;
   position: relative;
-  overflow: hidden;
-  padding-bottom: 27px;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #850000 0%, #ff6b6b 100%);
-  }
+  overflow: visible;
+  padding-bottom: 16px;
 `;
 
 const StatsRow = styled.div`
@@ -258,17 +248,11 @@ const StatsRow = styled.div`
 const StatItem = styled.div`
   text-align: center;
   flex: 1;
-  padding: 16px 12px;
+  padding: 10px 8px;
   background-color: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(133, 0, 0, 0.1);
   transition: all 0.3s ease;
-
-  &:hover {
-    background-color: rgba(133, 0, 0, 0.05);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(133, 0, 0, 0.15);
-  }
 `;
 
 const StatLabel = styled.div`
@@ -295,8 +279,8 @@ const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
       : "linear-gradient(135deg, #850000 0%, #a00000 100%)"};
   color: white;
   border: none;
-  padding: 15px 25px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -305,50 +289,17 @@ const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
     props.isPaused
       ? "0 6px 16px rgba(40, 167, 69, 0.3)"
       : "0 6px 16px rgba(133, 0, 0, 0.3)"};
-  min-height: 50px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  width: 100%;
   position: relative;
   overflow: hidden;
-  margin: 10px 8px;
+  margin: -10px 0 0 0;
+  box-sizing: border-box;
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent
-    );
-    transition: left 0.5s;
-  }
-
-  &:hover:not(:disabled) {
-    background: ${(props) =>
-      props.isPaused
-        ? "linear-gradient(135deg, #218838 0%, #1ea085 100%)"
-        : "linear-gradient(135deg, #6b0000 0%, #8b0000 100%)"};
-    transform: translateY(-3px);
-    box-shadow: ${(props) =>
-      props.isPaused
-        ? "0 8px 20px rgba(40, 167, 69, 0.4)"
-        : "0 8px 20px rgba(133, 0, 0, 0.4)"};
-
-    &::before {
-      left: 100%;
-    }
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(-1px);
-  }
+  /* hover 효과 제거 (요청 사항) */
 
   &:disabled {
     background: linear-gradient(135deg, #ccc 0%, #999 100%);
@@ -534,7 +485,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                     </ExerciseButton>
                   ))}
                 </ExerciseGrid>
-                <OtherExercises>
+                <OtherExercises onClick={() => navigate("/exercise")}>
                   <span>&gt; 다른 운동하러 가기</span>
                 </OtherExercises>
               </>
@@ -546,7 +497,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                   <ExerciseButton>플랭크</ExerciseButton>
                   <ExerciseButton>런지</ExerciseButton>
                 </ExerciseGrid>
-                <OtherExercises>
+                <OtherExercises onClick={() => navigate("/exercise")}>
                   <span>&gt; 다른 운동하러 가기</span>
                 </OtherExercises>
               </>

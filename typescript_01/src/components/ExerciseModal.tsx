@@ -142,14 +142,22 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
   const navigate = useNavigate();
 
   const handleStartWorkout = () => {
-    navigate("/camera");
+    if (!exercise) return;
+    // 선택한 운동명을 camera 페이지로 전달 (기본 횟수/세트는 camera에서 설정)
+    navigate("/camera", {
+      state: {
+        name: exercise.name,
+        // reps/sets은 Camera 페이지에서 운동명으로 기본값을 계산
+        category: exercise.category,
+      },
+    });
   };
   if (!isOpen || !exercise) {
     return null;
   }
 
   const handleStart = () => {
-    navigate("/camera");
+    handleStartWorkout();
   };
 
   return (

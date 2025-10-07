@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 interface WorkoutSetupModalProps {
@@ -10,6 +11,12 @@ interface WorkoutSetupModalProps {
     sets: number;
     category: string;
   }) => void;
+  preset?: {
+    name: string;
+    reps: number;
+    sets: number;
+    category: string;
+  };
 }
 
 interface Exercise {
@@ -276,7 +283,9 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
   isOpen,
   onClose,
   onStartWorkout,
+  preset,
 }) => {
+  const navigate = useNavigate();
   const exerciseCategories: ExerciseCategory[] = [
     {
       name: "하체",
@@ -356,15 +365,41 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
     },
   ];
 
-  const [selectedExercise, setSelectedExercise] = useState<Exercise>(
-    exerciseCategories[0].exercises[0]
+  const [selectedExercise, setSelectedExercise] = useState<Exercise>(() => {
+    if (preset) {
+      const found = exerciseCategories
+        .flatMap((c) => c.exercises)
+        .find((e) => e.name === preset.name);
+      return found || exerciseCategories[0].exercises[0];
+    }
+    return exerciseCategories[0].exercises[0];
+  });
+  const [reps, setReps] = useState<number>(
+    () => preset?.reps ?? exerciseCategories[0].exercises[0].defaultReps
   );
-  const [reps, setReps] = useState(
-    exerciseCategories[0].exercises[0].defaultReps
+  const [sets, setSets] = useState<number>(
+    () => preset?.sets ?? exerciseCategories[0].exercises[0].defaultSets
   );
-  const [sets, setSets] = useState(
-    exerciseCategories[0].exercises[0].defaultSets
-  );
+
+  // preset이 바뀔 때 모달 입력값 업데이트
+  useEffect(() => {
+    if (!preset) return;
+    const found = exerciseCategories
+      .flatMap((c) => c.exercises)
+      .find((e) => e.name === preset.name);
+    if (found) {
+      setSelectedExercise(found);
+    } else {
+      setSelectedExercise({
+        name: preset.name,
+        defaultReps: preset.reps,
+        defaultSets: preset.sets,
+        category: preset.category,
+      });
+    }
+    setReps(preset.reps);
+    setSets(preset.sets);
+  }, [preset]);
 
   const handleStartWorkout = () => {
     onStartWorkout({
@@ -377,8 +412,9 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
   };
 
   const handleViewPose = () => {
-    // 운동 자세 보기 기능 (추후 구현)
-    alert("운동 자세 보기 기능은 추후 구현됩니다.");
+    // 운동자세 보기 클릭 시 운동 목록 페이지로 이동
+    navigate("/exercise");
+    onClose();
   };
 
   if (!isOpen) return null;

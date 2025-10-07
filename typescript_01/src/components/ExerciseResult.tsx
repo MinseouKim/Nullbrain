@@ -5,18 +5,19 @@ import { useNavigate } from "react-router-dom";
 // 레이아웃 컨테이너
 const Page = styled.div`
   width: 100%;
-  min-height: calc(100vh - 140px);
+  height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 12px 12px 40px;
+  gap: 8px;
+  padding: 8px;
   box-sizing: border-box;
+  overflow: hidden;
 `;
 
 const Title = styled.h2`
   margin: 0;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: #111;
 `;
@@ -25,9 +26,10 @@ const Title = styled.h2`
 const TopGrid = styled.div`
   width: 100%;
   max-width: 1200px;
+  height: calc(100vh - 200px);
   display: grid;
   grid-template-columns: 1fr 1.3fr;
-  gap: 12px;
+  gap: 8px;
   align-items: stretch;
 
   @media (max-width: 1024px) {
@@ -37,13 +39,13 @@ const TopGrid = styled.div`
 
 const Card = styled.section`
   background: #f3f3f3;
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 8px;
+  padding: 12px;
   box-sizing: border-box;
 `;
 
 const CardTitle = styled.h3`
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 700;
   color: #111;
@@ -71,9 +73,9 @@ const ResultTable = styled.div`
 const ResultRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
-  padding: 12px 14px;
+  padding: 6px 8px;
   border-bottom: 1px solid #f0f0f0;
   flex: 1;
 
@@ -97,38 +99,37 @@ const VideoCard = styled(Card)`
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: 12px;
+  gap: 8px;
 `;
 
 // 우측: 비디오 영역 및 타임라인 리스트
 const VideoBox = styled.div`
   background: #e5e5e5;
-  min-height: 300px;
   flex: 1;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #dcdcdc;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 `;
 
 const Timeline = styled.div`
   margin-top: 0;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #e5e7eb;
   overflow: hidden;
-  flex: 0 0 120px;
+  height: 100px;
   display: flex;
   flex-direction: column;
 `;
 
 const TimelineRow = styled.div`
   display: grid;
-  grid-template-columns: 90px 1fr 100px 60px;
-  gap: 6px;
+  grid-template-columns: 60px 1fr 80px 50px;
+  gap: 4px;
   align-items: center;
-  padding: 8px 10px;
+  padding: 4px 8px;
   border-bottom: 1px solid #f3f4f6;
-  font-size: 14px;
+  font-size: 12px;
   background: #fff;
 
   &:last-child {
@@ -138,12 +139,13 @@ const TimelineRow = styled.div`
 
 const Pill = styled.span<{ color?: string }>`
   display: inline-block;
-  padding: 4px 10px;
+  padding: 2px 6px;
   border-radius: 999px;
   background: ${(p) => p.color || "#f1f5f9"};
   color: #111;
   font-weight: 600;
   text-align: center;
+  font-size: 10px;
 `;
 
 // 중단: 오류 분석, 추천 운동
@@ -203,7 +205,7 @@ const RecoBtn = styled.button`
 const FeedbackCard = styled(Card)`
   max-width: 1200px;
   width: 100%;
-  margin-top: 20px;
+  margin-top: 4px;
 `;
 
 // 추천 운동 카드가 상단의 "운동 결과" 카드와 동일한 가로 폭을 갖도록
