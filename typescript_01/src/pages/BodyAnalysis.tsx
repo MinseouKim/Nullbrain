@@ -4,7 +4,9 @@ import styled from "styled-components";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import MeasureOrchestrator, { MeasureResult } from "../measure/MeasureOrchestrator";
+import MeasureOrchestrator, {
+  MeasureResult,
+} from "../measure/MeasureOrchestrator";
 import BodyAnalysisModal, {
   BodyDataForStart,
 } from "../components/BodyAnalysisModal";
@@ -205,7 +207,8 @@ const BodyAnalysis: React.FC = () => {
         body: { height_cm: heightCm },
         measures: result,
       };
-      const base = (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:8000";
+      const base =
+        (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:8000";
       const res = await fetch(`${base}/api/profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

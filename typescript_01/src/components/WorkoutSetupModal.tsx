@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import styled from "styled-components";
 
 interface WorkoutSetupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartWorkout: (exerciseData: { name: string; reps: number; sets: number; category: string }) => void;
+  onStartWorkout: (exerciseData: {
+    name: string;
+    reps: number;
+    sets: number;
+    category: string;
+  }) => void;
 }
 
 interface Exercise {
@@ -27,7 +32,7 @@ const ModalOverlay = styled.div<{ isOpen: boolean }>`
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  display: ${props => props.isOpen ? 'flex' : 'none'};
+  display: ${(props) => (props.isOpen ? "flex" : "none")};
   align-items: center;
   justify-content: center;
   z-index: 1000;
@@ -215,7 +220,6 @@ const InfoText = styled.div`
   line-height: 1.5;
 `;
 
-
 const ButtonContainer = styled.div`
   display: flex;
   gap: 15px;
@@ -227,7 +231,7 @@ const ButtonContainer = styled.div`
   }
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
+const Button = styled.button<{ variant?: "primary" | "secondary" }>`
   padding: 15px 30px;
   border-radius: 8px;
   font-size: 16px;
@@ -243,7 +247,9 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
     min-width: 120px;
   }
 
-  ${props => props.variant === 'primary' ? `
+  ${(props) =>
+    props.variant === "primary"
+      ? `
     background-color: #850000;
     color: white;
     
@@ -252,7 +258,8 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(133, 0, 0, 0.3);
     }
-  ` : `
+  `
+      : `
     background-color: transparent;
     color: #850000;
     border: 2px solid #850000;
@@ -265,67 +272,113 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
   `}
 `;
 
-const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onStartWorkout 
+const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
+  isOpen,
+  onClose,
+  onStartWorkout,
 }) => {
   const exerciseCategories: ExerciseCategory[] = [
     {
-      name: '하체',
+      name: "하체",
       exercises: [
-        { name: '스쿼트', defaultReps: 10, defaultSets: 3, category: '하체' },
-        { name: '점프스쿼트', defaultReps: 15, defaultSets: 3, category: '하체' },
-        { name: '런지', defaultReps: 12, defaultSets: 3, category: '하체' },
-        { name: '월마운틴클라이머', defaultReps: 20, defaultSets: 3, category: '하체' }
-      ]
+        { name: "스쿼트", defaultReps: 10, defaultSets: 3, category: "하체" },
+        {
+          name: "점프스쿼트",
+          defaultReps: 15,
+          defaultSets: 3,
+          category: "하체",
+        },
+        { name: "런지", defaultReps: 12, defaultSets: 3, category: "하체" },
+        {
+          name: "월마운틴클라이머",
+          defaultReps: 20,
+          defaultSets: 3,
+          category: "하체",
+        },
+      ],
     },
     {
-      name: '상체',
+      name: "상체",
       exercises: [
-        { name: '푸쉬업', defaultReps: 10, defaultSets: 3, category: '상체' },
-        { name: '플랭크', defaultReps: 30, defaultSets: 3, category: '상체' },
-        { name: '사이드플랭크', defaultReps: 30, defaultSets: 3, category: '상체' },
-        { name: '마운틴클라이머', defaultReps: 20, defaultSets: 3, category: '상체' }
-      ]
+        { name: "푸쉬업", defaultReps: 10, defaultSets: 3, category: "상체" },
+        { name: "플랭크", defaultReps: 30, defaultSets: 3, category: "상체" },
+        {
+          name: "사이드플랭크",
+          defaultReps: 30,
+          defaultSets: 3,
+          category: "상체",
+        },
+        {
+          name: "마운틴클라이머",
+          defaultReps: 20,
+          defaultSets: 3,
+          category: "상체",
+        },
+      ],
     },
     {
-      name: '어깨',
+      name: "어깨",
       exercises: [
-        { name: '숄더프레스', defaultReps: 12, defaultSets: 3, category: '어깨' },
-        { name: '레터럴레이즈', defaultReps: 15, defaultSets: 3, category: '어깨' },
-        { name: '프론트레이즈', defaultReps: 15, defaultSets: 3, category: '어깨' },
-        { name: '리어델트플라이', defaultReps: 12, defaultSets: 3, category: '어깨' }
-      ]
+        {
+          name: "숄더프레스",
+          defaultReps: 12,
+          defaultSets: 3,
+          category: "어깨",
+        },
+        {
+          name: "레터럴레이즈",
+          defaultReps: 15,
+          defaultSets: 3,
+          category: "어깨",
+        },
+        {
+          name: "프론트레이즈",
+          defaultReps: 15,
+          defaultSets: 3,
+          category: "어깨",
+        },
+        {
+          name: "리어델트플라이",
+          defaultReps: 12,
+          defaultSets: 3,
+          category: "어깨",
+        },
+      ],
     },
     {
-      name: '팔',
+      name: "팔",
       exercises: [
-        { name: '버피', defaultReps: 8, defaultSets: 3, category: '팔' },
-        { name: '트라이셉딥', defaultReps: 10, defaultSets: 3, category: '팔' },
-        { name: '바이셉컬', defaultReps: 12, defaultSets: 3, category: '팔' },
-        { name: '해머컬', defaultReps: 12, defaultSets: 3, category: '팔' }
-      ]
-    }
+        { name: "버피", defaultReps: 8, defaultSets: 3, category: "팔" },
+        { name: "트라이셉딥", defaultReps: 10, defaultSets: 3, category: "팔" },
+        { name: "바이셉컬", defaultReps: 12, defaultSets: 3, category: "팔" },
+        { name: "해머컬", defaultReps: 12, defaultSets: 3, category: "팔" },
+      ],
+    },
   ];
 
-  const [selectedExercise, setSelectedExercise] = useState<Exercise>(exerciseCategories[0].exercises[0]);
-  const [reps, setReps] = useState(exerciseCategories[0].exercises[0].defaultReps);
-  const [sets, setSets] = useState(exerciseCategories[0].exercises[0].defaultSets);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise>(
+    exerciseCategories[0].exercises[0]
+  );
+  const [reps, setReps] = useState(
+    exerciseCategories[0].exercises[0].defaultReps
+  );
+  const [sets, setSets] = useState(
+    exerciseCategories[0].exercises[0].defaultSets
+  );
 
   const handleStartWorkout = () => {
     onStartWorkout({
       name: selectedExercise.name,
       reps: reps,
       sets: sets,
-      category: selectedExercise.category
+      category: selectedExercise.category,
     });
     onClose();
   };
 
   const handleViewPose = () => {
     // 운동 자세 보기 기능 (추후 구현)
-    alert('운동 자세 보기 기능은 추후 구현됩니다.');
+    alert("운동 자세 보기 기능은 추후 구현됩니다.");
   };
 
   if (!isOpen) return null;
@@ -335,20 +388,13 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>자세온</ModalTitle>
-          <Instructions>
-            먼저 각 운동 별 목표 갯수 및 세트 설정
-          </Instructions>
-          <Instructions>
-            운동이 준비 되었다면 시작 버튼을,
-          </Instructions>
+          <Instructions>먼저 각 운동 별 목표 갯수 및 세트 설정</Instructions>
+          <Instructions>운동이 준비 되었다면 시작 버튼을,</Instructions>
           <Instructions>
             운동자세를 볼려면 운동자세 보기를 눌러주세요
           </Instructions>
-          <RedText>
-            *운동 생략을 원하시면 0을 입력해주세요.
-          </RedText>
+          <RedText>*운동 생략을 원하시면 0을 입력해주세요.</RedText>
         </ModalHeader>
-
 
         <ExerciseSetup>
           <InputRow>
@@ -357,9 +403,14 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
               <NumberInput
                 type="text"
                 value={selectedExercise.name}
-                onChange={(e) => setSelectedExercise({...selectedExercise, name: e.target.value})}
+                onChange={(e) =>
+                  setSelectedExercise({
+                    ...selectedExercise,
+                    name: e.target.value,
+                  })
+                }
                 placeholder="운동명 입력"
-                style={{width: '120px'}}
+                style={{ width: "120px" }}
               />
             </InputContainer>
             <MultiplySign>×</MultiplySign>
@@ -387,7 +438,8 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
 
         <AdditionalInfo>
           <InfoText>
-            *운동은 기본 10~15회씩 3~5세트 기본으로 합니다. 처음이시라면 10회씩 3세트에서 천천히 늘려보세요!
+            *운동은 기본 10~15회씩 3~5세트 기본으로 합니다. 처음이시라면 10회씩
+            3세트에서 천천히 늘려보세요!
           </InfoText>
         </AdditionalInfo>
 
