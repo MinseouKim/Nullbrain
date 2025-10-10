@@ -18,7 +18,7 @@ export const EXERCISE_DETAILS: ExerciseDetail[] = [
     name: "스쿼트",
     category: "하체",
     description: "하체 근육을 강화하는 가장 대표적인 운동으로, 전신 근력 향상에도 효과적입니다.",
-    imageUrl: "/images/squat.png",
+    imageUrl: "/images/Squat2.jpg",
     stimulationArea: ["대퇴사두근 (허벅지 앞)", "둔근 (엉덩이)", "햄스트링 (허벅지 뒤)"],
     effect: ["하체 근력 강화", "코어 안정성 향상", "기초대사량 증가"],
     caution: ["허리가 구부러지지 않도록 곧게 펴주세요.", "무릎이 발끝보다 앞으로 과도하게 나가지 않도록 주의하세요.", "앉을 때 엉덩이를 뒤로 빼는 느낌으로 수행하세요."],

@@ -1,5 +1,5 @@
 // src/measure/MeasureOrchestrator.tsx
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BodyAnalysisCamera from "../components/BodyAnalysisCamera";
 import { KP, Size } from "../poseLib/poseTypes";
 import { EMA, MedianBuffer } from "./filters";
@@ -138,12 +138,18 @@ const Chip: React.FC<{ color: string; children: React.ReactNode }> = ({ color, c
   }}>{children}</span>
 );
 
-// ---- Steps ----
-type StepId =
+export type StepId = // ⭐️ export 추가
   | "full" | "tpose" | "side" | "ankle_rom"
   | "squat" | "elbow_flex" | "shoulder_abd" | "neck_rom"
   | "done";
 type Step = { id: StepId; title: string; instruction: string };
+
+/** 프롭 */
+type Props = {
+  heightCm: number;
+  onDone: (r: MeasureResult) => void;
+  onStepChange: (stepId: StepId) => void; // ⭐️ 이 줄을 추가
+};
 
 const STEPS: Step[] = [
   { id:"full",        title:"전신 프레임 확보",           instruction:"정면 전체가 보이게 서세요(머리~발목)." },
@@ -210,6 +216,11 @@ const MeasureOrchestrator: React.FC<Props> = ({ heightCm, onDone }) => {
   const stableFrames = useRef(0);
   const didFinish = useRef(false);
   const current = STEPS[stepIdx];
+
+ useEffect(() => {
+    onStepChange(current.id);
+  }, [current.id, onStepChange]);
+
 
   const toCm = useCallback(
     (px: number | null | undefined) =>
