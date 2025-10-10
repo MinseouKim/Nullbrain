@@ -11,16 +11,15 @@ import BodyAnalysisModal, {
 import CompletionModal from "../components/CompletionModal";
 
 // --- 단계별 이미지 맵 ---
-// public 폴더를 기준으로 한 이미지 경로를 직접 문자열로 입력합니다.
-const poseImageMap: Record<StepId, string> = {
+const poseImageMap: Record<StepId, string | string[]> = {
   full: "/images/전신_정면.png",
   tpose: "/images/전면_T자세.png",
   side: "/images/전신_측면.png",
-  ankle_rom: "/images/전신_측면.png",
-  squat: "/images/전신_정면.png",
-  elbow_flex: "/images/전면_T자세.png",
-  shoulder_abd: "/images/전면_T자세.png",
-  neck_rom: "/images/전신_측면.png",
+  ankle_rom: "/images/무릎.png",
+  squat: "/images/전신_정면.png", // 이 줄이 누락되었습니다.
+  elbow_flex: "/images/팔꿈치.png",
+  shoulder_abd: "/images/팔올림.png",
+  neck_rom: ["/images/고개숙임.png", "/images/고개듦.png"],
   done: "/images/전신_정면.png",
 };
 
@@ -177,12 +176,33 @@ const BodyAnalysis: React.FC = () => {
 
   // 현재 측정 단계를 저장하기 위한 state
   const [currentStepId, setCurrentStepId] = useState<StepId>('full');
-
+  
+  const [currentPoseImage, setCurrentPoseImage] = useState<string>('');
   useEffect(() => {
-    if (result) {
-      setShowCompletionModal(true);
+    const imagePaths = poseImageMap[currentStepId];
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (Array.isArray(imagePaths)) {
+      // 이미지가 배열인 경우 (neck_rom)
+      let imageIndex = 0;
+      setCurrentPoseImage(imagePaths[imageIndex]); // 첫 이미지로 즉시 설정
+      
+      intervalId = setInterval(() => {
+        imageIndex = (imageIndex + 1) % imagePaths.length;
+        setCurrentPoseImage(imagePaths[imageIndex]);
+      }, 2000); // 2초 간격
+    } else if (typeof imagePaths === 'string') {
+      // 이미지가 단일 문자열인 경우
+      setCurrentPoseImage(imagePaths);
     }
-  }, [result]);
+
+    // currentStepId가 변경될 때 이전 interval을 정리합니다. (메모리 누수 방지)
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [currentStepId]);
 
   const onStart = (data: BodyDataForStart) => {
     setHeightCm(data.height);
@@ -290,7 +310,7 @@ const BodyAnalysis: React.FC = () => {
             </InfoBox>
             <InfoBox style={{ flex: 1 }}>
               <PoseImage
-                src={poseImageMap[currentStepId]}
+                src={currentPoseImage}
                 alt="분석 자세 가이드"
               />
             </InfoBox>
