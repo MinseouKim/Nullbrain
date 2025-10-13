@@ -13,6 +13,7 @@ function Camera() {
     reps: number;
     sets: number;
     category: string;
+    restTime: number;
   } | null>(null);
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [isWorkoutPaused, setIsWorkoutPaused] = useState(false);
@@ -36,7 +37,13 @@ function Camera() {
   // ExerciseItems -> ExerciseModal에서 전달된 선택 값으로 초기화
   useEffect(() => {
     const preset = location?.state as
-      | { name?: string; reps?: number; sets?: number; category?: string }
+      | {
+          name?: string;
+          reps?: number;
+          sets?: number;
+          category?: string;
+          restTime?: number;
+        }
       | undefined;
     if (preset && preset.name) {
       // 이름 기준으로 기본 reps/sets 추정
@@ -57,6 +64,7 @@ function Camera() {
         reps: typeof preset.reps === "number" ? preset.reps : defaults.reps,
         sets: typeof preset.sets === "number" ? preset.sets : defaults.sets,
         category: preset.category || "전신",
+        restTime: preset.restTime || 60,
       });
       // 모달 자동 표시
       setShowModal(true);
@@ -68,6 +76,7 @@ function Camera() {
     reps: number;
     sets: number;
     category: string;
+    restTime: number;
   }) => {
     setWorkoutData(exerciseData);
     setIsWorkoutActive(true);
@@ -138,6 +147,7 @@ function Camera() {
                 reps: workoutData.reps,
                 sets: workoutData.sets,
                 category: workoutData.category,
+                restTime: workoutData.restTime,
               }
             : undefined
         }

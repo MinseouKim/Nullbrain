@@ -10,6 +10,7 @@ interface CameraSectionProps {
     reps: number;
     sets: number;
     category: string;
+    restTime: number;
   } | null;
   isWorkoutPaused: boolean;
 }

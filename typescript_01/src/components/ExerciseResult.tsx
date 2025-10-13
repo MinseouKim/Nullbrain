@@ -211,7 +211,7 @@ const FeedbackCard = styled(Card)`
 // 추천 운동 카드가 상단의 "운동 결과" 카드와 동일한 가로 폭을 갖도록
 // TopGrid가 grid-template-columns: 1fr 1.3fr 이므로 왼쪽 폭 비율은 1/2.3
 const RecoCard = styled(Card)`
-  width: calc(100% / 2.3);
+  width: 100%;
   @media (max-width: 1024px) {
     width: 100%;
   }
@@ -361,7 +361,7 @@ const ExerciseResult: React.FC = () => {
           스쿼트를 할 때는 등을 곧게 펴고 무릎 정렬에 신경을 더 써야합니다.
         </div>
         <Actions>
-          <ActionBtn onClick={() => navigate(-1)}>다시하기</ActionBtn>
+          <ActionBtn onClick={() => navigate("/camera")}>다시하기</ActionBtn>
           <ActionBtn variant="ghost" onClick={() => navigate("/exercise")}>
             다른 운동하러 가기
           </ActionBtn>

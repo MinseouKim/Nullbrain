@@ -16,6 +16,7 @@ interface MainLayoutProps {
     reps: number;
     sets: number;
     category: string;
+    restTime: number;
   } | null;
 }
 
@@ -273,38 +274,25 @@ const StatValue = styled.div`
 `;
 
 const StopExerciseButton = styled.button<{ isPaused?: boolean }>`
-  background: ${(props) =>
-    props.isPaused
-      ? "linear-gradient(135deg, #28a745 0%, #20c997 100%)"
-      : "linear-gradient(135deg, #850000 0%, #a00000 100%)"};
+  background: ${(props) => (props.isPaused ? "#28a745" : "#850000")};
   color: white;
   border: none;
-  padding: 10px 14px;
-  border-radius: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 700;
-  transition: all 0.3s ease;
-  box-shadow: ${(props) =>
-    props.isPaused
-      ? "0 6px 16px rgba(40, 167, 69, 0.3)"
-      : "0 6px 16px rgba(133, 0, 0, 0.3)"};
-  min-height: 44px;
+  font-weight: 600;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  position: relative;
-  overflow: hidden;
-  margin: -10px 0 0 0;
+  margin: 0 0 2px 0;
   box-sizing: border-box;
 
-  /* hover 효과 제거 (요청 사항) */
-
   &:disabled {
-    background: linear-gradient(135deg, #ccc 0%, #999 100%);
+    background: #ccc;
     cursor: not-allowed;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     opacity: 0.7;
   }
 `;

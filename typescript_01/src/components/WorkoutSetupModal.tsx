@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -10,12 +10,14 @@ interface WorkoutSetupModalProps {
     reps: number;
     sets: number;
     category: string;
+    restTime: number;
   }) => void;
   preset?: {
     name: string;
     reps: number;
     sets: number;
     category: string;
+    restTime?: number;
   };
 }
 
@@ -50,8 +52,8 @@ const ModalOverlay = styled.div<{ isOpen: boolean }>`
 const ModalContainer = styled.div`
   background-color: white;
   border-radius: 16px;
-  padding: 30px;
-  max-width: 90vw;
+  padding: 20px;
+  max-width: 500px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -60,40 +62,21 @@ const ModalContainer = styled.div`
   animation: modalSlideIn 0.3s ease-out;
   margin: auto;
 
-  /* 노트북 화면 크기 대응 */
-  @media (min-width: 1024px) and (max-width: 1440px) {
-    max-width: 600px;
-    padding: 35px;
-  }
-
-  /* 데스크톱 화면 크기 대응 */
-  @media (min-width: 1441px) {
-    max-width: 700px;
-    padding: 40px;
-  }
-
-  /* 태블릿 화면 크기 대응 */
-  @media (max-width: 768px) {
-    max-width: 95vw;
-    padding: 20px;
-    max-height: 95vh;
-  }
-
   @keyframes modalSlideIn {
     from {
       opacity: 0;
-      transform: translateY(-20px) scale(0.95);
+      transform: translateY(-20px);
     }
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
     }
   }
 `;
 
 const ModalHeader = styled.div`
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 `;
 
 const ModalTitle = styled.h2`
@@ -131,8 +114,8 @@ const RedText = styled.div`
 const ExerciseSetup = styled.div`
   background-color: #f8f9fa;
   border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 30px;
+  padding: 20px;
+  margin-bottom: 20px;
   border: 1px solid #e9ecef;
 `;
 
@@ -213,12 +196,204 @@ const MultiplySign = styled.span`
   margin: 0 10px;
 `;
 
+const RestTimeSection = styled.div`
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+`;
+
+const RestTimeLabel = styled.h4`
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  text-align: center;
+`;
+
+const RestTimeHorizontalContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  justify-content: space-between;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+`;
+
+const RestTimeInputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+`;
+
+const TimeInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+`;
+
+const TimeDropdownButton = styled.button`
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
+  min-width: 40px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  outline: none;
+
+  &:hover {
+    background: #e9ecef;
+    border-color: #850000;
+    color: #850000;
+  }
+
+  &:active {
+    background: #e9ecef;
+    border-color: #850000;
+    color: #850000;
+  }
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const TimeDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 4px;
+  transform: translateZ(0);
+  will-change: auto;
+
+  /* 스크롤바 스타일링 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+`;
+
+const TimeDropdownOption = styled.div<{ isSelected: boolean }>`
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: ${(props) => (props.isSelected ? "#850000" : "#666")};
+  background-color: ${(props) => (props.isSelected ? "#f8f9fa" : "white")};
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  transform: translateZ(0);
+
+  &:hover {
+    background-color: #f8f9fa;
+    color: #850000;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const TimeUnit = styled.span`
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+`;
+
+const RestTimeQuickSelect = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 2;
+`;
+
+const RestTimeSelectBox = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  max-width: 100%;
+`;
+
+const RestTimeOption = styled.div<{ isSelected: boolean }>`
+  padding: 10px 8px;
+  border: 2px solid ${(props) => (props.isSelected ? "#850000" : "transparent")};
+  border-radius: 8px;
+  background-color: ${(props) => (props.isSelected ? "#850000" : "white")};
+  color: ${(props) => (props.isSelected ? "white" : "#666")};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  box-shadow: ${(props) =>
+    props.isSelected
+      ? "0 2px 4px rgba(133, 0, 0, 0.2)"
+      : "0 1px 2px rgba(0, 0, 0, 0.1)"};
+
+  &:hover {
+    border-color: #850000;
+    background-color: ${(props) => (props.isSelected ? "#850000" : "#f8f9fa")};
+    color: ${(props) => (props.isSelected ? "white" : "#850000")};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(133, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+`;
+
 const AdditionalInfo = styled.div`
   background-color: #fff3cd;
   border: 1px solid #ffeaa7;
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 30px;
+  padding: 12px;
+  margin-bottom: 20px;
 `;
 
 const InfoText = styled.div`
@@ -380,6 +555,56 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
   const [sets, setSets] = useState<number>(
     () => preset?.sets ?? exerciseCategories[0].exercises[0].defaultSets
   );
+  const [restTime, setRestTime] = useState<number>(
+    () => preset?.restTime ?? 60 // 기본 60초
+  );
+  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowTimeDropdown(false);
+      }
+    };
+
+    if (showTimeDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showTimeDropdown]);
+
+  // 모달이 열려있을 때 배경 스크롤 방지
+  useEffect(() => {
+    if (isOpen) {
+      // 현재 스크롤 위치 저장
+      const scrollY = window.scrollY;
+
+      // body 스타일 변경으로 스크롤 방지
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+
+      return () => {
+        // 모달이 닫힐 때 원래 스타일로 복원
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+
+        // 스크롤 위치 복원
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
 
   // preset이 바뀔 때 모달 입력값 업데이트
   useEffect(() => {
@@ -399,6 +624,7 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
     }
     setReps(preset.reps);
     setSets(preset.sets);
+    setRestTime(preset.restTime ?? 60);
   }, [preset]);
 
   const handleStartWorkout = () => {
@@ -407,6 +633,7 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
       reps: reps,
       sets: sets,
       category: selectedExercise.category,
+      restTime: restTime,
     });
     onClose();
   };
@@ -420,10 +647,10 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <ModalOverlay isOpen={isOpen} onClick={onClose}>
-      <ModalContainer onClick={(e) => e.stopPropagation()}>
+    <ModalOverlay isOpen={isOpen}>
+      <ModalContainer>
         <ModalHeader>
-          <ModalTitle>자세온</ModalTitle>
+          <ModalTitle>자세ON</ModalTitle>
           <Instructions>먼저 각 운동 별 목표 갯수 및 세트 설정</Instructions>
           <Instructions>운동이 준비 되었다면 시작 버튼을,</Instructions>
           <Instructions>
@@ -470,6 +697,47 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
               />
             </InputContainer>
           </InputRow>
+
+          <RestTimeSection>
+            <RestTimeInputContainer>
+              <InputLabel>쉬는시간 설정</InputLabel>
+              <TimeInputWrapper ref={dropdownRef}>
+                <TimeDropdownButton
+                  onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                >
+                  ▼
+                </TimeDropdownButton>
+                <NumberInput
+                  type="number"
+                  value={restTime}
+                  onChange={(e) => setRestTime(parseInt(e.target.value) || 0)}
+                  min="0"
+                  max="120"
+                  step="5"
+                  style={{ width: "100px", height: "50px" }}
+                />
+                <TimeUnit>초</TimeUnit>
+                {showTimeDropdown && (
+                  <TimeDropdown>
+                    {[20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(
+                      (time) => (
+                        <TimeDropdownOption
+                          key={time}
+                          onClick={() => {
+                            setRestTime(time);
+                            setShowTimeDropdown(false);
+                          }}
+                          isSelected={restTime === time}
+                        >
+                          {time}초
+                        </TimeDropdownOption>
+                      )
+                    )}
+                  </TimeDropdown>
+                )}
+              </TimeInputWrapper>
+            </RestTimeInputContainer>
+          </RestTimeSection>
         </ExerciseSetup>
 
         <AdditionalInfo>
