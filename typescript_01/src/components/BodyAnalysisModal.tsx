@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from "react";
+// src/components/BodyAnalysisModal.tsx
+
+import React, { useState } from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom"; // 
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -20,15 +23,19 @@ const ModalContent = styled.form`
   position: relative;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
 `;
-const CloseButton = styled.button`
+const BackButton = styled.button`
   position: absolute;
   top: 15px;
-  right: 20px;
-  border: none;
+  left: 20px;
   background: none;
-  font-size: 2rem;
+  border: none;
+  font-size: 2.5rem;
+  font-weight: bold;
   color: #aaa;
   cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: all 0.2s;
   &:hover {
     color: #333;
     transform: scale(1.1);
@@ -65,8 +72,6 @@ const GenderSelector = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 `;
-
-// ⬇️ transient prop 사용: DOM에 안 흘러들어감
 const GenderButton = styled.button<{ $selected?: boolean }>`
   padding: 12px;
   border-radius: 8px;
@@ -79,7 +84,6 @@ const GenderButton = styled.button<{ $selected?: boolean }>`
     border-color: #850000;
   }
 `;
-
 const StartButton = styled.button`
   width: 100%;
   padding: 15px;
@@ -105,23 +109,15 @@ export interface BodyDataForStart {
 }
 type Props = {
   isOpen: boolean;
-  onClose: () => void;
   onStart: (data: BodyDataForStart) => void;
 };
 
-const BodyAnalysisModal: React.FC<Props> = ({ isOpen, onClose, onStart }) => {
+const BodyAnalysisModal: React.FC<Props> = ({ isOpen, onStart }) => {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState<"male" | "female">("male");
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    if (isOpen) window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
+  const navigate = useNavigate(); // 3. useNavigate 훅 사용
 
   if (!isOpen) return null;
 
@@ -134,79 +130,36 @@ const BodyAnalysisModal: React.FC<Props> = ({ isOpen, onClose, onStart }) => {
     onStart({ height: +height, weight: +weight, age: +age, gender });
   };
 
-  return (
-    <ModalOverlay onClick={onClose}>
-      <ModalContent onClick={(e) => e.stopPropagation()} onSubmit={submit}>
-        <CloseButton type="button" onClick={onClose}>
-          &times;
-        </CloseButton>
-        <Title>신체 정보 입력</Title>
+  // 4. 뒤로가기 핸들러 추가
+  const handleGoBack = () => {
+    navigate('/main');
+  };
 
+  return (
+    <ModalOverlay>
+      <ModalContent onClick={(e) => e.stopPropagation()} onSubmit={submit}>
+        {/* 5. 뒤로가기 버튼 추가 */}
+        <BackButton type="button" onClick={handleGoBack}>&larr;</BackButton>
+        <Title>신체 정보 입력</Title>
         <InputGroup>
           <Label htmlFor="h">키 (cm)</Label>
-          <Input
-            id="h"
-            type="number"
-            inputMode="numeric"
-            min={50}
-            max={250}
-            value={height}
-            onChange={(e) => setHeight(e.target.value)}
-            placeholder="예: 175"
-            required
-          />
+          <Input id="h" type="number" inputMode="numeric" min={50} max={250} value={height} onChange={(e) => setHeight(e.target.value)} placeholder="예: 175" required />
         </InputGroup>
-
         <InputGroup>
           <Label htmlFor="w">몸무게 (kg)</Label>
-          <Input
-            id="w"
-            type="number"
-            inputMode="numeric"
-            min={20}
-            max={300}
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            placeholder="예: 70"
-            required
-          />
+          <Input id="w" type="number" inputMode="numeric" min={20} max={300} value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="예: 70" required />
         </InputGroup>
-
         <InputGroup>
           <Label htmlFor="a">나이</Label>
-          <Input
-            id="a"
-            type="number"
-            inputMode="numeric"
-            min={5}
-            max={100}
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            placeholder="예: 30"
-            required
-          />
+          <Input id="a" type="number" inputMode="numeric" min={5} max={100} value={age} onChange={(e) => setAge(e.target.value)} placeholder="예: 30" required />
         </InputGroup>
-
         <InputGroup>
           <Label>성별</Label>
           <GenderSelector>
-            <GenderButton
-              type="button"
-              $selected={gender === "male"}
-              onClick={() => setGender("male")}
-            >
-              남성
-            </GenderButton>
-            <GenderButton
-              type="button"
-              $selected={gender === "female"}
-              onClick={() => setGender("female")}
-            >
-              여성
-            </GenderButton>
+            <GenderButton type="button" $selected={gender === "male"} onClick={() => setGender("male")}>남성</GenderButton>
+            <GenderButton type="button" $selected={gender === "female"} onClick={() => setGender("female")}>여성</GenderButton>
           </GenderSelector>
         </InputGroup>
-
         <StartButton type="submit">분석 시작하기</StartButton>
       </ModalContent>
     </ModalOverlay>
