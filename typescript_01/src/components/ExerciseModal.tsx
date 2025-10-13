@@ -140,16 +140,16 @@ interface ExerciseModalProps {
 
 const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
     
-      const navigate = useNavigate();
+  const navigate = useNavigate();
     
-      const handleStartWorkout= () => {
-        navigate('/camera');
-      };
+  const handleStartWorkout= () => {
+    navigate('/camera');
+  };
+
   if (!isOpen || !exercise) {
     return null;
   }
     
-
   const handleStart = () => {
     navigate("/camera");
   };
@@ -161,7 +161,9 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
         
         <ImageSection>
           <h2>{exercise.name}</h2>
-          <img src={exercise.imageUrl} alt={exercise.name} />
+          {/* ▼▼▼▼▼ [요청하신 수정 사항] ▼▼▼▼▼ */}
+          <img src={exercise.modalImageUrl} alt={exercise.name} />
+          {/* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */}
         </ImageSection>
 
         <InfoSection>
