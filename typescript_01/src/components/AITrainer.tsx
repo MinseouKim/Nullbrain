@@ -151,9 +151,9 @@ const AITrainer: React.FC<AITrainerProps> = ({
               if (hip && knee && ankle) {
                 const angle = calculateAngle(hip, knee, ankle);
 
-                if (angle < 90 && stage.current === "up") {
+                if (angle < 100 && stage.current === "up") {
                   stage.current = "down";
-                } else if (angle > 160 && stage.current === "down") {
+                } else if (angle > 150 && stage.current === "down") {
                   stage.current = "up";
 
                   setRepCount((prev) => {
