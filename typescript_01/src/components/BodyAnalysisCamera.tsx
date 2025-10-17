@@ -1,4 +1,3 @@
-// src/components/BodyAnalysisCamera.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { KP, Size } from "../poseLib/poseTypes";
 import type { SegMask } from "../poseLib/segmentation";
@@ -7,12 +6,8 @@ type Props = {
   running: boolean;
   onPose?: (arg: { kp: KP; size: Size }) => void;
   focusRoi?: { x1: number; y1: number; x2: number; y2: number } | null;
-  mirrored?: boolean;
-  /** (선택) 세그멘테이션 함수 - 비디오/캔버스를 받아 마스크 반환 */
-  getSegmentation?: (
-    source: HTMLCanvasElement | HTMLVideoElement
-  ) => Promise<SegMask | null>;
-  /** (선택) 마스크 콜백 */
+  mirrored?: boolean; // if true, mirror visually only on canvas
+  getSegmentation?: (source: HTMLCanvasElement | HTMLVideoElement) => Promise<SegMask | null>;
   onSegMask?: (mask: SegMask) => void;
 };
 
@@ -21,6 +16,26 @@ const CDN = {
   draw: "https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1620248257/drawing_utils.js",
   pose: "https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js",
 };
+
+// script loader
+const loadScript = (src: string) =>
+  new Promise<void>((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement("script");
+    s.src = src;
+    s.crossOrigin = "anonymous";
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`Script load error: ${src}`));
+    document.head.appendChild(s);
+  });
+
+let scriptsReady: Promise<void> | null = null;
+function ensureScripts() {
+  if (!scriptsReady) {
+    scriptsReady = Promise.all([loadScript(CDN.cam), loadScript(CDN.draw), loadScript(CDN.pose)]).then(() => {});
+  }
+  return scriptsReady;
+}
 
 const BodyAnalysisCamera: React.FC<Props> = ({
   running,
@@ -35,40 +50,44 @@ const BodyAnalysisCamera: React.FC<Props> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cameraRef = useRef<any>(null);
   const poseRef = useRef<any>(null);
+
   const frameCount = useRef(0);
 
-  const loadScript = (src: string) =>
-    new Promise<void>((resolve, reject) => {
-      if (document.querySelector(`script[src="${src}"]`)) return resolve();
-      const s = document.createElement("script");
-      s.src = src;
-      s.crossOrigin = "anonymous";
-      s.onload = () => resolve();
-      s.onerror = () => reject(new Error(`Script load error: ${src}`));
-      document.head.appendChild(s);
-    });
+  // seg throttle/lock
+  const segPending = useRef(false);
+  const lastSegTs = useRef(0);
 
-  useEffect(() => {
-    setFeedback(
-      running
-        ? "체형 분석 중... 자세를 유지해주세요."
-        : "분석이 일시정지 되었습니다."
-    );
-  }, [running]);
+  // 🔧 최신 콜백/프로퍼티를 참조하기 위한 refs (클로저 고착 방지)
+  const onPoseRef = useRef<Props["onPose"] | null>(null);
+const focusRoiRef = useRef<Props["focusRoi"] | null>(null);
+const getSegRef = useRef<Props["getSegmentation"] | null>(null);
+const onSegMaskRef = useRef<Props["onSegMask"] | null>(null);
 
+  const runningRef = useRef<boolean>(running);
+
+  useEffect(() => { onPoseRef.current = onPose ?? null; }, [onPose]);
+useEffect(() => { focusRoiRef.current = focusRoi ?? null; }, [focusRoi]);
+useEffect(() => { getSegRef.current = getSegmentation ?? null; }, [getSegmentation]);
+useEffect(() => { onSegMaskRef.current = onSegMask ?? null; }, [onSegMask]);
+
+useEffect(() => {
+  runningRef.current = running;
+  setFeedback(running ? "체형 분석 중... 자세를 유지해주세요." : "분석이 일시정지 되었습니다.");
+}, [running]);
+
+  // ⚠️ 초기화 이펙트: running에 의존하지 않도록 수정 (running 토글 시 재초기화 방지)
   useEffect(() => {
-    (async () => {
+    let cancelled = false;
+
+    async function init() {
       try {
-        await Promise.all([
-          loadScript(CDN.cam),
-          loadScript(CDN.draw),
-          loadScript(CDN.pose),
-        ]);
+        await ensureScripts();
       } catch (err) {
-        console.error("MediaPipe 스크립트 로딩 실패:", err);
+        console.error("MediaPipe script load failed:", err);
         setFeedback("AI 모델 로딩에 실패했습니다.");
         return;
       }
+      if (cancelled) return;
 
       const Pose = (window as any).Pose;
       const Camera = (window as any).Camera;
@@ -83,107 +102,122 @@ const BodyAnalysisCamera: React.FC<Props> = ({
           `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`,
       });
       pose.setOptions({
-        modelComplexity: 1,
+        modelComplexity: 2,          // more stable (heavier)
         smoothLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-        selfieMode: mirrored,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.6,
+        selfieMode: false,           // keep semantic left/right; we mirror only in canvas
       });
       poseRef.current = pose;
 
       pose.onResults(async (results: any) => {
-        // 안전 가드: 결과 또는 이미지가 준비되지 않은 경우 무시
-        if (!results || !results.image) return;
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        if (!canvasRef.current) return;
+        if (!results?.image) return;
+        const canvas = canvasRef.current!;
+        const ctx = canvas.getContext("2d")!;
         canvas.width = results.image.width;
         canvas.height = results.image.height;
 
-        // 1) 프레임
-        ctx.save();
-        if (mirrored) {
+        const withMirror = (fn: () => void) => {
+          if (!mirrored) { fn(); return; }
+          ctx.save();
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
-        }
-        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-        ctx.restore();
+          fn();
+          ctx.restore();
+        };
 
-        // 2) 포즈 콜백
+        // draw frame
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        withMirror(() => {
+          ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+        });
+
+        // pose callback (landmarks are original-space)
         const kp: KP = results.poseLandmarks ? results.poseLandmarks : [];
-        onPose?.({ kp, size: { w: canvas.width, h: canvas.height } });
+onPoseRef.current?.({ kp, size: { w: canvas.width, h: canvas.height } });
 
-        // 3) 스켈레톤
+        // skeleton overlay
         if (results.poseLandmarks) {
-          ctx.save();
-          if (mirrored) {
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-          }
-          drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
-            lineWidth: 3,
+          withMirror(() => {
+            drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { lineWidth: 3 });
+            drawLandmarks(ctx, results.poseLandmarks, { lineWidth: 1 });
           });
-          drawLandmarks(ctx, results.poseLandmarks, { lineWidth: 1 });
-          ctx.restore();
         }
 
-        // 4) ROI
-        if (focusRoi) {
-          const { x1, y1, x2, y2 } = focusRoi;
-          ctx.save();
-          if (mirrored) {
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-          }
-          ctx.setLineDash([6, 4]);
-          ctx.lineWidth = 2;
-          ctx.strokeStyle = "#39b3ff";
-          ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-          ctx.restore();
+        // ROI overlay (최신 값 ref 사용)
+        const roi = focusRoiRef.current;
+        if (roi) {
+          const { x1, y1, x2, y2 } = roi;
+          withMirror(() => {
+            ctx.setLineDash([6, 4]);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#39b3ff";
+            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+          });
         }
 
-        // 5) (옵션) 세그멘테이션 — 매 5프레임마다 한 번만
+        // segmentation throttled: 5 frames + 200ms (최신 함수 ref 사용)
         frameCount.current++;
-        if (getSegmentation && onSegMask && frameCount.current % 5 === 0) {
-          try {
-            const mask = await getSegmentation(videoRef.current!);
-            if (mask) onSegMask(mask);
-          } catch (e) {
-            // segmentation은 옵션이므로 실패해도 조용히 패스
-          }
-        }
+const now = performance.now();
+const wantSeg = !!(getSegRef.current && onSegMaskRef.current && frameCount.current % 5 === 0);
+if (wantSeg && !segPending.current && now - lastSegTs.current > 200) {
+  segPending.current = true;
+  try {
+    // 현재 ref 스냅샷을 로컬 변수로 잡아 안전하게 사용
+    const segFn = getSegRef.current!;
+    const segCb = onSegMaskRef.current!;
+    const vv = videoRef.current;
+if (vv && vv.readyState >= 2 && vv.videoWidth > 0 && vv.videoHeight > 0) {
+  const mask = await segFn(vv);
+  if (mask) segCb(mask);
+}
+  } catch {
+  } finally {
+    lastSegTs.current = performance.now();
+    segPending.current = false;
+  }
+}
       });
 
-      cameraRef.current = new Camera(videoRef.current, {
-        onFrame: async () => {
-          // if (!running) return;  // 완전 정지하려면 주석 해제
-          const video = videoRef.current;
-          if (!video) return;
-          // 비디오가 준비되지 않은 경우(메타데이터/프레임 없음) 스킵
-          if (
-            video.readyState < 2 ||
-            video.videoWidth === 0 ||
-            video.videoHeight === 0
-          )
-            return;
-          await poseRef.current?.send({ image: video });
-        },
-        width: 1280,
-        height: 720,
-      });
+      cameraRef.current = new (window as any).Camera(videoRef.current, {
+  onFrame: async () => {
+    const vv = videoRef.current;
+    const pr = poseRef.current;
+
+    // 실행/마운트/레디 상태 모두 체크
+    if (!runningRef.current) return;
+    if (!pr || !vv) return;
+    if (vv.readyState < 2) return;            // HAVE_CURRENT_DATA 미만이면 패스
+    if (!vv.videoWidth || !vv.videoHeight) return;
+
+    try {
+      await pr.send({ image: vv });
+    } catch (e) {
+      // 프레임 스킵
+      // console.warn("pose.send failed", e);
+    }
+  },
+  width: 1280,
+  height: 720,
+});
       await cameraRef.current.start();
-    })();
+      setFeedback("체형 분석 중... 자세를 유지해주세요.");
+    }
 
+    init();
     return () => {
-      cameraRef.current?.stop?.();
-      poseRef.current?.close?.();
+      try { cameraRef.current?.stop?.(); } catch {}
+      try { poseRef.current?.close?.(); } catch {}
+      cameraRef.current = null;
+      poseRef.current = null;
     };
+  // ⬇️ mirrored만 의존하도록 수정 (running 제거)
   }, [mirrored]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <video ref={videoRef} style={{ display: "none" }} muted playsInline />
+      <video ref={videoRef} style={{ display: "none" }} muted playsInline autoPlay />
       <canvas
         ref={canvasRef}
         style={{
@@ -196,15 +230,11 @@ const BodyAnalysisCamera: React.FC<Props> = ({
       />
       <p
         style={{
-          position: "absolute",
-          top: 10,
-          left: 10,
+          position: "absolute", top: 10, left: 10,
           background: "rgba(0,0,0,0.7)",
           color: running ? "#0f0" : "#FFFF00",
-          padding: "10px",
-          borderRadius: 5,
-          fontSize: 18,
-          margin: 0,
+          padding: "10px", borderRadius: 5, fontSize: 18, margin: 0,
+
         }}
       >
         {feedback}

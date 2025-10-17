@@ -1,8 +1,6 @@
-// src/components/BodyAnalysisModal.tsx
-
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom"; // 
+import { useNavigate } from "react-router-dom";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -110,6 +108,7 @@ export interface BodyDataForStart {
 type Props = {
   isOpen: boolean;
   onStart: (data: BodyDataForStart) => void;
+  onClose?: () => void;
 };
 
 const BodyAnalysisModal: React.FC<Props> = ({ isOpen, onStart }) => {
@@ -117,7 +116,7 @@ const BodyAnalysisModal: React.FC<Props> = ({ isOpen, onStart }) => {
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState<"male" | "female">("male");
-  const navigate = useNavigate(); // 3. useNavigate 훅 사용
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
@@ -130,7 +129,6 @@ const BodyAnalysisModal: React.FC<Props> = ({ isOpen, onStart }) => {
     onStart({ height: +height, weight: +weight, age: +age, gender });
   };
 
-  // 4. 뒤로가기 핸들러 추가
   const handleGoBack = () => {
     navigate('/main');
   };
@@ -138,20 +136,22 @@ const BodyAnalysisModal: React.FC<Props> = ({ isOpen, onStart }) => {
   return (
     <ModalOverlay>
       <ModalContent onClick={(e) => e.stopPropagation()} onSubmit={submit}>
-        {/* 5. 뒤로가기 버튼 추가 */}
         <BackButton type="button" onClick={handleGoBack}>&larr;</BackButton>
         <Title>신체 정보 입력</Title>
         <InputGroup>
           <Label htmlFor="h">키 (cm)</Label>
-          <Input id="h" type="number" inputMode="numeric" min={50} max={250} value={height} onChange={(e) => setHeight(e.target.value)} placeholder="예: 175" required />
+          <Input id="h" type="number" inputMode="numeric" min={50} max={250}
+                 value={height} onChange={(e) => setHeight(e.target.value)} placeholder="예: 175" required />
         </InputGroup>
         <InputGroup>
           <Label htmlFor="w">몸무게 (kg)</Label>
-          <Input id="w" type="number" inputMode="numeric" min={20} max={300} value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="예: 70" required />
+          <Input id="w" type="number" inputMode="numeric" min={20} max={300}
+                 value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="예: 70" required />
         </InputGroup>
         <InputGroup>
           <Label htmlFor="a">나이</Label>
-          <Input id="a" type="number" inputMode="numeric" min={5} max={100} value={age} onChange={(e) => setAge(e.target.value)} placeholder="예: 30" required />
+          <Input id="a" type="number" inputMode="numeric" min={5} max={100}
+                 value={age} onChange={(e) => setAge(e.target.value)} placeholder="예: 30" required />
         </InputGroup>
         <InputGroup>
           <Label>성별</Label>
