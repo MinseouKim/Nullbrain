@@ -1,4 +1,3 @@
-// src/pages/BodyAnalysis.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
 
@@ -6,6 +5,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import MeasureOrchestrator, {
   MeasureResult,
+  ResultModal,
 } from "../measure/MeasureOrchestrator";
 import BodyAnalysisModal, {
   BodyDataForStart,
@@ -71,7 +71,6 @@ const GuideBox = styled.div`
     margin: 0 0 15px 0;
     font-size: 16px;
     color: #850000;
-  
   }
   ul {
     margin: 0;
@@ -189,9 +188,14 @@ const BodyAnalysis: React.FC = () => {
   const [openModal, setOpenModal] = useState(true);
   const [heightCm, setHeightCm] = useState<number>(175);
   const [isVoiceOn, setIsVoiceOn] = useState(true);
+
   const [result, setResult] = useState<MeasureResult | null>(null);
+
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
+
+  // 결과 요약 모달
+  const [resultModalOpen, setResultModalOpen] = useState(false);
 
   const onStart = (data: BodyDataForStart) => {
     setHeightCm(data.height);
@@ -215,7 +219,13 @@ const BodyAnalysis: React.FC = () => {
         body: JSON.stringify(payload),
       });
       const js = await res.json();
-      if (js.ok) setSavedId(js.id);
+      if (js.ok) {
+        setSavedId(js.id);
+        alert("프로필이 저장되었습니다.");
+        setResultModalOpen(false);
+      } else {
+        alert("저장에 실패했습니다.");
+      }
     } catch (e) {
       console.error(e);
       alert("저장 중 오류가 발생했습니다.");
@@ -230,24 +240,8 @@ const BodyAnalysis: React.FC = () => {
       <MainLayoutContainer>
         <ContentContainer>
           <MainContent>
-            {!result ? (
-              <MeasureOrchestrator heightCm={heightCm} onDone={setResult} />
-            ) : (
-              <div style={{ padding: 24 }}>
-                <h2>측정 완료 ✅</h2>
-                <p>요약을 확인한 뒤 저장하세요.</p>
-                <pre
-                  style={{
-                    background: "#f6f6f6",
-                    padding: 16,
-                    borderRadius: 8,
-                    overflow: "auto",
-                  }}
-                >
-                  {JSON.stringify(result, null, 2)}
-                </pre>
-              </div>
-            )}
+            {/* ✅ 완료 후에도 화면 전환 없이 계속 카메라/측정 유지 */}
+            <MeasureOrchestrator heightCm={heightCm} onDone={setResult} />
           </MainContent>
 
           <Sidebar>
@@ -280,9 +274,21 @@ const BodyAnalysis: React.FC = () => {
               />
             </PosePreview>
 
-            <ActionButton onClick={saveProfile} disabled={!result || saving}>
-              {saving ? "저장 중..." : "프로필 저장하기"}
+            <ActionButton
+              onClick={() => {
+                if (result) setResultModalOpen(true);
+              }}
+              disabled={!result || saving}
+            >
+              {saving ? "저장 중..." : (result ? "프로필 저장하기" : "측정 진행 중…")}
             </ActionButton>
+
+            {result && (
+              <p style={{ margin: "8px 0 0", color: "#198754", fontWeight: 600 }}>
+                측정 완료 ✅ — 결과 요약을 확인하려면 버튼을 눌러주세요.
+              </p>
+            )}
+
             {savedId && (
               <p style={{ margin: 0, color: "#555" }}>
                 저장됨: <code>{savedId}</code>
@@ -297,6 +303,15 @@ const BodyAnalysis: React.FC = () => {
           onStart={onStart}
         />
       </MainLayoutContainer>
+
+      {/* 결과 요약 모달 */}
+      <ResultModal
+        open={resultModalOpen}
+        result={result}
+        onClose={() => setResultModalOpen(false)}
+        onSave={saveProfile}
+      />
+
       <Footer />
     </>
   );
