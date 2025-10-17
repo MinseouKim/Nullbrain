@@ -3,6 +3,7 @@
 import React from "react";
 import styled from "styled-components";
 import AITrainer from "./AITrainer";
+import { Landmark } from "../types/Landmark";
 
 interface CameraSectionProps {
   workoutData?: {
@@ -10,9 +11,16 @@ interface CameraSectionProps {
     reps: number;
     sets: number;
     category: string;
-    restTime: number;
   } | null;
   isWorkoutPaused: boolean;
+  targetReps: number;
+  onSetComplete: (data: {
+    landmarkHistory: Landmark[][];
+    repCount: number;
+  }) => Promise<void>;
+  currentSet: number;
+  totalSets: number;
+  feedbackMessage: string;
 }
 
 // Styled Components (기존 디자인 코드 복원)
@@ -90,6 +98,11 @@ const CameraSubtitle = styled.div`
 const CameraSection: React.FC<CameraSectionProps> = ({
   workoutData,
   isWorkoutPaused,
+  targetReps,
+  onSetComplete,
+  feedbackMessage,
+  currentSet,
+  totalSets,
 }) => {
   const exerciseForAI = (name: string): "squat" | "pushup" => {
     const lowerCaseName = name.toLowerCase();
@@ -105,11 +118,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({
   return (
     <CameraSectionContainer>
       <FeedbackSection>
-        <FeedbackMessage>
-          {workoutData
-            ? `${workoutData.name} 운동을 시작합니다!`
-            : "운동을 설정하고 시작해주세요!"}
-        </FeedbackMessage>
+        <FeedbackMessage>{feedbackMessage}</FeedbackMessage>
       </FeedbackSection>
 
       <CameraContainer>
@@ -118,6 +127,10 @@ const CameraSection: React.FC<CameraSectionProps> = ({
           <AITrainer
             exercise={exerciseForAI(workoutData.name)}
             isWorkoutPaused={isWorkoutPaused}
+            targetReps={targetReps}
+            onSetComplete={onSetComplete}
+            currentSet={currentSet}
+            totalSets={totalSets}
           />
         ) : (
           // 운동 데이터가 없으면 플레이스홀더를 렌더링

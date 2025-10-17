@@ -65,7 +65,6 @@ const onSegMaskRef = useRef<Props["onSegMask"] | null>(null);
 
   const runningRef = useRef<boolean>(running);
 
-
   useEffect(() => { onPoseRef.current = onPose ?? null; }, [onPose]);
 useEffect(() => { focusRoiRef.current = focusRoi ?? null; }, [focusRoi]);
 useEffect(() => { getSegRef.current = getSegmentation ?? null; }, [getSegmentation]);
@@ -202,7 +201,6 @@ if (vv && vv.readyState >= 2 && vv.videoWidth > 0 && vv.videoHeight > 0) {
   width: 1280,
   height: 720,
 });
-
       await cameraRef.current.start();
       setFeedback("체형 분석 중... 자세를 유지해주세요.");
     }
@@ -222,7 +220,13 @@ if (vv && vv.readyState >= 2 && vv.videoWidth > 0 && vv.videoHeight > 0) {
       <video ref={videoRef} style={{ display: "none" }} muted playsInline autoPlay />
       <canvas
         ref={canvasRef}
-        style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#000", borderRadius: 12 }}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          backgroundColor: "#000",
+          borderRadius: 12,
+        }}
       />
       <p
         style={{
@@ -230,6 +234,7 @@ if (vv && vv.readyState >= 2 && vv.videoWidth > 0 && vv.videoHeight > 0) {
           background: "rgba(0,0,0,0.7)",
           color: running ? "#0f0" : "#FFFF00",
           padding: "10px", borderRadius: 5, fontSize: 18, margin: 0,
+
         }}
       >
         {feedback}
