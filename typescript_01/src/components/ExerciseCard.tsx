@@ -16,7 +16,7 @@ const Card = styled.div`
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
-  width: 100%; 
+  width: 100%;
   &:hover {
     transform: translateY(-5px);
   }
@@ -26,9 +26,9 @@ const Card = styled.div`
 const CardImage = styled.img`
   width: 100%;
   height: 200px;
-  object-fit: cover; 
-  display: block; 
-  background-color: #ddd; /
+  object-fit: cover;
+  display: block;
+  background-color: #ddd;
 `;
 
 // 이미지 없을 때 또는 로딩 중일 때 표시할 placeholder
@@ -42,7 +42,7 @@ const ImagePlaceholder = styled.div`
   font-size: 1.5rem; /* 텍스트 크기 조정 */
   font-weight: bold;
   background-color: #ddd;
-`;  
+`;
 
 // 이름 영역
 const CardName = styled.p`

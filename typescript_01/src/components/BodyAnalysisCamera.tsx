@@ -92,8 +92,12 @@ const BodyAnalysisCamera: React.FC<Props> = ({
       poseRef.current = pose;
 
       pose.onResults(async (results: any) => {
-        const canvas = canvasRef.current!;
-        const ctx = canvas.getContext("2d")!;
+        // 안전 가드: 결과 또는 이미지가 준비되지 않은 경우 무시
+        if (!results || !results.image) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
         canvas.width = results.image.width;
         canvas.height = results.image.height;
 
@@ -154,7 +158,16 @@ const BodyAnalysisCamera: React.FC<Props> = ({
       cameraRef.current = new Camera(videoRef.current, {
         onFrame: async () => {
           // if (!running) return;  // 완전 정지하려면 주석 해제
-          await poseRef.current?.send({ image: videoRef.current });
+          const video = videoRef.current;
+          if (!video) return;
+          // 비디오가 준비되지 않은 경우(메타데이터/프레임 없음) 스킵
+          if (
+            video.readyState < 2 ||
+            video.videoWidth === 0 ||
+            video.videoHeight === 0
+          )
+            return;
+          await poseRef.current?.send({ image: video });
         },
         width: 1280,
         height: 720,
