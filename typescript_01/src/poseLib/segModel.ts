@@ -9,6 +9,7 @@ async function ensureSeg(): Promise<void> {
   if (!ready) {
     ready = (async () => {
       // NPM 패키지에서만 import (← 여기서 더 이상 CDN import 안 함)
+      // @ts-ignore - @mediapipe/selfie_segmentation 타입 선언이 없음
       const mp = await import("@mediapipe/selfie_segmentation");
       // 패키지 타입이 느슨해서 any 처리
       const SelfieSegmentation = (mp as any).SelfieSegmentation;
