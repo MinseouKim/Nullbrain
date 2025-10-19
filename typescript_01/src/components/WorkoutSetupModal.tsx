@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 interface WorkoutSetupModalProps {
@@ -10,15 +9,7 @@ interface WorkoutSetupModalProps {
     reps: number;
     sets: number;
     category: string;
-    restTime: number;
   }) => void;
-  preset?: {
-    name: string;
-    reps: number;
-    sets: number;
-    category: string;
-    restTime?: number;
-  };
 }
 
 interface Exercise {
@@ -458,9 +449,7 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
   isOpen,
   onClose,
   onStartWorkout,
-  preset,
 }) => {
-  const navigate = useNavigate();
   const exerciseCategories: ExerciseCategory[] = [
     {
       name: "하체",
@@ -540,115 +529,36 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
     },
   ];
 
-  const [selectedExercise, setSelectedExercise] = useState<Exercise>(() => {
-    if (preset) {
-      const found = exerciseCategories
-        .flatMap((c) => c.exercises)
-        .find((e) => e.name === preset.name);
-      return found || exerciseCategories[0].exercises[0];
-    }
-    return exerciseCategories[0].exercises[0];
-  });
-  const [reps, setReps] = useState<number>(
-    () => preset?.reps ?? exerciseCategories[0].exercises[0].defaultReps
+  const [selectedExercise, setSelectedExercise] = useState<Exercise>(
+    exerciseCategories[0].exercises[0]
   );
-  const [sets, setSets] = useState<number>(
-    () => preset?.sets ?? exerciseCategories[0].exercises[0].defaultSets
+  const [reps, setReps] = useState(
+    exerciseCategories[0].exercises[0].defaultReps
   );
-  const [restTime, setRestTime] = useState<number>(
-    () => preset?.restTime ?? 60 // 기본 60초
+  const [sets, setSets] = useState(
+    exerciseCategories[0].exercises[0].defaultSets
   );
-  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // 드롭다운 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowTimeDropdown(false);
-      }
-    };
-
-    if (showTimeDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showTimeDropdown]);
-
-  // 모달이 열려있을 때 배경 스크롤 방지
-  useEffect(() => {
-    if (isOpen) {
-      // 현재 스크롤 위치 저장
-      const scrollY = window.scrollY;
-
-      // body 스타일 변경으로 스크롤 방지
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      document.body.style.overflow = "hidden";
-
-      return () => {
-        // 모달이 닫힐 때 원래 스타일로 복원
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        document.body.style.overflow = "";
-
-        // 스크롤 위치 복원
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [isOpen]);
-
-  // preset이 바뀔 때 모달 입력값 업데이트
-  useEffect(() => {
-    if (!preset) return;
-    const found = exerciseCategories
-      .flatMap((c) => c.exercises)
-      .find((e) => e.name === preset.name);
-    if (found) {
-      setSelectedExercise(found);
-    } else {
-      setSelectedExercise({
-        name: preset.name,
-        defaultReps: preset.reps,
-        defaultSets: preset.sets,
-        category: preset.category,
-      });
-    }
-    setReps(preset.reps);
-    setSets(preset.sets);
-    setRestTime(preset.restTime ?? 60);
-  }, [preset]);
 
   const handleStartWorkout = () => {
     onStartWorkout({
       name: selectedExercise.name,
-      reps: reps,
-      sets: sets,
+      reps,
+      sets,
       category: selectedExercise.category,
-      restTime: restTime,
     });
-    onClose();
   };
 
   const handleViewPose = () => {
-    // 운동자세 보기 클릭 시 운동 목록 페이지로 이동
-    navigate("/exercise");
-    onClose();
+    // 운동 자세 보기 기능 (추후 구현)
+    alert("운동 자세 보기 기능은 추후 구현됩니다.");
   };
 
   if (!isOpen) return null;
 
+
   return (
-    <ModalOverlay isOpen={isOpen}>
-      <ModalContainer>
+    <ModalOverlay isOpen={isOpen} onClick={onClose}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>자세ON</ModalTitle>
           <Instructions>먼저 각 운동 별 목표 갯수 및 세트 설정</Instructions>
@@ -697,47 +607,6 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
               />
             </InputContainer>
           </InputRow>
-
-          <RestTimeSection>
-            <RestTimeInputContainer>
-              <InputLabel>쉬는시간 설정</InputLabel>
-              <TimeInputWrapper ref={dropdownRef}>
-                <TimeDropdownButton
-                  onClick={() => setShowTimeDropdown(!showTimeDropdown)}
-                >
-                  ▼
-                </TimeDropdownButton>
-                <NumberInput
-                  type="number"
-                  value={restTime}
-                  onChange={(e) => setRestTime(parseInt(e.target.value) || 0)}
-                  min="0"
-                  max="120"
-                  step="5"
-                  style={{ width: "100px", height: "50px" }}
-                />
-                <TimeUnit>초</TimeUnit>
-                {showTimeDropdown && (
-                  <TimeDropdown>
-                    {[20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(
-                      (time) => (
-                        <TimeDropdownOption
-                          key={time}
-                          onClick={() => {
-                            setRestTime(time);
-                            setShowTimeDropdown(false);
-                          }}
-                          isSelected={restTime === time}
-                        >
-                          {time}초
-                        </TimeDropdownOption>
-                      )
-                    )}
-                  </TimeDropdown>
-                )}
-              </TimeInputWrapper>
-            </RestTimeInputContainer>
-          </RestTimeSection>
         </ExerciseSetup>
 
         <AdditionalInfo>

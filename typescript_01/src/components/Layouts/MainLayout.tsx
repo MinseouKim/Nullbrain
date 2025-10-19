@@ -16,7 +16,6 @@ interface MainLayoutProps {
     reps: number;
     sets: number;
     category: string;
-    restTime: number;
   } | null;
 }
 

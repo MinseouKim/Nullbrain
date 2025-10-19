@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@mediapipe/pose": "^0.5",
+    "@mediapipe/camera_utils": "^0.3",
+    "@mediapipe/drawing_utils": "^0.3",
     "@mediapipe/selfie_segmentation": "^0.1.1675465747",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
