@@ -560,7 +560,7 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
     <ModalOverlay isOpen={isOpen} onClick={onClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>자세온</ModalTitle>
+          <ModalTitle>자세ON</ModalTitle>
           <Instructions>먼저 각 운동 별 목표 갯수 및 세트 설정</Instructions>
           <Instructions>운동이 준비 되었다면 시작 버튼을,</Instructions>
           <Instructions>
