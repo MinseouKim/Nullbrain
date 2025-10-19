@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
@@ -7,6 +7,7 @@ import Footer from "../components/Footer";
 import MeasureOrchestrator, {
   MeasureResult,
   ResultModal,
+  StepId,
 } from "../measure/MeasureOrchestrator";
 import BodyAnalysisModal, {
   BodyDataForStart,
@@ -18,7 +19,7 @@ const poseImageMap: Record<StepId, string | string[]> = {
   full: "/images/전신_정면.png",
   tpose: "/images/전면_T자세.png",
   side: "/images/전신_측면.png",
-  ankle_rom: "/images/무릎.png",
+  waist_flex: "/images/무릎.png", // <-- 허리굽힘 이미지로 수정해야함
   squat: "/images/전신_정면.png", // 이 줄이 누락되었습니다.
   elbow_flex: "/images/팔꿈치.png",
   shoulder_abd: "/images/팔올림.png",
@@ -81,6 +82,19 @@ const Sidebar = styled.aside`
   overflow-y: auto;
   flex-shrink: 0;
 `;
+const EndAnalysisButton = styled.button`
+    background-color: #850000;
+    color: white;
+    border: none;
+    padding: 25px 30px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 700;
+    min-height: 80px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    &:hover { background-color: #6b0000; }
+`;
 const ControlBox = styled.div`
   display: flex;
   justify-content: space-between;
@@ -140,25 +154,43 @@ const PoseImage = styled.img`
     object-fit: contain;
     border-radius: 8px;
 `;
-const SaveButton = styled.button`
-    background: linear-gradient(135deg, #850000 0%, #a00000 100%);
-    color: white;
-    border: none;
-    padding: 15px 25px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    min-height: 50px;
-    margin-top: auto;
-    &:disabled {
-        background: linear-gradient(135deg, #ccc 0%, #999 100%);
-        cursor: not-allowed;
-    }
-    &:hover:not(:disabled) {
-        transform: translateY(-3px);
-    }
+const ActionButton = styled.button<{ isStopped?: boolean }>`
+  margin-top: auto;
+  background: ${(props) =>
+    props.isStopped
+      ? "linear-gradient(135deg, #28a745 0%, #20c997 100%)"
+      : "linear-gradient(135deg, #850000 0%, #a00000 100%)"};
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: ${(props) =>
+    props.isStopped
+      ? "0 6px 16px rgba(40, 167, 69, 0.3)"
+      : "0 6px 16px rgba(133, 0, 0, 0.3)"};
+  &:hover:not(:disabled) {
+    background: ${(props) =>
+      props.isStopped
+        ? "linear-gradient(135deg, #218838 0%, #1ea085 100%)"
+        : "linear-gradient(135deg, #6b0000 0%, #8b0000 100%)"};
+    transform: translateY(-3px);
+    box-shadow: ${(props) =>
+      props.isStopped
+        ? "0 8px 20px rgba(40, 167, 69, 0.4)"
+        : "0 8px 20px rgba(133, 0, 0, 0.4)"};
+  }
+  &:disabled {
+    background: linear-gradient(135deg, #ccc 0%, #999 100%);
+    cursor: not-allowed;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0.7;
+  }
 `;
+
 const ToggleSwitchLabel = styled.label`
   position: relative;
   display: inline-block;
@@ -332,18 +364,31 @@ const BodyAnalysis: React.FC = () => {
                 src={currentPoseImage}
                 alt="분석 자세 가이드"
               />
-            </PosePreview>
-
+            </InfoBox>
+{/*       
+      <SaveButton onClick={saveProfile} disabled={!result || saving}>
+              {saving ? "저장 중..." : "프로필 저장하기"}
+            </SaveButton>
+            {savedId && (
+              <p style={{ margin: 0, color: "#555" }}>
+                저장됨: <code>{savedId}</code>
+              </p>
+            )}
+          </Sidebar>
+           */}
             <ActionButton
               onClick={() => {
-                if (result) setResultModalOpen(true);
+                if (result) {
+                  setResultModalOpen(true);
+                  saveProfile();
+                }
               }}
               disabled={!result || saving}
             >
               {saving ? "저장 중..." : (result ? "프로필 저장하기" : "측정 진행 중…")}
             </ActionButton>
 
-            {result && (
+            {result && !savedId && (
               <p style={{ margin: "8px 0 0", color: "#198754", fontWeight: 600 }}>
                 측정 완료 ✅ — 결과 요약을 확인하려면 버튼을 눌러주세요.
               </p>

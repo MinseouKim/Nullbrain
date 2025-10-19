@@ -289,7 +289,7 @@ const Chip: React.FC<{ color: string; children: React.ReactNode }> = ({ color, c
 );
 
 // ---- Steps ----
-type StepId =
+export type StepId =
   | "full" | "tpose" | "side" | "waist_flex"
   | "squat" | "elbow_flex" | "shoulder_abd" | "neck_rom"
   | "done";
