@@ -44,7 +44,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
   // onResults 콜백에서 'stale closure' 문제를 피하기 위함
   const stateRef = useRef({ isWorkoutPaused, targetReps });
-
   useEffect(() => {
     stateRef.current = { isWorkoutPaused, targetReps };
   }, [isWorkoutPaused, targetReps]);
@@ -53,6 +52,8 @@ const AITrainer: React.FC<AITrainerProps> = ({
     setRepCount(0);
     stage.current = "up";
     landmarkHistory.current = [];
+    // 세트가 바뀔 때 녹화 세이프티: 진행 중이면 마무리
+    stopRecordingSafely();
   }, [exercise, currentSet]);
 
   const loadScript = (src: string) =>
@@ -66,6 +67,74 @@ const AITrainer: React.FC<AITrainerProps> = ({
       document.head.appendChild(s);
     });
 
+  // -----------------------------
+  // 🎥 [추가] MediaRecorder 녹화 로직
+  // -----------------------------
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const isRecordingRef = useRef(false);
+
+  // 비디오 엘리먼트의 srcObject(웹캠 스트림)에서 레코더 생성
+  const ensureRecorder = () => {
+    if (mediaRecorderRef.current) return mediaRecorderRef.current;
+    const vd = videoRef.current as HTMLVideoElement | null;
+    const ms = (vd?.srcObject || null) as MediaStream | null;
+    if (!ms) return null;
+    try {
+      const rec = new MediaRecorder(ms, { mimeType: "video/webm" });
+      rec.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordingChunksRef.current.push(e.data);
+      };
+      rec.onstop = () => {
+        // 세트 완료 시점에 stop되며, 현재는 영상 저장/전달 안함(요구사항)
+        // 필요하면 여기서 Blob을 다루면 됨.
+      };
+      mediaRecorderRef.current = rec;
+      return rec;
+    } catch (e) {
+      console.warn("[AITrainer] MediaRecorder init failed:", e);
+      return null;
+    }
+  };
+
+  const startRecordingIfNeeded = () => {
+    if (isRecordingRef.current) return;
+    const rec = ensureRecorder();
+    if (!rec) return;
+    recordingChunksRef.current = [];
+    try {
+      rec.start();
+      isRecordingRef.current = true;
+      // console.log("[AITrainer] recording started");
+    } catch (e) {
+      console.warn("[AITrainer] recorder.start() failed:", e);
+    }
+  };
+
+  const stopRecordingSafely = () => {
+    const rec = mediaRecorderRef.current;
+    if (rec && isRecordingRef.current) {
+      try {
+        rec.stop();
+      } catch (e) {
+        // 이미 정지 상태이면 무시
+      }
+    }
+    isRecordingRef.current = false;
+  };
+
+  // 부모에 넘기는 onSetComplete를 래핑해서,
+  // 먼저 녹화를 안전하게 종료한 뒤 원래 콜백 호출
+  const wrappedOnSetComplete = async (data: {
+    exerciseName: "squat" | "pushup";
+    landmarkHistory: Landmark[][];
+    repCount: number;
+  }) => {
+    stopRecordingSafely();
+    await onSetComplete(data);
+  };
+  // -----------------------------
+
   // 이 훅은 exercise가 변경될 때만 다시 실행됨
   useEffect(() => {
     let isActive = true;
@@ -76,7 +145,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
           loadScript(CDN.draw),
           loadScript(CDN.pose),
         ]);
-
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (err) {
         console.error("Mediapipe 로딩 실패:", err);
@@ -124,18 +192,21 @@ const AITrainer: React.FC<AITrainerProps> = ({
             lineWidth: 2,
           });
 
-          // prop 대신 stateRef의 최신 값을 사용!
           if (!stateRef.current.isWorkoutPaused) {
+            // 🔴 일시정지 상태가 아니면 첫 프레임에서 즉시 녹화 시작
+            startRecordingIfNeeded();
+
             landmarkHistory.current.push(results.poseLandmarks as Landmark[]);
 
             const handler = exerciseHandlers[exercise];
             if (handler) {
+              // ⚠️ onSetComplete 대신 wrappedOnSetComplete 전달 (녹화 종료 후 원 콜백 호출)
               handler(
                 results.poseLandmarks,
                 stage,
                 setRepCount,
                 stateRef,
-                onSetComplete,
+                wrappedOnSetComplete,
                 landmarkHistory
               );
             } else {
@@ -152,20 +223,32 @@ const AITrainer: React.FC<AITrainerProps> = ({
           try {
             await pose.send({ image: videoRef.current });
           } catch (err) {
-            console.warn("pose.send 실패 (무시 가능):", err);
+            // 간헐적 오류는 무시
           }
         },
         width: 1280,
         height: 720,
       });
 
-      cameraRef.current.start();
+      await cameraRef.current.start();
+      // MediaPipe Camera가 video.srcObject를 세팅하므로, 레코더 준비 시도
+      ensureRecorder();
     })();
 
     return () => {
       isActive = false;
-      cameraRef.current?.stop?.();
-      poseRef.current?.close?.();
+      stopRecordingSafely();
+      try {
+        cameraRef.current?.stop?.();
+      } catch {}
+      try {
+        poseRef.current?.close?.();
+      } catch {}
+      // 트랙 정리
+      const vd = videoRef.current;
+      const ms = (vd?.srcObject || null) as MediaStream | null;
+      ms?.getTracks().forEach((t) => t.stop());
+      if (vd) vd.srcObject = null;
     };
   }, [exercise]);
 
@@ -202,13 +285,13 @@ const AITrainer: React.FC<AITrainerProps> = ({
       <p
         style={{
           position: "absolute",
-          bottom: 10, // 화면 하단으로 위치 변경
+          bottom: 10,
           left: 10,
           background: "rgba(0,0,0,0.7)",
           color: "#fff",
           padding: "10px",
           borderRadius: 5,
-          fontSize: 22, // 폰트 크기 키움
+          fontSize: 22,
           fontWeight: "bold",
           margin: 0,
         }}

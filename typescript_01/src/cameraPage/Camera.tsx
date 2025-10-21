@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/Layouts/MainLayout";
 import CameraSection from "../components/CameraSection";
@@ -29,14 +29,9 @@ function Camera() {
   const [isWorkoutPaused, setIsWorkoutPaused] = useState(false);
   const [timer, setTimer] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
-  const [feedbackMessage, setFeedbackMessage] = useState("운동을 설정하고 시작해주세요!");
+  const [feedbackMessage, setFeedbackMessage] =
+    useState("운동을 설정하고 시작해주세요!");
   const [allSetResults, setAllSetResults] = useState<SetResult[]>([]);
-
-  // 🎥 녹화 관련 상태
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunks = useRef<Blob[]>([]);
-  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
 
   // ⏱ 타이머 관리
   useEffect(() => {
@@ -48,25 +43,6 @@ function Camera() {
       if (interval) clearInterval(interval);
     };
   }, [isWorkoutActive, isWorkoutPaused]);
-
-  // 🎥 카메라 스트림 및 녹화 시작
-  useEffect(() => {
-    if (isWorkoutActive) {
-      navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-        if (videoRef.current) videoRef.current.srcObject = stream;
-        const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-        mediaRecorderRef.current = recorder;
-        recorder.ondataavailable = (e) => chunks.current.push(e.data);
-        recorder.onstop = () => {
-          const blob = new Blob(chunks.current, { type: "video/webm" });
-          setRecordedBlob(blob);
-        };
-        recorder.start();
-      });
-    } else {
-      mediaRecorderRef.current?.stop();
-    }
-  }, [isWorkoutActive]);
 
   // 🏋️ 운동 시작
   const handleStartWorkout = (exerciseData: {
@@ -86,16 +62,23 @@ function Camera() {
   };
 
   // ✅ 세트 완료 시 백엔드 분석 요청
-  const handleSetComplete = async (data: { landmarkHistory: Landmark[][]; repCount: number }) => {
+  const handleSetComplete = async (data: {
+    landmarkHistory: Landmark[][];
+    repCount: number;
+    videoBlob?: Blob; // 👈 CameraSection에서 넘어올 수 있음
+  }) => {
     setIsWorkoutPaused(true);
     setFeedbackMessage("AI가 세트 분석 중입니다. 잠시만 기다려주세요...");
 
     const proceedToNextSet = (result: SetResult | null) => {
       setCurrentSet((prev) => {
         const nextSet = prev + 1;
-        const feedbackText = result?.aiFeedback || "AI 분석 실패 — 계속 진행합니다.";
+        const feedbackText =
+          result?.aiFeedback || "AI 분석 실패 — 계속 진행합니다.";
         if (workoutData && nextSet > workoutData.sets) {
-          setFeedbackMessage(`${feedbackText} 모든 세트를 완료했습니다! 결과 페이지로 이동합니다.`);
+          setFeedbackMessage(
+            `${feedbackText} 모든 세트를 완료했습니다! 결과 페이지로 이동합니다.`
+          );
           setTimeout(() => {
             navigate("/result", {
               state: {
@@ -104,7 +87,7 @@ function Camera() {
                   finalTime: formatTime(timer),
                   allSetResults: [...allSetResults, result].filter(Boolean),
                 },
-                videoBlob: recordedBlob,
+                videoBlob: data.videoBlob, // 👈 CameraSection에서 녹화본 전달
               },
             });
           }, 2500);
@@ -120,7 +103,7 @@ function Camera() {
         exerciseName: workoutData?.name.toLowerCase(),
         landmarkHistory: data.landmarkHistory,
         repCount: data.repCount,
-        userProfile: { weight: 70 }, // 예시용
+        userProfile: { weight: 70 },
       };
       const res = await fetch("http://localhost:8000/api/analyze-set", {
         method: "POST",
@@ -163,10 +146,6 @@ function Camera() {
       timer={formatTime(timer)}
       workoutData={workoutData}
     >
-      <div style={{ textAlign: "center" }}>
-        <video ref={videoRef} autoPlay playsInline muted style={{ width: "640px", borderRadius: 10 }} />
-      </div>
-
       <CameraSection
         workoutData={workoutData}
         isWorkoutPaused={isWorkoutPaused}
