@@ -12,6 +12,7 @@ const LoginPage = lazy(() => import("../pages/LoginPage"));
 const SignUpPage = lazy(() => import("../pages/SignUpPage"));
 const AdminPage = lazy(() => import("../pages/AdminPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
+const MyPage = lazy(() => import("../pages/MyPage"));
 
 const Routers = (props: any) => {
   return (
@@ -28,6 +29,7 @@ const Routers = (props: any) => {
         <Route path="signUp" element={<SignUpPage {...props} />} />
         <Route path="admin" element={<AdminPage {...props} />} />
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="mypage" element={<MyPage {...props} />} />
       </Routes>
     </Suspense>
   );

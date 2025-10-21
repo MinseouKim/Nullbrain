@@ -14,65 +14,65 @@ const HeaderContainer = styled.header`
   position: relative;
   min-height: 60px;
 
-  /* 768px 이하 */
+  /* <=768 */
   @media (max-width: 768px) {
     padding: 8px 16px;
     min-height: 55px;
   }
 
-  /* 480px 이하 */
+  /* <=480 */
   @media (max-width: 480px) {
     padding: 6px 12px;
     min-height: 50px;
   }
 
-  /* 320px 이하 */
+  /* <=320 */
   @media (max-width: 320px) {
     padding: 4px 8px;
     min-height: 45px;
   }
 `;
 
+/* 우측 바가 너무 커지면 줄이도록 flex 설정 추가 */
 const RightBar = styled.div`
   display: flex;
-  gap: 30px;
+  gap: 12px;
+  flex-shrink: 1;
+  align-items: center;
 
   @media (max-width: 768px) {
-    gap: 20px;
+    gap: 10px;
   }
 
   @media (max-width: 480px) {
-    gap: 12px;
+    gap: 8px;
   }
 
   @media (max-width: 320px) {
-    gap: 8px;
+    gap: 5px;
   }
 `;
 
 const pulse = keyframes`
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.05);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 `;
 
+/* 로고를 절대위치에서 제거하고 플렉스 중앙 정렬로 변경.
+   z-index로 버튼들이 겹치는 경우 로고가 눌리지 않도록 처리. */
 const Logo = styled.div`
   font-weight: bold;
   font-size: 24px;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
   cursor: pointer;
   transition: all 0.3s ease;
   overflow: hidden;
   white-space: nowrap;
+  text-align: center;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  padding: 4px 8px;
 
   &::before {
     content: "";
@@ -81,35 +81,26 @@ const Logo = styled.div`
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
     transition: left 0.5s;
   }
 
   &:hover {
     color: #850000;
-    text-shadow: 0 1px 1px rgba(133, 0, 0, 0.3);
-
-    &::before {
-      left: 100%;
-    }
+    text-shadow: 0 1px 1px rgba(133,0,0,0.3);
+    &::before { left: 100%; }
   }
 
-  &:active {
-    animation: ${pulse} 0.2s ease-in-out;
-  }
+  &:active { animation: ${pulse} 0.2s ease-in-out; }
 
-  /* 반응형 폰트 크기 */
   @media (max-width: 768px) {
     font-size: 20px;
   }
 
   @media (max-width: 480px) {
     font-size: 18px;
+    /* 모바일에서 로고가 너무 넓어지지 않게 패딩 축소 */
+    padding: 2px 6px;
   }
 
   @media (max-width: 320px) {
@@ -117,21 +108,24 @@ const Logo = styled.div`
   }
 `;
 
+/* 왼쪽 네비는 좁은 화면에서 숨겨 겹침 방지 */
 const LeftBar = styled.div`
   display: flex;
   gap: 30px;
   align-items: center;
+  flex-shrink: 1;
 
   @media (max-width: 768px) {
-    gap: 20px;
+    gap: 10px;
   }
 
   @media (max-width: 480px) {
-    gap: 12px;
+    gap: 5px;
+    display: none; /* <=480에서는 숨김 */
   }
 
   @media (max-width: 320px) {
-    gap: 8px;
+    gap: 3px;
   }
 `;
 
@@ -140,20 +134,18 @@ const NavItem = styled.span`
   font-size: 16px;
   transition: color 0.2s ease-in-out;
 
-  &:hover {
-    color: #850000;
-  }
+  &:hover { color: #850000; }
 
   @media (max-width: 768px) {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   @media (max-width: 480px) {
-    font-size: 14px;
+    font-size: 10px;
   }
 
   @media (max-width: 320px) {
-    font-size: 13px;
+    font-size: 8px;
   }
 `;
 
@@ -164,7 +156,7 @@ const Login = styled.button`
   padding: 5px 20px;
   border-radius: 50px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   transition: all 0.2s ease;
 
   &:hover {
@@ -174,18 +166,18 @@ const Login = styled.button`
   }
 
   @media (max-width: 768px) {
-    padding: 4px 14px;
-    font-size: 15px;
+    padding: 4px 10px;
+    font-size: 10px;
   }
 
   @media (max-width: 480px) {
-    padding: 4px 10px;
-    font-size: 14px;
+    padding: 4px 8px;
+    font-size: 8px;
   }
 
   @media (max-width: 320px) {
-    padding: 3px 8px;
-    font-size: 12px;
+    padding: 3px 6px;
+    font-size: 6px;
   }
 `;
 
@@ -196,7 +188,7 @@ const Signup = styled.button`
   padding: 5px 20px;
   border-radius: 50px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   transition: all 0.2s ease;
 
   &:hover {
@@ -205,18 +197,18 @@ const Signup = styled.button`
   }
 
   @media (max-width: 768px) {
-    padding: 4px 14px;
-    font-size: 15px;
+    padding: 4px 10px;
+    font-size: 10px;
   }
 
   @media (max-width: 480px) {
-    padding: 4px 10px;
-    font-size: 14px;
+    padding: 4px 8px;
+    font-size: 8px;
   }
 
   @media (max-width: 320px) {
-    padding: 3px 8px;
-    font-size: 12px;
+    padding: 3px 6px;
+    font-size: 6px;
   }
 `;
 
