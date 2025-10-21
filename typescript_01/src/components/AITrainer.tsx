@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Landmark } from "../types/Landmark";
+import { handleSquat } from "../logic/exercise/SquatLogic";
+import { exerciseHandlers } from "../logic/ExerciseHandler";
 
 interface AITrainerProps {
-  exercise: "squat" | "pushup";
+  exercise: keyof typeof exerciseHandlers;
   isWorkoutPaused: boolean;
   targetReps: number;
   onSetComplete: (data: {
@@ -43,25 +45,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
   // onResults 콜백에서 'stale closure' 문제를 피하기 위함
   const stateRef = useRef({ isWorkoutPaused, targetReps });
 
-  const loadScript = (src: string) =>
-    new Promise<void>((resolve, reject) => {
-      if (document.querySelector(`script[src="${src}"]`)) return resolve();
-      const s = document.createElement("script");
-      s.src = src;
-      s.crossOrigin = "anonymous";
-      s.onload = () => resolve();
-      s.onerror = () => reject(new Error(`Script load error: ${src}`));
-      document.head.appendChild(s);
-    });
-
-  const calculateAngle = (a: Landmark, b: Landmark, c: Landmark): number => {
-    const rad =
-      Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
-    let angle = Math.abs((rad * 180.0) / Math.PI);
-    if (angle > 180.0) angle = 360 - angle;
-    return angle;
-  };
-
   useEffect(() => {
     stateRef.current = { isWorkoutPaused, targetReps };
   }, [isWorkoutPaused, targetReps]);
@@ -72,15 +55,16 @@ const AITrainer: React.FC<AITrainerProps> = ({
     landmarkHistory.current = [];
   }, [exercise, currentSet]);
 
-  useEffect(() => {
-    if (repCount >= targetReps && targetReps > 0) {
-      onSetComplete({
-        exerciseName: exercise,
-        landmarkHistory: landmarkHistory.current,
-        repCount: targetReps,
-      });
-    }
-  }, [repCount, targetReps, exercise, onSetComplete]);
+  const loadScript = (src: string) =>
+    new Promise<void>((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) return resolve();
+      const s = document.createElement("script");
+      s.src = src;
+      s.crossOrigin = "anonymous";
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error(`Script load error: ${src}`));
+      document.head.appendChild(s);
+    });
 
   // 이 훅은 exercise가 변경될 때만 다시 실행됨
   useEffect(() => {
@@ -144,35 +128,18 @@ const AITrainer: React.FC<AITrainerProps> = ({
           if (!stateRef.current.isWorkoutPaused) {
             landmarkHistory.current.push(results.poseLandmarks as Landmark[]);
 
-            if (exercise === "squat") {
-              const hip = results.poseLandmarks[23];
-              const knee = results.poseLandmarks[25];
-              const ankle = results.poseLandmarks[27];
-              if (hip && knee && ankle) {
-                const angle = calculateAngle(hip, knee, ankle);
-
-                if (angle < 100 && stage.current === "up") {
-                  stage.current = "down";
-                } else if (angle > 150 && stage.current === "down") {
-                  stage.current = "up";
-
-                  setRepCount((prev) => {
-                    const newRep = prev + 1;
-                    console.log(`[AITrainer] Rep Count: ${prev} -> ${newRep}`);
-                    // prop 대신 stateRef의 최신 값을 사용!
-                    if (newRep >= stateRef.current.targetReps) {
-                      onSetComplete({
-                        exerciseName: exercise,
-                        landmarkHistory: landmarkHistory.current,
-                        repCount: stateRef.current.targetReps,
-                      });
-                      landmarkHistory.current = [];
-                      return 0;
-                    }
-                    return newRep;
-                  });
-                }
-              }
+            const handler = exerciseHandlers[exercise];
+            if (handler) {
+              handler(
+                results.poseLandmarks,
+                stage,
+                setRepCount,
+                stateRef,
+                onSetComplete,
+                landmarkHistory
+              );
+            } else {
+              console.warn(`[AITrainer] Unknown exercise: ${exercise}`);
             }
           }
         }
@@ -204,7 +171,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
   const setInfo = `Set ${currentSet} / ${totalSets}`;
   const repInfo = `Reps ${repCount} / ${targetReps}`;
-  const displayedStatus = isWorkoutPaused ? "일시정지" : "운동 중";
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -231,9 +197,7 @@ const AITrainer: React.FC<AITrainerProps> = ({
           fontSize: 18,
           margin: 0,
         }}
-      >
-        {displayedStatus}
-      </p>
+      ></p>
       {/* 세트와 횟수 표시 */}
       <p
         style={{
