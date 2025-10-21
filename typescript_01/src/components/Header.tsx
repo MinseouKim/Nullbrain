@@ -33,7 +33,6 @@ const HeaderContainer = styled.header`
   }
 `;
 
-/* 우측 바가 너무 커지면 줄이도록 flex 설정 추가 */
 const RightBar = styled.div`
   display: flex;
   gap: 12px;
@@ -59,8 +58,6 @@ const pulse = keyframes`
   100% { transform: translateY(0) scale(1); }
 `;
 
-/* 로고를 절대위치에서 제거하고 플렉스 중앙 정렬로 변경.
-   z-index로 버튼들이 겹치는 경우 로고가 눌리지 않도록 처리. */
 const Logo = styled.div`
   font-weight: bold;
   font-size: 24px;
@@ -108,7 +105,6 @@ const Logo = styled.div`
   }
 `;
 
-/* 왼쪽 네비는 좁은 화면에서 숨겨 겹침 방지 */
 const LeftBar = styled.div`
   display: flex;
   gap: 30px;
