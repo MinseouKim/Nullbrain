@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/Layouts/MainLayout";
 import CameraSection from "../components/CameraSection";
 import WorkoutSetupModal from "../components/WorkoutSetupModal";
 import { Landmark } from "../types/Landmark";
 
-// 세트별 분석 결과를 저장하기 위한 타입 정의
+// 세트별 분석 결과 타입
 interface SetResult {
   setNumber: number;
   aiFeedback: string;
@@ -29,22 +29,46 @@ function Camera() {
   const [isWorkoutPaused, setIsWorkoutPaused] = useState(false);
   const [timer, setTimer] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
-  const [feedbackMessage, setFeedbackMessage] =
-    useState("운동을 설정하고 시작해주세요!");
+  const [feedbackMessage, setFeedbackMessage] = useState("운동을 설정하고 시작해주세요!");
   const [allSetResults, setAllSetResults] = useState<SetResult[]>([]);
 
+  // 🎥 녹화 관련 상태
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+
+  // ⏱ 타이머 관리
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isWorkoutActive && !isWorkoutPaused) {
-      interval = setInterval(() => {
-        setTimer((timer) => timer + 1);
-      }, 1000);
+      interval = setInterval(() => setTimer((t) => t + 1), 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [isWorkoutActive, isWorkoutPaused]);
 
+  // 🎥 카메라 스트림 및 녹화 시작
+  useEffect(() => {
+    if (isWorkoutActive) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+        mediaRecorderRef.current = recorder;
+        recorder.ondataavailable = (e) => chunks.current.push(e.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks.current, { type: "video/webm" });
+          setRecordedBlob(blob);
+        };
+        recorder.start();
+      });
+    } else {
+      mediaRecorderRef.current?.stop();
+    }
+  }, [isWorkoutActive]);
+
+  // 🏋️ 운동 시작
   const handleStartWorkout = (exerciseData: {
     name: string;
     reps: number;
@@ -61,48 +85,17 @@ function Camera() {
     setAllSetResults([]);
   };
 
-  const handleCloseModal = () => {
-    if (!workoutData) {
-      alert("운동을 선택해야 시작할 수 있습니다!");
-      setShowModal(true);
-      return;
-    }
-    setShowModal(false);
-  };
-
-  const handleToggleWorkout = () => {
-    setIsWorkoutPaused((prev) => !prev);
-  };
-
-  const handleEndWorkout = () => {
-    setIsWorkoutActive(false);
-    setIsWorkoutPaused(false);
-    setTimer(0);
-    setWorkoutData(null);
-    setFeedbackMessage("운동을 설정하고 시작해주세요!");
-    navigate("/");
-  };
-
-  // 👇 [수정] 비동기 타이밍 문제를 해결한 최종 버전
-  const handleSetComplete = async (data: {
-    landmarkHistory: Landmark[][];
-    repCount: number;
-  }) => {
+  // ✅ 세트 완료 시 백엔드 분석 요청
+  const handleSetComplete = async (data: { landmarkHistory: Landmark[][]; repCount: number }) => {
     setIsWorkoutPaused(true);
     setFeedbackMessage("AI가 세트 분석 중입니다. 잠시만 기다려주세요...");
 
-    // 성공/실패 여부와 관계없이 세트 진행 로직을 실행하는 함수
-    const proceedToNextStep = (result: SetResult | null) => {
-      setCurrentSet((prevCurrentSet) => {
-        const nextSet = prevCurrentSet + 1;
-        const feedbackToShow =
-          result?.aiFeedback ||
-          "AI 피드백 분석에 실패했습니다. 운동 흐름을 계속 진행합니다.";
-
+    const proceedToNextSet = (result: SetResult | null) => {
+      setCurrentSet((prev) => {
+        const nextSet = prev + 1;
+        const feedbackText = result?.aiFeedback || "AI 분석 실패 — 계속 진행합니다.";
         if (workoutData && nextSet > workoutData.sets) {
-          const finalMessage = `${feedbackToShow} 모든 세트를 완료했습니다! 3초 후 결과 페이지로 이동합니다.`;
-          setFeedbackMessage(finalMessage);
-
+          setFeedbackMessage(`${feedbackText} 모든 세트를 완료했습니다! 결과 페이지로 이동합니다.`);
           setTimeout(() => {
             navigate("/result", {
               state: {
@@ -111,66 +104,69 @@ function Camera() {
                   finalTime: formatTime(timer),
                   allSetResults: [...allSetResults, result].filter(Boolean),
                 },
+                videoBlob: recordedBlob,
               },
             });
-          }, 3000);
+          }, 2500);
         } else {
-          const nextSetMessage = `${feedbackToShow} 휴식 후 '계속' 버튼을 눌러 ${nextSet}세트를 시작하세요.`;
-          setFeedbackMessage(nextSetMessage);
+          setFeedbackMessage(`${feedbackText} ${nextSet}세트를 준비해주세요.`);
         }
         return nextSet;
       });
     };
 
-    // 백엔드 통신
     try {
       const payload = {
         exerciseName: workoutData?.name.toLowerCase(),
         landmarkHistory: data.landmarkHistory,
         repCount: data.repCount,
-        userProfile: { weight: 70 }, // (임시)
+        userProfile: { weight: 70 }, // 예시용
       };
-      const response = await fetch("http://localhost:8000/api/analyze-set", {
+      const res = await fetch("http://localhost:8000/api/analyze-set", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        const currentSetResult: SetResult = {
+      if (res.ok) {
+        const result = await res.json();
+        const setResult: SetResult = {
           setNumber: currentSet,
           aiFeedback: result.ai_feedback,
           analysisData: result.set_analysis_data,
           stats: result.calculated_stats,
         };
-        setAllSetResults((prev) => [...prev, currentSetResult]);
-        proceedToNextStep(currentSetResult); // 성공 시 결과와 함께 다음 단계 진행
+        setAllSetResults((prev) => [...prev, setResult]);
+        proceedToNextSet(setResult);
       } else {
-        console.error("서버 응답 오류:", response.status);
-        proceedToNextStep(null); // 서버 오류 시 결과 없이 다음 단계 진행
+        console.error("서버 오류:", res.status);
+        proceedToNextSet(null);
       }
-    } catch (error) {
-      console.error("네트워크 요청 실패:", error);
-      proceedToNextStep(null); // 네트워크 실패 시 결과 없이 다음 단계 진행
+    } catch (err) {
+      console.error("네트워크 오류:", err);
+      proceedToNextSet(null);
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, "0")}`;
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
   return (
     <MainLayout
       isWorkoutActive={isWorkoutActive}
       isWorkoutPaused={isWorkoutPaused}
-      onToggleWorkout={handleToggleWorkout}
-      onEndWorkout={handleEndWorkout}
+      onToggleWorkout={() => setIsWorkoutPaused((p) => !p)}
+      onEndWorkout={() => navigate("/")}
       timer={formatTime(timer)}
       workoutData={workoutData}
     >
+      <div style={{ textAlign: "center" }}>
+        <video ref={videoRef} autoPlay playsInline muted style={{ width: "640px", borderRadius: 10 }} />
+      </div>
+
       <CameraSection
         workoutData={workoutData}
         isWorkoutPaused={isWorkoutPaused}
@@ -180,9 +176,10 @@ function Camera() {
         totalSets={workoutData?.sets ?? 0}
         feedbackMessage={feedbackMessage}
       />
+
       <WorkoutSetupModal
         isOpen={showModal}
-        onClose={handleCloseModal}
+        onClose={() => setShowModal(false)}
         onStartWorkout={handleStartWorkout}
       />
     </MainLayout>
