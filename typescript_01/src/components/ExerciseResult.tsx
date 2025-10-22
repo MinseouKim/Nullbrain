@@ -1,6 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
+import dummy from "../datas/dummydata.json"; // ✅ 더미데이터 import
+
+// ✅ 테스트 모드 전환
+const isTestMode = true;
 
 const Page = styled.div`
   width: 100%;
@@ -149,24 +153,72 @@ const ExerciseResult: React.FC = () => {
 
   const workoutPlan = location.state?.workoutPlan;
   const performanceData = location.state?.performanceData;
-  const videoBlob = location.state?.videoBlob;
-  const videoUrl = useMemo(
-    () => (videoBlob ? URL.createObjectURL(videoBlob) : null),
-    [videoBlob]
-  );
+
+  const [overallFeedback, setOverallFeedback] = useState<string>("로딩 중...");
+  const [improvementTips, setImprovementTips] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!workoutPlan || !performanceData) {
+    if (!isTestMode && (!workoutPlan || !performanceData)) {
       alert("운동 기록이 없습니다. 메인 페이지로 이동합니다.");
       navigate("/");
     }
   }, [workoutPlan, performanceData, navigate]);
 
   const summaryData = useMemo(() => {
-    if (!workoutPlan || !performanceData) return null;
+    // 1️⃣ 테스트 모드일 경우: 더미데이터 사용
+    if (isTestMode) {
+      const { workoutPlan, performanceData } = dummy;
+
+      const { name, reps, sets } = workoutPlan;
+      const { finalTime, allSetResults } = performanceData;
+
+      const errorTags = new Set<string>();
+      allSetResults.forEach((r: any) => {
+        if (r.analysisData?.["운동 가동범위"]?.includes("부족"))
+          errorTags.add("가동범위 부족");
+        if (r.analysisData?.["좌우 대칭성"]?.includes("불균형"))
+          errorTags.add("좌우 불균형");
+      });
+
+      const totalCalories = allSetResults.reduce(
+        (sum: number, r: any) => sum + (r.stats?.calories || 0),
+        0
+      );
+      const avgAccuracy =
+        allSetResults.length > 0
+          ? allSetResults.reduce(
+              (sum: number, r: any) => sum + (r.stats?.accuracy || 0),
+              0
+            ) / allSetResults.length
+          : 0;
+
+      return {
+        name,
+        totalReps: reps * sets,
+        finalTime,
+        errorTags: Array.from(errorTags),
+        accuracy: Math.round(avgAccuracy),
+        kcal: Math.round(totalCalories),
+        allSetResults,
+      };
+    }
+
+    // 2️⃣ 실제 데이터 모드
+    if (!workoutPlan || !performanceData) {
+      return {
+        name: "로딩 중",
+        totalReps: 0,
+        finalTime: "0:00",
+        errorTags: [],
+        accuracy: 0,
+        kcal: 0,
+        allSetResults: [],
+      };
+    }
+
     const { name, reps, sets } = workoutPlan;
     const { finalTime, allSetResults } = performanceData;
-    const finalFeedback = allSetResults.map((r: any) => r.aiFeedback).join(" ");
+
     const errorTags = new Set<string>();
     allSetResults.forEach((r: any) => {
       if (r.analysisData?.["운동 가동범위"]?.includes("부족"))
@@ -174,6 +226,7 @@ const ExerciseResult: React.FC = () => {
       if (r.analysisData?.["좌우 대칭성"]?.includes("불균형"))
         errorTags.add("좌우 불균형");
     });
+
     const totalCalories = allSetResults.reduce(
       (sum: number, r: any) => sum + (r.stats?.calories || 0),
       0
@@ -185,24 +238,37 @@ const ExerciseResult: React.FC = () => {
             0
           ) / allSetResults.length
         : 0;
+
     return {
       name,
       totalReps: reps * sets,
       finalTime,
-      finalFeedback,
       errorTags: Array.from(errorTags),
       accuracy: Math.round(avgAccuracy),
       kcal: Math.round(totalCalories),
+      allSetResults,
     };
   }, [workoutPlan, performanceData]);
 
-  if (!summaryData) {
-    return (
-      <Page>
-        <h2>운동 결과를 불러오는 중...</h2>
-      </Page>
-    );
-  }
+  // ✅ 전체 피드백 요청
+  useEffect(() => {
+    const fetchOverallFeedback = async () => {
+      if (!summaryData?.allSetResults) return;
+      try {
+        const res = await fetch("http://localhost:8000/api/feedback/overall", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ set_results: summaryData.allSetResults }),
+        });
+        const data = await res.json();
+        setOverallFeedback(data.overall_feedback || "피드백 생성 실패");
+        setImprovementTips(data.improvement_tips || []);
+      } catch (err) {
+        setOverallFeedback("⚠️ 종합 피드백 요청 실패");
+      }
+    };
+    fetchOverallFeedback();
+  }, [summaryData]);
 
   return (
     <Page>
@@ -259,20 +325,11 @@ const ExerciseResult: React.FC = () => {
         {/* 우측 영상 카드 */}
         <VideoCard>
           <CardTitle>운동 영상</CardTitle>
-          <VideoBox>
-            {videoUrl ? (
-              <video
-                src={videoUrl}
-                controls
-                style={{ width: "100%", borderRadius: 10 }}
-              />
-            ) : (
-              <div style={{ padding: 20 }}>영상 데이터가 없습니다.</div>
-            )}
-          </VideoBox>
+          <VideoBox />
         </VideoCard>
       </TopGrid>
 
+      {/* ✅ 종합 피드백 + 개선 팁 */}
       <FeedbackCard>
         <CardTitle>종합 피드백</CardTitle>
         <div
@@ -284,8 +341,30 @@ const ExerciseResult: React.FC = () => {
             lineHeight: 1.6,
           }}
         >
-          {summaryData.finalFeedback}
+          {overallFeedback}
         </div>
+
+        {improvementTips.length > 0 && (
+          <div
+            style={{
+              background: "#fff",
+              marginTop: 10,
+              padding: "12px 16px",
+              borderRadius: 10,
+              border: "1px solid #e5e7eb",
+              lineHeight: 1.6,
+            }}
+          >
+            <strong>✨ 개선 포인트</strong>
+            <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+              {improvementTips.map((tip, i) => (
+                <li key={i} style={{ marginBottom: 6 }}>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <Actions>
           <ActionBtn onClick={() => navigate(-1)}>다시하기</ActionBtn>
