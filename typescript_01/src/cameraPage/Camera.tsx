@@ -4,6 +4,7 @@ import MainLayout from "../components/Layouts/MainLayout";
 import CameraSection from "../components/CameraSection";
 import WorkoutSetupModal from "../components/WorkoutSetupModal";
 import { Landmark } from "../types/Landmark";
+import { ExerciseName } from "../types/ExerciseTypes";
 
 // 세트별 분석 결과 타입
 interface SetResult {
@@ -64,13 +65,13 @@ function Camera() {
 
   // ✅ CameraSection에서 한 세트 완료 시 호출
   const handleSetComplete = async (data: {
-    exerciseName: "squat" | "pushup";
+    exerciseName: ExerciseName;
     landmarkHistory: Landmark[][];
     repCount: number;
     finalTime?: string;
   }) => {
     setIsWorkoutPaused(true);
-    setFeedbackMessage("AI가 세트를 분석 중입니다...");
+    setFeedbackMessage("⏳ AI가 세트를 분석 중입니다...");
 
     try {
       const res = await fetch("http://localhost:8000/feedback/set", {
@@ -83,29 +84,38 @@ function Camera() {
         }),
       });
 
-      if (!res.ok) throw new Error(`서버 오류 (${res.status})`);
-      const result = await res.json();
-      console.log("✅ AI 피드백 수신:", result);
+      let aiResult = null;
+      if (res.ok) {
+        aiResult = await res.json();
+        console.log("✅ AI 피드백 수신:", aiResult);
+      } else {
+        console.warn("⚠️ AI 서버 응답 오류:", res.status);
+      }
 
+      // ✅ 세트 결과 정리
       const setResult: SetResult = {
         setNumber: currentSet,
-        aiFeedback: result.feedback || "AI 피드백 없음",
-        analysisData: result.analysisData || {},
-        stats: result.stats || { accuracy: 0, calories: 0 },
+        aiFeedback: aiResult?.feedback || "AI 피드백 없음",
+        analysisData: aiResult?.analysisData || {},
+        stats: aiResult?.stats || { accuracy: 0, calories: 0 },
       };
+
+      // ✅ 전체 결과에 추가
       const updatedResults = [...allSetResults, setResult];
       setAllSetResults(updatedResults);
 
-      // ✅ 피드백을 즉시 표시 (사용자에게 보이게)
-      setFeedbackMessage(setResult.aiFeedback);
+      // ✅ 피드백 메시지 표시
+      setFeedbackMessage(
+        setResult.aiFeedback || "세트 완료! 잠시만 기다려주세요."
+      );
 
-      // 2초 후 자동으로 다음 세트로 넘어가기
+      // ✅ AI 응답 없더라도 2.5초 후 자동으로 다음 세트로 진행
       setTimeout(() => {
         if (workoutData && currentSet < workoutData.sets) {
           const nextSet = currentSet + 1;
           setCurrentSet(nextSet);
           setIsWorkoutPaused(false);
-          setFeedbackMessage(`${nextSet}세트를 시작하세요!`);
+          setFeedbackMessage(`💪 ${nextSet}세트를 시작하세요!`);
         } else {
           console.log("🎯 모든 세트 완료 → 결과 페이지 이동");
           navigate("/result", {
@@ -121,9 +131,26 @@ function Camera() {
       }, 2500);
     } catch (err) {
       console.error("❌ 세트 분석 실패:", err);
-      setFeedbackMessage("AI 분석 실패. 다음 세트로 진행합니다.");
-      setCurrentSet((prev) => prev + 1);
-      setIsWorkoutPaused(false);
+      // ✅ 실패해도 세트는 정상 진행되도록 보정
+      setFeedbackMessage("⚠️ AI 분석 실패. 다음 세트로 진행합니다.");
+      setTimeout(() => {
+        if (workoutData && currentSet < workoutData.sets) {
+          const nextSet = currentSet + 1;
+          setCurrentSet(nextSet);
+          setIsWorkoutPaused(false);
+          setFeedbackMessage(`💪 ${nextSet}세트를 시작하세요!`);
+        } else {
+          navigate("/result", {
+            state: {
+              workoutPlan: workoutData,
+              performanceData: {
+                finalTime: formatTime(timer),
+                allSetResults,
+              },
+            },
+          });
+        }
+      }, 2000);
     }
   };
 

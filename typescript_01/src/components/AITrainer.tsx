@@ -1,17 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Landmark } from "../types/Landmark";
 import { exerciseHandlers } from "../logic/ExerciseHandler";
+import { ExerciseName } from "../types/ExerciseTypes";
 
 const DEBUG_IGNORE_FULLBODY = true;
 
 interface AITrainerProps {
-  exercise: keyof typeof exerciseHandlers;
+  exercise: ExerciseName;
   isWorkoutPaused: boolean;
   targetReps: number;
   currentSet: number;
   totalSets: number;
   onSetComplete: (data: {
-    exerciseName: "squat" | "pushup";
+    exerciseName: ExerciseName;
     landmarkHistory: Landmark[][];
     repCount: number;
     finalTime?: string;
@@ -46,17 +47,18 @@ const AITrainer: React.FC<AITrainerProps> = ({
   const startTimeRef = useRef<number | null>(null);
   const hasFullBodyRef = useRef(false);
   const lastSavedTimeRef = useRef<number>(0);
+  const isSetProcessing = useRef(false);
 
   useEffect(() => {
     stateRef.current = { isWorkoutPaused, targetReps };
   }, [isWorkoutPaused, targetReps]);
 
   useEffect(() => {
-    // 세트 바뀔 때마다 초기화
     setRepCount(0);
     stage.current = "up";
     landmarkHistory.current = [];
     startTimeRef.current = null;
+    isSetProcessing.current = false;
   }, [exercise, currentSet]);
 
   const loadScript = (src: string) =>
@@ -70,7 +72,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
       document.head.appendChild(s);
     });
 
-  // 전신 감지 함수
   const isFullBodyVisible = (lms: Landmark[]): boolean => {
     const safe = (i: number) => {
       const lm = lms[i];
@@ -80,56 +81,65 @@ const AITrainer: React.FC<AITrainerProps> = ({
     return ids.every(safe);
   };
 
-  // 메시지 오버레이
   const drawMessage = (ctx: CanvasRenderingContext2D, msg: string) => {
     ctx.save();
     ctx.font = "30px Pretendard, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
     const x = ctx.canvas.width / 2;
     const y = ctx.canvas.height / 2;
-    const paddingX = 40;
-    const paddingY = 28;
     const textWidth = ctx.measureText(msg).width;
-    const boxWidth = textWidth + paddingX * 2;
+    const boxWidth = textWidth + 80;
     const boxHeight = 80;
-
-    // ✅ 부드러운 둥근 배경 (그라데이션 + 블러 느낌)
-    const gradient = ctx.createLinearGradient(
-      x - boxWidth / 2,
-      y,
-      x + boxWidth / 2,
-      y
-    );
-    gradient.addColorStop(0, "rgba(0,0,0,0.55)");
-    gradient.addColorStop(1, "rgba(0,0,0,0.35)");
-
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.beginPath();
     ctx.roundRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight, 18);
     ctx.fill();
-
-    // ✅ 글씨 그림자 + 흰색 텍스트
-    ctx.shadowColor = "rgba(0,0,0,0.5)";
-    ctx.shadowBlur = 5;
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#fff";
     ctx.fillText(msg, x, y + 3);
     ctx.restore();
   };
 
-  // 세트 완료 처리
   const handleSetComplete = async () => {
+    if (isSetProcessing.current) return;
+    isSetProcessing.current = true;
+
+    setFeedbackMessage("⏳ AI 피드백 분석 중입니다...");
+
     const end = Date.now();
     const elapsed = startTimeRef.current
       ? ((end - startTimeRef.current) / 1000).toFixed(1)
       : "0";
-    await onSetComplete({
-      exerciseName: exercise,
-      landmarkHistory: landmarkHistory.current,
-      repCount,
-      finalTime: `${elapsed}초`,
-    });
+
+    const timeoutPromise = new Promise<void>((resolve) =>
+      setTimeout(() => {
+        console.warn("⚠️ AI 피드백 응답 없음 → 자동 다음 세트 이동");
+        resolve();
+      }, 3000)
+    );
+
+    try {
+      await Promise.race([
+        onSetComplete({
+          exerciseName: exercise,
+          landmarkHistory: landmarkHistory.current,
+          repCount,
+          finalTime: `${elapsed}초`,
+        }),
+        timeoutPromise,
+      ]);
+    } catch (e) {
+      console.warn("❌ AI 피드백 요청 실패:", e);
+    }
+
+    setFeedbackMessage("✅ 세트 완료! 다음 세트를 준비하세요!");
+
+    setTimeout(() => {
+      setRepCount(0);
+      landmarkHistory.current = [];
+      isSetProcessing.current = false;
+      setFeedbackMessage("운동을 시작하세요!");
+    }, 2500);
   };
 
   useEffect(() => {
@@ -147,10 +157,7 @@ const AITrainer: React.FC<AITrainerProps> = ({
       const drawLandmarks = (window as any).drawLandmarks;
       const POSE_CONNECTIONS = (window as any).POSE_CONNECTIONS;
 
-      if (!Pose || !Camera || !videoRef.current || !canvasRef.current) {
-        console.warn("❌ Pose or Camera not ready");
-        return;
-      }
+      if (!Pose || !Camera || !videoRef.current || !canvasRef.current) return;
 
       const pose = new Pose({
         locateFile: (f: string) =>
@@ -163,80 +170,61 @@ const AITrainer: React.FC<AITrainerProps> = ({
         minTrackingConfidence: 0.5,
       });
 
-      // ✅ 순서만 수정된 onResults
       pose.onResults((res: any) => {
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext("2d");
         if (!canvas || !ctx) return;
 
-        // 항상 영상 프레임 먼저 그리기
         canvas.width = res.image.width;
         canvas.height = res.image.height;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(res.image, 0, 0, canvas.width, canvas.height);
 
         const lms = res.poseLandmarks as Landmark[] | undefined;
-
         if (!lms) {
-          hasFullBodyRef.current = false;
-          drawMessage(ctx, "카메라 안에 전신이 보이게 서주세요");
+          if (!DEBUG_IGNORE_FULLBODY)
+            drawMessage(ctx, "카메라 안에 전신이 보이게 서주세요");
           return;
         }
 
-        // 전신 감지 (1회)
         if (!hasFullBodyRef.current) {
-          if (DEBUG_IGNORE_FULLBODY) {
-            // ✅ 테스트용: 전신 감지 무시
+          if (DEBUG_IGNORE_FULLBODY || isFullBodyVisible(lms)) {
             hasFullBodyRef.current = true;
-            console.log("⚙️ [TEST MODE] 전신 감지 생략됨. 프레임 기록 시작.");
+            setFeedbackMessage("✅ 전신 인식 완료! 세트를 시작합니다!");
+            setTimeout(() => setFeedbackMessage("운동을 시작하세요!"), 1500);
           } else {
-            const visible = isFullBodyVisible(lms);
-            if (visible) {
-              hasFullBodyRef.current = true;
-              setFeedbackMessage("✅ 전신 인식 완료! 세트를 시작합니다!");
-              setTimeout(() => setFeedbackMessage(""), 1000);
-            } else {
-              setFeedbackMessage("📸 카메라 안에 전신이 보이게 서주세요");
-              return;
-            }
+            drawMessage(ctx, "전신이 화면에 들어오게 서주세요");
+            return;
           }
         }
 
-        // 스켈레톤 오버레이
         drawConnectors(ctx, lms, POSE_CONNECTIONS, {
           color: "#39b3ff",
           lineWidth: 1.5,
         });
-        drawLandmarks(ctx, lms, {
-          color: "#000",
-          lineWidth: 1,
-          radius: 1.8,
-        });
+        drawLandmarks(ctx, lms, { color: "#000", lineWidth: 1, radius: 1.8 });
 
-        // 10fps 분석
         const now = Date.now();
         if (
           !stateRef.current.isWorkoutPaused &&
           hasFullBodyRef.current &&
-          now - lastSavedTimeRef.current > 100
+          now - lastSavedTimeRef.current > 100 &&
+          !isSetProcessing.current
         ) {
           if (!startTimeRef.current) startTimeRef.current = now;
           lastSavedTimeRef.current = now;
           landmarkHistory.current.push(lms);
 
-          if (landmarkHistory.current.length % 30 === 0) {
-            console.log(
-              `[DEBUG] 현재 저장된 프레임 수: ${landmarkHistory.current.length}`
-            );
-          }
-
-          const handler = exerciseHandlers[exercise];
-          if (handler) {
+          const handler =
+            exerciseHandlers[exercise as keyof typeof exerciseHandlers];
+          if (typeof handler === "function") {
             handler(lms, stage, () => {
               setRepCount((prev) => {
                 const next = prev + 1;
-                if (next >= stateRef.current.targetReps) handleSetComplete();
-                return next;
+                if (next === stateRef.current.targetReps) {
+                  setTimeout(() => handleSetComplete(), 500);
+                }
+                return Math.min(next, stateRef.current.targetReps);
               });
             });
           }
@@ -244,7 +232,6 @@ const AITrainer: React.FC<AITrainerProps> = ({
       });
 
       poseRef.current = pose;
-
       cameraRef.current = new Camera(videoRef.current, {
         onFrame: async () => {
           if (!isActive || !videoRef.current) return;

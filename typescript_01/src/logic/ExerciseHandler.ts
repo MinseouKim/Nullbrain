@@ -1,10 +1,13 @@
 import { handleSquat } from "./exercise/SquatLogic";
 import { handlePushup } from "./exercise/PushupLogic";
-// 앞으로 다른 운동이 생기면 여기에만 추가
-// import { handlePlank } from "./exercise/plankLogic";
+// import { handlePlank } from "./exercise/PlankLogic";
 
+// ✅ 향후 추가되는 운동까지 자동 반영 가능한 구조
 export const exerciseHandlers = {
   squat: handleSquat,
   pushup: handlePushup,
   // plank: handlePlank,
-} as const;
+} satisfies Record<
+  string,
+  (landmarks: any, stage: any, onRepDetected: () => void) => void
+>;

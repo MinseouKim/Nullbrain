@@ -3,6 +3,8 @@ import styled from "styled-components";
 import AITrainer from "./AITrainer";
 import { Landmark } from "../types/Landmark";
 import { useNavigate } from "react-router-dom";
+import { ExerciseName } from "../types/ExerciseTypes";
+import { exerciseForAI } from "../utils/exerciseMapper";
 
 interface CameraSectionProps {
   workoutData?: {
@@ -109,7 +111,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({
 
   // ✅ 세트 완료 처리
   const handleSetComplete = async (data: {
-    exerciseName: "squat" | "pushup";
+    exerciseName: ExerciseName;
     landmarkHistory: Landmark[][];
     repCount: number;
     finalTime?: string;
