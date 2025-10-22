@@ -1,2 +1,1 @@
-// types/ExerciseTypes.ts
-export type ExerciseName = "squat" | "pushup" | string;
+export type ExerciseName = "squat" | "pushup" | "lunge" | string;

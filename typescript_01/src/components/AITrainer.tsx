@@ -1,9 +1,8 @@
+// src/components/AITrainer.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { Landmark } from "../types/Landmark";
 import { exerciseHandlers } from "../logic/ExerciseHandler";
 import { ExerciseName } from "../types/ExerciseTypes";
-
-const DEBUG_IGNORE_FULLBODY = true;
 
 interface AITrainerProps {
   exercise: ExerciseName;
@@ -26,15 +25,10 @@ const CDN = {
   pose: "https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js",
 };
 
-const AITrainer: React.FC<AITrainerProps> = ({
-  exercise,
-  isWorkoutPaused,
-  targetReps,
-  onSetComplete,
-  currentSet,
-  totalSets,
-  setFeedbackMessage,
-}) => {
+const AITrainer: React.FC<AITrainerProps> = (props) => {
+  // [수정] props를 구조분해하지 않고 props 객체 자체를 사용
+  const { currentSet, exercise } = props;
+
   const [repCount, setRepCount] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,23 +37,31 @@ const AITrainer: React.FC<AITrainerProps> = ({
 
   const stage = useRef<"up" | "down">("up");
   const landmarkHistory = useRef<Landmark[][]>([]);
-  const stateRef = useRef({ isWorkoutPaused, targetReps });
+
+  // [핵심 수정]
+  // onResults 콜백은 한 번만 생성되므로,
+  // 콜백 내부에서 항상 최신 props와 state를 참조할 수 있도록 ref를 사용합니다.
+  const propsAndStateRef = useRef({ ...props, repCount });
+
+  // 렌더링될 때마다 ref의 값을 최신 props와 state로 업데이트
+  useEffect(() => {
+    propsAndStateRef.current = { ...props, repCount };
+  }, [props, repCount]);
+
   const startTimeRef = useRef<number | null>(null);
   const hasFullBodyRef = useRef(false);
   const lastSavedTimeRef = useRef<number>(0);
   const isSetProcessing = useRef(false);
 
-  useEffect(() => {
-    stateRef.current = { isWorkoutPaused, targetReps };
-  }, [isWorkoutPaused, targetReps]);
-
+  // 세트가 변경될 때마다 카메라 재시작 없이 상태만 초기화
   useEffect(() => {
     setRepCount(0);
     stage.current = "up";
     landmarkHistory.current = [];
     startTimeRef.current = null;
     isSetProcessing.current = false;
-  }, [exercise, currentSet]);
+    hasFullBodyRef.current = false;
+  }, [currentSet, exercise]);
 
   const loadScript = (src: string) =>
     new Promise<void>((resolve, reject) => {
@@ -75,7 +77,7 @@ const AITrainer: React.FC<AITrainerProps> = ({
   const isFullBodyVisible = (lms: Landmark[]): boolean => {
     const safe = (i: number) => {
       const lm = lms[i];
-      return lm && typeof lm.visibility === "number" && lm.visibility > 0.6;
+      return !!(lm && typeof lm.visibility === "number" && lm.visibility > 0.6);
     };
     const ids = [0, 11, 12, 23, 24, 25, 26, 27, 28];
     return ids.every(safe);
@@ -93,169 +95,218 @@ const AITrainer: React.FC<AITrainerProps> = ({
     const boxHeight = 80;
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.beginPath();
-    ctx.roundRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight, 18);
+    const radius = 18;
+    const left = x - boxWidth / 2;
+    const top = y - boxHeight / 2;
+    ctx.moveTo(left + radius, top);
+    ctx.lineTo(left + boxWidth - radius, top);
+    ctx.quadraticCurveTo(left + boxWidth, top, left + boxWidth, top + radius);
+    ctx.lineTo(left + boxWidth, top + boxHeight - radius);
+    ctx.quadraticCurveTo(
+      left + boxWidth,
+      top + boxHeight,
+      left + boxWidth - radius,
+      top + boxHeight
+    );
+    ctx.lineTo(left + radius, top + boxHeight);
+    ctx.quadraticCurveTo(left, top + boxHeight, left, top + boxHeight - radius);
+    ctx.lineTo(left, top + radius);
+    ctx.quadraticCurveTo(left, top, left + radius, top);
+    ctx.closePath();
     ctx.fill();
     ctx.fillStyle = "#fff";
     ctx.fillText(msg, x, y + 3);
     ctx.restore();
   };
 
-  const handleSetComplete = async () => {
-    if (isSetProcessing.current) return;
-    isSetProcessing.current = true;
-
-    setFeedbackMessage("⏳ AI 피드백 분석 중입니다...");
-
-    const end = Date.now();
-    const elapsed = startTimeRef.current
-      ? ((end - startTimeRef.current) / 1000).toFixed(1)
-      : "0";
-
-    const timeoutPromise = new Promise<void>((resolve) =>
-      setTimeout(() => {
-        console.warn("⚠️ AI 피드백 응답 없음 → 자동 다음 세트 이동");
-        resolve();
-      }, 3000)
-    );
-
-    try {
-      await Promise.race([
-        onSetComplete({
-          exerciseName: exercise,
-          landmarkHistory: landmarkHistory.current,
-          repCount,
-          finalTime: `${elapsed}초`,
-        }),
-        timeoutPromise,
-      ]);
-    } catch (e) {
-      console.warn("❌ AI 피드백 요청 실패:", e);
-    }
-
-    setFeedbackMessage("✅ 세트 완료! 다음 세트를 준비하세요!");
-
-    setTimeout(() => {
-      setRepCount(0);
-      landmarkHistory.current = [];
-      isSetProcessing.current = false;
-      setFeedbackMessage("운동을 시작하세요!");
-    }, 2500);
-  };
-
+  // 카메라 설정 useEffect (운동이 바뀔 때만 실행)
   useEffect(() => {
     let isActive = true;
-    (async () => {
-      await Promise.all([
-        loadScript(CDN.cam),
-        loadScript(CDN.draw),
-        loadScript(CDN.pose),
-      ]);
 
-      const Pose = (window as any).Pose;
-      const Camera = (window as any).Camera;
-      const drawConnectors = (window as any).drawConnectors;
-      const drawLandmarks = (window as any).drawLandmarks;
-      const POSE_CONNECTIONS = (window as any).POSE_CONNECTIONS;
+    const setupCameraAndPose = async () => {
+      try {
+        // [수정] setFeedbackMessage를 props에서 직접 가져오지 않고 ref를 통해 호출
+        propsAndStateRef.current.setFeedbackMessage("AI 모델 로딩 중... (1/4)");
+        await Promise.all([
+          loadScript(CDN.cam),
+          loadScript(CDN.draw),
+          loadScript(CDN.pose),
+        ]);
 
-      if (!Pose || !Camera || !videoRef.current || !canvasRef.current) return;
+        const Pose = (window as any).Pose;
+        const Camera = (window as any).Camera;
+        const drawConnectors = (window as any).drawConnectors;
+        const drawLandmarks = (window as any).drawLandmarks;
+        const POSE_CONNECTIONS = (window as any).POSE_CONNECTIONS;
 
-      const pose = new Pose({
-        locateFile: (f: string) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`,
-      });
-      pose.setOptions({
-        modelComplexity: 1,
-        smoothLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
+        if (!Pose || !Camera)
+          throw new Error("MediaPipe 객체를 찾을 수 없습니다.");
+        if (!videoRef.current || !canvasRef.current)
+          throw new Error("HTML 요소를 찾을 수 없습니다.");
+        if (!isActive) return;
 
-      pose.onResults((res: any) => {
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext("2d");
-        if (!canvas || !ctx) return;
+        propsAndStateRef.current.setFeedbackMessage(
+          "AI 모델 초기화 중... (2/4)"
+        );
+        const pose = new Pose({
+          locateFile: (f: string) =>
+            `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`,
+        });
+        poseRef.current = pose;
 
-        canvas.width = res.image.width;
-        canvas.height = res.image.height;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(res.image, 0, 0, canvas.width, canvas.height);
+        pose.setOptions({
+          modelComplexity: 1,
+          smoothLandmarks: true,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
 
-        const lms = res.poseLandmarks as Landmark[] | undefined;
-        if (!lms) {
-          if (!DEBUG_IGNORE_FULLBODY)
+        pose.onResults((res: any) => {
+          const canvas = canvasRef.current;
+          const ctx = canvas?.getContext("2d");
+          if (!canvas || !ctx || !isActive) return;
+
+          canvas.width = res.image.width;
+          canvas.height = res.image.height;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(res.image, 0, 0, canvas.width, canvas.height);
+
+          const lms = res.poseLandmarks as Landmark[] | undefined;
+          if (!lms) {
             drawMessage(ctx, "카메라 안에 전신이 보이게 서주세요");
-          return;
-        }
-
-        if (!hasFullBodyRef.current) {
-          if (DEBUG_IGNORE_FULLBODY || isFullBodyVisible(lms)) {
-            hasFullBodyRef.current = true;
-            setFeedbackMessage("✅ 전신 인식 완료! 세트를 시작합니다!");
-            setTimeout(() => setFeedbackMessage("운동을 시작하세요!"), 1500);
-          } else {
-            drawMessage(ctx, "전신이 화면에 들어오게 서주세요");
             return;
           }
-        }
 
-        drawConnectors(ctx, lms, POSE_CONNECTIONS, {
-          color: "#39b3ff",
-          lineWidth: 1.5,
-        });
-        drawLandmarks(ctx, lms, { color: "#000", lineWidth: 1, radius: 1.8 });
-
-        const now = Date.now();
-        if (
-          !stateRef.current.isWorkoutPaused &&
-          hasFullBodyRef.current &&
-          now - lastSavedTimeRef.current > 100 &&
-          !isSetProcessing.current
-        ) {
-          if (!startTimeRef.current) startTimeRef.current = now;
-          lastSavedTimeRef.current = now;
-          landmarkHistory.current.push(lms);
-
-          const handler =
-            exerciseHandlers[exercise as keyof typeof exerciseHandlers];
-          if (typeof handler === "function") {
-            handler(lms, stage, () => {
-              setRepCount((prev) => {
-                const next = prev + 1;
-                if (next === stateRef.current.targetReps) {
-                  setTimeout(() => handleSetComplete(), 500);
-                }
-                return Math.min(next, stateRef.current.targetReps);
-              });
-            });
+          if (!hasFullBodyRef.current) {
+            const visible = isFullBodyVisible(lms);
+            if (visible) {
+              hasFullBodyRef.current = true;
+              propsAndStateRef.current.setFeedbackMessage(
+                "✅ 전신 인식 완료! 세트를 시작합니다!"
+              );
+              setTimeout(
+                () =>
+                  propsAndStateRef.current.setFeedbackMessage(
+                    "운동을 시작하세요!"
+                  ),
+                1500
+              );
+            } else {
+              drawMessage(ctx, "전신이 화면에 들어오게 서주세요");
+              return;
+            }
           }
+
+          drawConnectors(ctx, lms, POSE_CONNECTIONS, {
+            color: "#39b3ff",
+            lineWidth: 1.5,
+          });
+          drawLandmarks(ctx, lms, { color: "#000", lineWidth: 1, radius: 1.8 });
+
+          const now = Date.now();
+
+          // [핵심 수정] 모든 변수를 propsAndStateRef.current에서 읽어옴
+          const { isWorkoutPaused, targetReps, repCount, exercise } =
+            propsAndStateRef.current;
+
+          if (
+            !isWorkoutPaused &&
+            hasFullBodyRef.current &&
+            now - lastSavedTimeRef.current > 100 &&
+            !isSetProcessing.current
+          ) {
+            if (!startTimeRef.current) startTimeRef.current = now;
+            lastSavedTimeRef.current = now;
+            landmarkHistory.current.push(lms);
+
+            const handler =
+              exerciseHandlers[exercise as keyof typeof exerciseHandlers];
+            if (typeof handler === "function") {
+              handler(lms, stage, () => {
+                if (isSetProcessing.current) return;
+
+                // [핵심 수정] 횟수도 ref에서 직접 읽어옴
+                const currentRepCount = propsAndStateRef.current.repCount;
+                const targetRepCount = propsAndStateRef.current.targetReps;
+
+                const next = currentRepCount + 1;
+
+                if (next >= targetRepCount) {
+                  isSetProcessing.current = true;
+                  setRepCount(targetRepCount); // UI 업데이트
+
+                  const end = Date.now();
+                  const elapsed = startTimeRef.current
+                    ? ((end - startTimeRef.current) / 1000).toFixed(1)
+                    : "0";
+
+                  setTimeout(() => {
+                    // [핵심 수정] onSetComplete도 ref에서 호출
+                    propsAndStateRef.current.onSetComplete({
+                      exerciseName: propsAndStateRef.current.exercise,
+                      landmarkHistory: landmarkHistory.current,
+                      repCount: targetRepCount,
+                      finalTime: `${elapsed}초`,
+                    });
+                  }, 200);
+                } else {
+                  setRepCount(next); // UI 업데이트
+                }
+              });
+            }
+          }
+        });
+
+        propsAndStateRef.current.setFeedbackMessage("카메라 설정 중... (3/4)");
+        if (!videoRef.current || !isActive) return;
+
+        cameraRef.current = new Camera(videoRef.current, {
+          onFrame: async () => {
+            if (!isActive || !videoRef.current || !poseRef.current) return;
+            try {
+              await poseRef.current.send({ image: videoRef.current });
+            } catch (e) {
+              console.error("Pose send error:", e);
+            }
+          },
+          width: 1280,
+          height: 720,
+        });
+
+        propsAndStateRef.current.setFeedbackMessage("카메라 시작 중... (4/4)");
+        await cameraRef.current.start();
+      } catch (err) {
+        console.error("❌ 카메라 또는 AI 설정 실패:", err);
+
+        // [수정] err 타입 에러 해결
+        let errorMessage = "알 수 없는 오류가 발생했습니다.";
+        if (err instanceof Error) {
+          errorMessage = err.message;
         }
-      });
+        propsAndStateRef.current.setFeedbackMessage(
+          `❌ 카메라/AI 초기화 실패: ${errorMessage}`
+        );
+      }
+    };
 
-      poseRef.current = pose;
-      cameraRef.current = new Camera(videoRef.current, {
-        onFrame: async () => {
-          if (!isActive || !videoRef.current) return;
-          await pose.send({ image: videoRef.current });
-        },
-        width: 1280,
-        height: 720,
-      });
-
-      await cameraRef.current.start();
-    })();
+    setupCameraAndPose(); // 설정 함수 실행
 
     return () => {
       isActive = false;
       try {
         cameraRef.current?.stop?.();
         poseRef.current?.close?.();
-      } catch {}
+        cameraRef.current = null;
+        poseRef.current = null;
+      } catch (e) {
+        console.error("Camera cleanup error:", e);
+      }
       const vd = videoRef.current;
       const ms = (vd?.srcObject || null) as MediaStream | null;
       ms?.getTracks().forEach((t) => t.stop());
       if (vd) vd.srcObject = null;
     };
-  }, [exercise]);
+  }, [exercise]); // 운동이 바뀔 때만 카메라/AI 재설정
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -296,7 +347,8 @@ const AITrainer: React.FC<AITrainerProps> = ({
           fontWeight: "bold",
         }}
       >
-        {`Set ${currentSet} / ${totalSets} | Reps ${repCount} / ${targetReps}`}
+        {/* [수정] 표시되는 횟수도 props에서 직접 받도록 변경 */}
+        {`Set ${props.currentSet} / ${props.totalSets} | Reps ${repCount} / ${props.targetReps}`}
       </p>
     </div>
   );

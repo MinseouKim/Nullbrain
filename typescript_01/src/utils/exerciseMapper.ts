@@ -14,12 +14,12 @@ export const exerciseNameMap: Record<string, string> = {
   푸시업: "pushup",
   팔굽혀펴기: "pushup",
 
+  lunge: "lunge",
+  런지: "lunge",
+
   plank: "plank",
   플랭크: "plank",
   플랭: "plank",
-
-  lunge: "lunge",
-  런지: "lunge",
 
   deadlift: "deadlift",
   데드리프트: "deadlift",
@@ -69,5 +69,6 @@ export function exerciseForAI(name: string): string {
     }
   }
 
+  // 매핑 테이블에 bestMatch 키가 있는지 확인 후 반환, 없으면 기본값
   return exerciseNameMap[bestMatch] || "squat";
 }
