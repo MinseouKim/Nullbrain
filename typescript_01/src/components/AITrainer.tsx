@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Landmark } from "../types/Landmark";
 import { exerciseHandlers } from "../logic/ExerciseHandler";
 import { ExerciseName } from "../types/ExerciseTypes";
+import { ensureCameraReady, getCameraErrorMessage } from "../utils/camera";
 
 interface AITrainerProps {
   exercise: ExerciseName;
@@ -125,8 +126,10 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
 
     const setupCameraAndPose = async () => {
       try {
+        await ensureCameraReady({ probe: true, constraints: { video: true } });
+
         // [수정] setFeedbackMessage를 props에서 직접 가져오지 않고 ref를 통해 호출
-        propsAndStateRef.current.setFeedbackMessage("AI 모델 로딩 중... (1/4)");
+        propsAndStateRef.current.setFeedbackMessage("AI 모델 로딩 중");
         await Promise.all([
           loadScript(CDN.cam),
           loadScript(CDN.draw),
@@ -145,9 +148,7 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           throw new Error("HTML 요소를 찾을 수 없습니다.");
         if (!isActive) return;
 
-        propsAndStateRef.current.setFeedbackMessage(
-          "AI 모델 초기화 중... (2/4)"
-        );
+        propsAndStateRef.current.setFeedbackMessage("AI 모델 초기화 중");
         const pose = new Pose({
           locateFile: (f: string) =>
             `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`,
@@ -257,7 +258,7 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           }
         });
 
-        propsAndStateRef.current.setFeedbackMessage("카메라 설정 중... (3/4)");
+        propsAndStateRef.current.setFeedbackMessage("카메라 설정 중");
         if (!videoRef.current || !isActive) return;
 
         cameraRef.current = new Camera(videoRef.current, {
@@ -273,15 +274,22 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           height: 720,
         });
 
-        propsAndStateRef.current.setFeedbackMessage("카메라 시작 중... (4/4)");
-        await cameraRef.current.start();
-      } catch (err) {
-        console.error("❌ 카메라 또는 AI 설정 실패:", err);
+        try {
+          propsAndStateRef.current.setFeedbackMessage("카메라 시작 중");
+          await cameraRef.current.start();
+        } catch (e) {
+          const msg = getCameraErrorMessage(e);
+          propsAndStateRef.current.setFeedbackMessage(`❌ ${msg}`);
+          return;
+        }
+      } catch (e) {
+        const msg = getCameraErrorMessage(e);
+        console.error("❌ 카메라 또는 AI 설정 실패:", msg);
 
         // [수정] err 타입 에러 해결
         let errorMessage = "알 수 없는 오류가 발생했습니다.";
-        if (err instanceof Error) {
-          errorMessage = err.message;
+        if (e instanceof Error) {
+          errorMessage = e.message;
         }
         propsAndStateRef.current.setFeedbackMessage(
           `❌ 카메라/AI 초기화 실패: ${errorMessage}`
