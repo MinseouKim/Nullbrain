@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import dummy from "../datas/dummydata.json"; // ✅ 더미데이터 import
 
 // ✅ 테스트 모드 전환
-const isTestMode = true;
+const isTestMode = false;
 
 const Page = styled.div`
   width: 100%;
