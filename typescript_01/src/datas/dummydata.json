@@ -1,0 +1,40 @@
+{
+  "workoutPlan": {
+    "name": "스쿼트",
+    "reps": 10,
+    "sets": 3,
+    "category": "하체"
+  },
+  "performanceData": {
+    "finalTime": "2:34",
+    "allSetResults": [
+      {
+        "setNumber": 1,
+        "aiFeedback": "무릎이 살짝 앞으로 나가요. 중심을 뒤로 유지하세요.",
+        "stats": { "accuracy": 88, "calories": 12 },
+        "analysisData": { "운동 가동범위": "적절", "좌우 대칭성": "양호" }
+      },
+      {
+        "setNumber": 2,
+        "aiFeedback": "좋아요! 허리 라인이 안정적입니다.",
+        "stats": { "accuracy": 92, "calories": 15 },
+        "analysisData": { "운동 가동범위": "좋음", "좌우 대칭성": "균형" }
+      },
+      {
+        "setNumber": 3,
+        "aiFeedback": "전반적으로 훌륭하지만 마지막에 살짝 피로감이 느껴집니다.",
+        "stats": { "accuracy": 85, "calories": 14 },
+        "analysisData": { "운동 가동범위": "부족", "좌우 대칭성": "불균형" }
+      }
+    ]
+  },
+  "overallFeedback": {
+    "overall_feedback": "전체적으로 좋은 자세와 리듬을 유지했습니다. 후반 피로 시에도 자세가 무너지지 않도록 주의하세요.",
+    "summary_accuracy": 88,
+    "improvement_tips": [
+      "복부에 긴장을 유지하세요.",
+      "무릎이 안쪽으로 모이지 않게 주의하세요.",
+      "세트 후반에도 자세를 끝까지 유지하세요."
+    ]
+  }
+}

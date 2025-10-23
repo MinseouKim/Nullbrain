@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
 interface WorkoutSetupModalProps {
   isOpen: boolean;
   onClose: () => void;
   onStartWorkout: (exerciseData: {
-    name: string;
+    name: string; // 사용자가 입력한 이름 ("스쿼트") 그대로 전달
     reps: number;
     sets: number;
     category: string;
@@ -24,7 +24,6 @@ interface ExerciseCategory {
   exercises: Exercise[];
 }
 
-// Styled Components
 const ModalOverlay = styled.div<{ isOpen: boolean }>`
   position: fixed;
   top: 0;
@@ -110,6 +109,7 @@ const ExerciseSetup = styled.div`
   border: 1px solid #e9ecef;
 `;
 
+// [원복] ExerciseTitle을 다시 ExerciseName으로
 const ExerciseName = styled.h3`
   font-size: 25px;
   font-weight: 600;
@@ -187,198 +187,6 @@ const MultiplySign = styled.span`
   margin: 0 10px;
 `;
 
-const RestTimeSection = styled.div`
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #e9ecef;
-`;
-
-const RestTimeLabel = styled.h4`
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
-  text-align: center;
-`;
-
-const RestTimeHorizontalContainer = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 20px;
-  justify-content: space-between;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  }
-`;
-
-const RestTimeInputContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-`;
-
-const TimeInputWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-`;
-
-const TimeDropdownButton = styled.button`
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #666;
-  transition: background-color 0.2s ease, border-color 0.2s ease,
-    color 0.2s ease;
-  min-width: 40px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  outline: none;
-
-  &:hover {
-    background: #e9ecef;
-    border-color: #850000;
-    color: #850000;
-  }
-
-  &:active {
-    background: #e9ecef;
-    border-color: #850000;
-    color: #850000;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const TimeDropdown = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  max-height: 160px;
-  overflow-y: auto;
-  margin-top: 4px;
-  transform: translateZ(0);
-  will-change: auto;
-
-  /* 스크롤바 스타일링 */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-  }
-`;
-
-const TimeDropdownOption = styled.div<{ isSelected: boolean }>`
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  color: ${(props) => (props.isSelected ? "#850000" : "#666")};
-  background-color: ${(props) => (props.isSelected ? "#f8f9fa" : "white")};
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  transform: translateZ(0);
-
-  &:hover {
-    background-color: #f8f9fa;
-    color: #850000;
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-`;
-
-const TimeUnit = styled.span`
-  font-size: 16px;
-  font-weight: 500;
-  color: #666;
-`;
-
-const RestTimeQuickSelect = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  flex: 2;
-`;
-
-const RestTimeSelectBox = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 12px;
-  background-color: #f8f9fa;
-  max-width: 100%;
-`;
-
-const RestTimeOption = styled.div<{ isSelected: boolean }>`
-  padding: 10px 8px;
-  border: 2px solid ${(props) => (props.isSelected ? "#850000" : "transparent")};
-  border-radius: 8px;
-  background-color: ${(props) => (props.isSelected ? "#850000" : "white")};
-  color: ${(props) => (props.isSelected ? "white" : "#666")};
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-  box-shadow: ${(props) =>
-    props.isSelected
-      ? "0 2px 4px rgba(133, 0, 0, 0.2)"
-      : "0 1px 2px rgba(0, 0, 0, 0.1)"};
-
-  &:hover {
-    border-color: #850000;
-    background-color: ${(props) => (props.isSelected ? "#850000" : "#f8f9fa")};
-    color: ${(props) => (props.isSelected ? "white" : "#850000")};
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(133, 0, 0, 0.2);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 768px) {
-    padding: 8px 6px;
-    font-size: 12px;
-  }
-`;
-
 const AdditionalInfo = styled.div`
   background-color: #fff3cd;
   border: 1px solid #ffeaa7;
@@ -425,7 +233,7 @@ const Button = styled.button<{ variant?: "primary" | "secondary" }>`
       ? `
     background-color: #850000;
     color: white;
-    
+
     &:hover {
       background-color: #6b0000;
       transform: translateY(-2px);
@@ -436,7 +244,7 @@ const Button = styled.button<{ variant?: "primary" | "secondary" }>`
     background-color: transparent;
     color: #850000;
     border: 2px solid #850000;
-    
+
     &:hover {
       background-color: #850000;
       color: white;
@@ -450,6 +258,7 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
   onClose,
   onStartWorkout,
 }) => {
+  // [원복] exerciseCategories 배열을 다시 모달 내부에 하드코딩
   const exerciseCategories: ExerciseCategory[] = [
     {
       name: "하체",
@@ -529,6 +338,7 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
     },
   ];
 
+  // [원복] state가 Exercise 객체 전체를 참조하도록
   const [selectedExercise, setSelectedExercise] = useState<Exercise>(
     exerciseCategories[0].exercises[0]
   );
@@ -539,9 +349,10 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
     exerciseCategories[0].exercises[0].defaultSets
   );
 
+  // [원복] handleStartWorkout이 입력된 name을 그대로 전달
   const handleStartWorkout = () => {
     onStartWorkout({
-      name: selectedExercise.name,
+      name: selectedExercise.name, // 사용자가 입력/선택한 이름 그대로 전달
       reps,
       sets,
       category: selectedExercise.category,
@@ -549,12 +360,10 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
   };
 
   const handleViewPose = () => {
-    // 운동 자세 보기 기능 (추후 구현)
     alert("운동 자세 보기 기능은 추후 구현됩니다.");
   };
 
   if (!isOpen) return null;
-
 
   return (
     <ModalOverlay isOpen={isOpen} onClick={onClose}>
@@ -573,17 +382,17 @@ const WorkoutSetupModal: React.FC<WorkoutSetupModalProps> = ({
           <InputRow>
             <InputContainer>
               <InputLabel>운동명</InputLabel>
+              {/* [원복] 다시 NumberInput type="text" 사용 */}
               <NumberInput
                 type="text"
-                value={selectedExercise.name}
+                value={selectedExercise.name} // selectedExercise 객체의 name 사용
                 onChange={(e) =>
                   setSelectedExercise({
                     ...selectedExercise,
-                    name: e.target.value,
+                    name: e.target.value, // 입력값을 바로 name에 반영
                   })
                 }
                 placeholder="운동명 입력"
-                style={{ width: "120px" }}
               />
             </InputContainer>
             <MultiplySign>×</MultiplySign>
