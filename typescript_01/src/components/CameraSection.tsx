@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import styled from "styled-components";
 import AITrainer from "./AITrainer";
 import { Landmark } from "../types/Landmark";
 import { useNavigate } from "react-router-dom";
 import { ExerciseName } from "../types/ExerciseTypes";
 import { exerciseForAI } from "../utils/exerciseMapper";
+import { AuthContext } from "../context/AuthContext";
 
 interface CameraSectionProps {
   workoutData?: {
@@ -98,6 +99,8 @@ const CameraSection: React.FC<CameraSectionProps> = ({
   totalSets,
   onAdvanceSet,
 }) => {
+  const { user } = useContext(AuthContext); // ✅ 추가
+  const userId = user?.id ?? "dev-user-01";
   const navigate = useNavigate();
   const [allSetResults, setAllSetResults] = useState<any[]>([]);
   const [feedbackMessage, setFeedbackMessage] =
@@ -136,6 +139,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          userId,
           exercise: data.exerciseName, // AITrainer가 넘겨준 ID("squat")
           rep_count: data.repCount,
           analysis_data: data.landmarkHistory,

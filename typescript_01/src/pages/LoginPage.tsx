@@ -18,7 +18,7 @@ const LoginBox = styled.div`
   background: #fff;
   padding: 48px 36px;
   border-radius: 20px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -64,7 +64,7 @@ const LoginButton = styled.button`
 
 const users = [
   { id: "admin", pw: "123", role: "admin" },
-  { id: "asd", pw: "456", role: "user" }
+  { id: "asd", pw: "456", role: "user" },
 ];
 
 const LoginPage: React.FC = () => {
@@ -72,14 +72,15 @@ const LoginPage: React.FC = () => {
   const [pw, setPw] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); 
+  const { login } = useContext(AuthContext);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const user = users.find(u => u.id === email && u.pw === pw);
+    const user = users.find((u) => u.id === email && u.pw === pw);
     if (user) {
       setError("");
-      login();
+      // ✅ userId를 Context에 저장 (localStorage에도 저장)
+      login({ id: user.id, role: user.role });
       navigate("/"); // 로그인 성공 시 홈으로 이동
     } else {
       setError("아이디 또는 비밀번호가 올바르지 않습니다.");
@@ -88,31 +89,31 @@ const LoginPage: React.FC = () => {
 
   return (
     <>
-    <Header/>
-    <LoginContainer>
-      <LoginBox>
-        <Title>로그인</Title>
-        <form onSubmit={handleLogin}>
-          <Input
-            type="text"
-            placeholder="아이디"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="비밀번호"
-            value={pw}
-            onChange={e => setPw(e.target.value)}
-            required
-          />
-          <LoginButton type="submit">로그인</LoginButton>
-        </form>
-        {error && <div style={{ color: "#c00", marginTop: 12 }}>{error}</div>}
-      </LoginBox>
-    </LoginContainer>
-    <Footer/>
+      <Header />
+      <LoginContainer>
+        <LoginBox>
+          <Title>로그인</Title>
+          <form onSubmit={handleLogin}>
+            <Input
+              type="text"
+              placeholder="아이디"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="비밀번호"
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              required
+            />
+            <LoginButton type="submit">로그인</LoginButton>
+          </form>
+          {error && <div style={{ color: "#c00", marginTop: 12 }}>{error}</div>}
+        </LoginBox>
+      </LoginContainer>
+      <Footer />
     </>
   );
 };

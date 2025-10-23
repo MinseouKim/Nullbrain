@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -27,7 +28,6 @@ const poseImageMap: Record<StepId, string | string[]> = {
   done: "/images/전신_정면.png",
 };
 
-
 // --- 스타일 컴포넌트 (기존과 동일) ---
 const MainLayoutContainer = styled.div`
   min-height: 100vh;
@@ -52,24 +52,24 @@ const MainContent = styled.main`
   gap: 20px;
 `;
 const FeedbackBox = styled.div`
-    background: #f8f9fa;
-    border-radius: 16px;
-    padding: 24px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
 `;
 const CameraWrapper = styled.div`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 `;
 const Sidebar = styled.aside`
   width: 350px;
@@ -83,17 +83,19 @@ const Sidebar = styled.aside`
   flex-shrink: 0;
 `;
 const EndAnalysisButton = styled.button`
-    background-color: #850000;
-    color: white;
-    border: none;
-    padding: 25px 30px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 20px;
-    font-weight: 700;
-    min-height: 80px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    &:hover { background-color: #6b0000; }
+  background-color: #850000;
+  color: white;
+  border: none;
+  padding: 25px 30px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 700;
+  min-height: 80px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  &:hover {
+    background-color: #6b0000;
+  }
 `;
 const ControlBox = styled.div`
   display: flex;
@@ -128,31 +130,44 @@ const GuideBox = styled.div`
   }
 `;
 const InfoBox = styled.div`
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 16px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    position: relative;
-    overflow: hidden;
-    &::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #850000 0%, #ff6b6b 100%);
-    }
-    h3 { margin: 0 0 15px 0; font-size: 16px; color: #850000; }
-    ul { margin: 0; padding-left: 0; list-style: none; font-size: 14px; color: #666; line-height: 1.6; }
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #850000 0%, #ff6b6b 100%);
+  }
+  h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #850000;
+  }
+  ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+  }
 `;
 const PoseImage = styled.img`
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 `;
 const ActionButton = styled.button<{ isStopped?: boolean }>`
   margin-top: auto;
@@ -203,19 +218,40 @@ const HiddenCheckbox = styled.input.attrs({ type: "checkbox" })`
   height: 0;
 `;
 const SliderSpan = styled.span`
-  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc; transition: 0.4s; border-radius: 34px;
-  &:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: 0.4s; border-radius: 50%; }
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+  &:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
 `;
 const StyledToggleSwitch = styled.div`
-  ${HiddenCheckbox}:checked + ${SliderSpan} { background-color: #850000; }
-  ${HiddenCheckbox}:checked + ${SliderSpan}:before { transform: translateX(26px); }
+  ${HiddenCheckbox}:checked + ${SliderSpan} {
+    background-color: #850000;
+  }
+  ${HiddenCheckbox}:checked + ${SliderSpan}:before {
+    transform: translateX(26px);
+  }
 `;
 const ControlRow = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
 `;
 
 const BodyAnalysis: React.FC = () => {
@@ -229,10 +265,13 @@ const BodyAnalysis: React.FC = () => {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const navigate = useNavigate();
 
+  const { user } = useContext(AuthContext);
+  const userId = user?.id ?? "dev-user-01";
+
   // 현재 측정 단계를 저장하기 위한 state
-  const [currentStepId, setCurrentStepId] = useState<StepId>('full');
-  
-  const [currentPoseImage, setCurrentPoseImage] = useState<string>('');
+  const [currentStepId, setCurrentStepId] = useState<StepId>("full");
+
+  const [currentPoseImage, setCurrentPoseImage] = useState<string>("");
   useEffect(() => {
     const imagePaths = poseImageMap[currentStepId];
     let intervalId: NodeJS.Timeout | null = null;
@@ -241,12 +280,12 @@ const BodyAnalysis: React.FC = () => {
       // 이미지가 배열인 경우 (neck_rom)
       let imageIndex = 0;
       setCurrentPoseImage(imagePaths[imageIndex]); // 첫 이미지로 즉시 설정
-      
+
       intervalId = setInterval(() => {
         imageIndex = (imageIndex + 1) % imagePaths.length;
         setCurrentPoseImage(imagePaths[imageIndex]);
       }, 2000); // 2초 간격
-    } else if (typeof imagePaths === 'string') {
+    } else if (typeof imagePaths === "string") {
       // 이미지가 단일 문자열인 경우
       setCurrentPoseImage(imagePaths);
     }
@@ -270,11 +309,11 @@ const BodyAnalysis: React.FC = () => {
   const handleEndAnalysis = () => {
     setResult(null);
     setSavedId(null);
-    navigate('/main');
+    navigate("/main");
   };
-  
+
   const handleNavigateToWorkout = () => {
-    navigate('/workout-items');
+    navigate("/workout-items");
   };
 
   // MeasureOrchestrator로부터 단계 변경 신호를 받아 state를 업데이트하는 함수
@@ -287,11 +326,13 @@ const BodyAnalysis: React.FC = () => {
     setSaving(true);
     try {
       const payload = {
+        userId,
         version: 2,
         body: { height_cm: heightCm },
         measures: result,
       };
-      const base = (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:8000";
+      const base =
+        (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:8000";
       const res = await fetch(`${base}/api/profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -344,7 +385,7 @@ const BodyAnalysis: React.FC = () => {
                   <ToggleSwitchLabel>
                     <HiddenCheckbox
                       checked={isVoiceOn}
-                      onChange={() => alert('미구현 서비스입니다.')}
+                      onChange={() => alert("미구현 서비스입니다.")}
                     />
                     <SliderSpan />
                   </ToggleSwitchLabel>
@@ -360,12 +401,9 @@ const BodyAnalysis: React.FC = () => {
               </ul>
             </InfoBox>
             <InfoBox style={{ flex: 1 }}>
-              <PoseImage
-                src={currentPoseImage}
-                alt="분석 자세 가이드"
-              />
+              <PoseImage src={currentPoseImage} alt="분석 자세 가이드" />
             </InfoBox>
-{/*       
+            {/*       
       <SaveButton onClick={saveProfile} disabled={!result || saving}>
               {saving ? "저장 중..." : "프로필 저장하기"}
             </SaveButton>
@@ -385,15 +423,20 @@ const BodyAnalysis: React.FC = () => {
               }}
               disabled={!result || saving}
             >
-              {saving ? "저장 중..." : (result ? "프로필 저장하기" : "측정 진행 중…")}
+              {saving
+                ? "저장 중..."
+                : result
+                ? "프로필 저장하기"
+                : "측정 진행 중…"}
             </ActionButton>
 
             {result && !savedId && (
-              <p style={{ margin: "8px 0 0", color: "#198754", fontWeight: 600 }}>
+              <p
+                style={{ margin: "8px 0 0", color: "#198754", fontWeight: 600 }}
+              >
                 측정 완료 ✅ — 결과 요약을 확인하려면 버튼을 눌러주세요.
               </p>
             )}
-
 
             {savedId && (
               <p style={{ margin: 0, color: "#555" }}>
@@ -403,10 +446,7 @@ const BodyAnalysis: React.FC = () => {
           </Sidebar>
         </ContentContainer>
 
-        <BodyAnalysisModal
-          isOpen={openModal}
-          onStart={onStart}
-        />
+        <BodyAnalysisModal isOpen={openModal} onStart={onStart} />
 
         <CompletionModal
           isOpen={showCompletionModal}
