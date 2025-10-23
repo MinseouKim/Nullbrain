@@ -174,6 +174,9 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
 
           const lms = res.poseLandmarks as Landmark[] | undefined;
           if (!lms) {
+            propsAndStateRef.current.setFeedbackMessage(
+              "카메라 안에 전신이 보이게 서주세요"
+            );
             drawMessage(ctx, "카메라 안에 전신이 보이게 서주세요");
             return;
           }
@@ -188,11 +191,14 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
               setTimeout(
                 () =>
                   propsAndStateRef.current.setFeedbackMessage(
-                    "운동을 시작하세요!"
+                    `${exercise}운동을 시작하세요!`
                   ),
                 1500
               );
             } else {
+              propsAndStateRef.current.setFeedbackMessage(
+                "전신이 화면에 들어오게 서주세요"
+              );
               drawMessage(ctx, "전신이 화면에 들어오게 서주세요");
               return;
             }
