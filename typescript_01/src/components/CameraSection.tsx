@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+// src/cameraPage/CameraSection.tsx
+import React, { useState, useEffect, useRef, useContext } from "react";
 import styled from "styled-components";
-import AITrainer from "./AITrainer";
+import AITrainer from "../components/AITrainer";
 import { Landmark } from "../types/Landmark";
 import { useNavigate } from "react-router-dom";
 import { ExerciseName } from "../types/ExerciseTypes";
 import { exerciseForAI } from "../utils/exerciseMapper";
+import { AuthContext } from "../context/AuthContext";
 
 interface CameraSectionProps {
   workoutData?: {
-    name: string; // 사용자가 입력한 이름 ("스쿼트")이 들어옴
+    name: string;
     reps: number;
     sets: number;
     category: string;
@@ -20,7 +22,6 @@ interface CameraSectionProps {
   onAdvanceSet?: () => void;
 }
 
-// ... (styled-components 코드는 이전과 동일) ...
 const CameraSectionContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -98,16 +99,19 @@ const CameraSection: React.FC<CameraSectionProps> = ({
   totalSets,
   onAdvanceSet,
 }) => {
+  const { user } = useContext(AuthContext);
+  const userId = user?.id ?? "dev-user-01";
   const navigate = useNavigate();
+
   const [allSetResults, setAllSetResults] = useState<any[]>([]);
   const [feedbackMessage, setFeedbackMessage] =
     useState("운동을 설정하고 시작해주세요!");
 
   const isProcessingSet = useRef(false);
+  const [feedbackLocked, setFeedbackLocked] = useState(false);
 
   useEffect(() => {
     if (workoutData) {
-      // workoutData.name은 사용자가 입력한 "스쿼트"
       setFeedbackMessage(`${workoutData.name} 운동을 시작합니다!`);
       setAllSetResults([]);
     } else {
@@ -117,11 +121,12 @@ const CameraSection: React.FC<CameraSectionProps> = ({
 
   useEffect(() => {
     isProcessingSet.current = false;
+    setFeedbackLocked(false); // 새 세트 들어오면 메시지 억제 해제
   }, [currentSet]);
 
   // ✅ 세트 완료 처리
   const handleSetComplete = async (data: {
-    exerciseName: ExerciseName; // 실제로는 "squat" 같은 ID가 AITrainer에서 옴
+    exerciseName: ExerciseName; // 영어 ID ("squat")
     landmarkHistory: Landmark[][];
     repCount: number;
     finalTime?: string;
@@ -130,22 +135,26 @@ const CameraSection: React.FC<CameraSectionProps> = ({
     isProcessingSet.current = true;
 
     try {
+      setFeedbackLocked(true);
       setFeedbackMessage("🤖 AI가 세트를 분석 중입니다...");
 
+      // 👇 한글명, 세트/타깃 포함해서 보냄
       const res = await fetch("http://localhost:8000/api/feedback/set", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          exercise: data.exerciseName, // AITrainer가 넘겨준 ID("squat")
+          userId, // 로그인한 사용자
+          exerciseId: data.exerciseName, // 내부 ID (영문)
+          exerciseName: workoutData?.name, // 표시명 (한글)
           rep_count: data.repCount,
-          analysis_data: data.landmarkHistory,
+          set_index: currentSet, // 1-based
+          total_sets: totalSets,
+          target_reps: targetReps,
+          analysis_data: data.landmarkHistory, // landmark history
         }),
       });
 
-      if (!res.ok) {
-        throw new Error(`AI 서버 오류: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`AI 서버 오류: ${res.status}`);
       const feedbackResult = await res.json();
       const feedbackText =
         feedbackResult.feedback || "AI 피드백을 불러올 수 없습니다.";
@@ -154,56 +163,41 @@ const CameraSection: React.FC<CameraSectionProps> = ({
         aiFeedback: feedbackText,
         stats: feedbackResult.stats || {},
         analysisData: feedbackResult.analysisData || {},
+        meta: {
+          setIndex: currentSet,
+          totalSets,
+          targetReps,
+          exerciseId: data.exerciseName,
+          exerciseName: workoutData?.name,
+        },
       };
+
       const combinedResults = [...allSetResults, newSet];
       setAllSetResults(combinedResults);
 
-      // --- 마지막 세트 처리 (AI 성공) ---
       if (currentSet >= totalSets) {
+        // ✅ 마지막 세트: 짧게 보여주고 곧바로 결과 페이지로 이동
         setFeedbackMessage(
-          "모든 운동을 완료하셨습니다. 결과페이지로 이동합니다."
+          `💬 ${feedbackText}\n✅ 모든 세트 완료! 결과 페이지로 이동합니다...`
         );
 
-        setTimeout(async () => {
-          try {
-            const overallRes = await fetch(
-              "http://localhost:8000/api/feedback/overall",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ set_results: combinedResults }),
-              }
-            );
-            const overall = await overallRes.json();
-            navigate("/result", {
-              state: {
-                workoutPlan: workoutData, // workoutData.name은 "스쿼트"
-                performanceData: {
-                  finalTime: data.finalTime,
-                  allSetResults: combinedResults,
-                  overallFeedback: overall,
-                },
+        setTimeout(() => {
+          navigate("/result", {
+            state: {
+              workoutPlan: workoutData,
+              performanceData: {
+                finalTime: data.finalTime,
+                allSetResults: combinedResults,
+                // overall은 결과 페이지에서 mount 시 비동기 호출
               },
-            });
-          } catch (overallErr) {
-            navigate("/result", {
-              state: {
-                workoutPlan: workoutData,
-                performanceData: {
-                  finalTime: data.finalTime,
-                  allSetResults: combinedResults,
-                  overallFeedback: { error: "전체 분석 실패" },
-                },
-              },
-            });
-          }
-        }, 2000);
+            },
+          });
+        }, 600); // ⏱ 600ms로 단축
       } else {
-        // --- 다음 세트 진행 ---
+        // 다음 세트로 자동 진행(기존 2초 유지)
         setFeedbackMessage(
           `💬 ${feedbackText}\n✅ ${currentSet}세트 완료! 다음 세트를 준비하세요.`
         );
-
         setTimeout(() => {
           onAdvanceSet?.();
           setFeedbackMessage(`${currentSet + 1}세트를 시작합니다!`);
@@ -211,14 +205,9 @@ const CameraSection: React.FC<CameraSectionProps> = ({
       }
     } catch (err) {
       console.error("❌ 세트 분석 실패:", err);
-
-      // --- 마지막 세트 처리 (AI 실패) ---
       if (currentSet >= totalSets) {
         setFeedbackMessage(
           "모든 운동을 완료하셨습니다. 결과페이지로 이동합니다."
-        );
-        console.log(
-          "AI 분석 실패. 마지막 세트이므로 결과 페이지로 이동합니다."
         );
         setTimeout(() => {
           navigate("/result", {
@@ -231,21 +220,22 @@ const CameraSection: React.FC<CameraSectionProps> = ({
               },
             },
           });
-        }, 2000);
+        }, 800);
       } else {
-        // --- 다음 세트 진행 (AI 실패) ---
         setFeedbackMessage("⚠️ AI 분석 실패. 다음 세트로 진행합니다.");
         setTimeout(() => {
           onAdvanceSet?.();
           setFeedbackMessage(
             `⚠️ AI 분석 오류. ${currentSet + 1}세트를 시작합니다!`
           );
-        }, 2000);
+        }, 1500);
       }
+    } finally {
+      setFeedbackLocked(false);
+      isProcessingSet.current = false;
     }
   };
 
-  // [원복] exerciseForAI 함수를 사용하는 부분 복구
   return (
     <CameraSectionContainer>
       <FeedbackSection>
@@ -255,7 +245,6 @@ const CameraSection: React.FC<CameraSectionProps> = ({
       <CameraContainer>
         {workoutData ? (
           <AITrainer
-            // [수정] workoutData.name("스쿼트")을 exerciseForAI로 변환하여 전달
             exercise={exerciseForAI(workoutData.name) as ExerciseName}
             isWorkoutPaused={isWorkoutPaused}
             targetReps={targetReps}
@@ -263,6 +252,8 @@ const CameraSection: React.FC<CameraSectionProps> = ({
             currentSet={currentSet}
             totalSets={totalSets}
             setFeedbackMessage={setFeedbackMessage}
+            suppressMessages={feedbackLocked} // ✅ 피드백 노출 중 덮어쓰기 방지
+            displayName={workoutData.name}
           />
         ) : (
           <CameraPlaceholder>

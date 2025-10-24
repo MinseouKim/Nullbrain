@@ -86,10 +86,6 @@ function Camera() {
         totalSets={workoutData?.sets ?? 0}
         // [수정] CameraSection이 요구하는 'onAdvanceSet' prop 전달
         onAdvanceSet={handleAdvanceSet}
-
-        // [삭제] feedbackMessage 관련 props 전달 제거
-        // feedbackMessage={feedbackMessage}
-        // setFeedbackMessage={setFeedbackMessage}
       />
 
       {/* ⚙️ 운동 설정 모달 */}

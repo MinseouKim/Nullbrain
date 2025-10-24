@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Landmark } from "../types/Landmark";
 import { exerciseHandlers } from "../logic/ExerciseHandler";
 import { ExerciseName } from "../types/ExerciseTypes";
+import { ensureCameraReady, getCameraErrorMessage } from "../utils/camera";
 
 interface AITrainerProps {
   exercise: ExerciseName;
@@ -17,6 +18,8 @@ interface AITrainerProps {
     finalTime?: string;
   }) => Promise<void>;
   setFeedbackMessage: (msg: string) => void;
+  suppressMessages?: boolean; // 부모가 피드백 띄우는 동안 메시지 억제
+  displayName?: string;
 }
 
 const CDN = {
@@ -26,7 +29,6 @@ const CDN = {
 };
 
 const AITrainer: React.FC<AITrainerProps> = (props) => {
-  // [수정] props를 구조분해하지 않고 props 객체 자체를 사용
   const { currentSet, exercise } = props;
 
   const [repCount, setRepCount] = useState(0);
@@ -38,29 +40,35 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
   const stage = useRef<"up" | "down">("up");
   const landmarkHistory = useRef<Landmark[][]>([]);
 
-  // [핵심 수정]
-  // onResults 콜백은 한 번만 생성되므로,
-  // 콜백 내부에서 항상 최신 props와 state를 참조할 수 있도록 ref를 사용합니다.
+  // 최신 props/state 참조용
   const propsAndStateRef = useRef({ ...props, repCount });
-
-  // 렌더링될 때마다 ref의 값을 최신 props와 state로 업데이트
   useEffect(() => {
     propsAndStateRef.current = { ...props, repCount };
   }, [props, repCount]);
 
   const startTimeRef = useRef<number | null>(null);
-  const hasFullBodyRef = useRef(false);
+  const hasFullBodyRef = useRef(false); // 세트별로 동작 판별 허용
+  const shownFullBodyMessageRef = useRef(false); // ✅ “전신 인식 완료” 문구는 최초 1회만
   const lastSavedTimeRef = useRef<number>(0);
   const isSetProcessing = useRef(false);
 
-  // 세트가 변경될 때마다 카메라 재시작 없이 상태만 초기화
+  // 부모 메시지에 안전하게 전달
+  const setMsgSafe = (msg: string) => {
+    const { suppressMessages, setFeedbackMessage } = propsAndStateRef.current;
+    if (!isSetProcessing.current && !suppressMessages) {
+      setFeedbackMessage(msg);
+    }
+  };
+
+  // 세트가 변경되면 카운트/버퍼만 초기화 (전신 인식 안내 문구는 최초 1회만)
   useEffect(() => {
     setRepCount(0);
     stage.current = "up";
     landmarkHistory.current = [];
     startTimeRef.current = null;
     isSetProcessing.current = false;
-    hasFullBodyRef.current = false;
+    hasFullBodyRef.current = false; // 세트별 감지를 위해 false로
+    // shownFullBodyMessageRef는 유지 → 안내 문구는 최초 1회만 노출
   }, [currentSet, exercise]);
 
   const loadScript = (src: string) =>
@@ -119,14 +127,14 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
     ctx.restore();
   };
 
-  // 카메라 설정 useEffect (운동이 바뀔 때만 실행)
   useEffect(() => {
     let isActive = true;
 
     const setupCameraAndPose = async () => {
       try {
-        // [수정] setFeedbackMessage를 props에서 직접 가져오지 않고 ref를 통해 호출
-        propsAndStateRef.current.setFeedbackMessage("AI 모델 로딩 중... (1/4)");
+        await ensureCameraReady({ probe: true, constraints: { video: true } });
+
+        setMsgSafe("AI 모델 로딩 중");
         await Promise.all([
           loadScript(CDN.cam),
           loadScript(CDN.draw),
@@ -145,9 +153,7 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           throw new Error("HTML 요소를 찾을 수 없습니다.");
         if (!isActive) return;
 
-        propsAndStateRef.current.setFeedbackMessage(
-          "AI 모델 초기화 중... (2/4)"
-        );
+        setMsgSafe("AI 모델 초기화 중");
         const pose = new Pose({
           locateFile: (f: string) =>
             `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`,
@@ -173,6 +179,7 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
 
           const lms = res.poseLandmarks as Landmark[] | undefined;
           if (!lms) {
+            setMsgSafe("카메라 안에 전신이 보이게 서주세요");
             drawMessage(ctx, "카메라 안에 전신이 보이게 서주세요");
             return;
           }
@@ -181,17 +188,18 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
             const visible = isFullBodyVisible(lms);
             if (visible) {
               hasFullBodyRef.current = true;
-              propsAndStateRef.current.setFeedbackMessage(
-                "✅ 전신 인식 완료! 세트를 시작합니다!"
-              );
-              setTimeout(
-                () =>
-                  propsAndStateRef.current.setFeedbackMessage(
-                    "운동을 시작하세요!"
-                  ),
-                1500
-              );
+              // ✅ “전신 인식 완료” 문구는 최초 1회만
+              if (!shownFullBodyMessageRef.current) {
+                shownFullBodyMessageRef.current = true;
+                setMsgSafe("✅ 전신 인식 완료! 세트를 시작합니다!");
+                const nameForUI = propsAndStateRef.current.displayName;
+                setTimeout(
+                  () => setMsgSafe(`${nameForUI} 운동을 시작하세요!`),
+                  1500
+                );
+              }
             } else {
+              setMsgSafe("전신이 화면에 들어오게 서주세요");
               drawMessage(ctx, "전신이 화면에 들어오게 서주세요");
               return;
             }
@@ -205,7 +213,6 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
 
           const now = Date.now();
 
-          // [핵심 수정] 모든 변수를 propsAndStateRef.current에서 읽어옴
           const { isWorkoutPaused, targetReps, repCount, exercise } =
             propsAndStateRef.current;
 
@@ -225,15 +232,13 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
               handler(lms, stage, () => {
                 if (isSetProcessing.current) return;
 
-                // [핵심 수정] 횟수도 ref에서 직접 읽어옴
                 const currentRepCount = propsAndStateRef.current.repCount;
                 const targetRepCount = propsAndStateRef.current.targetReps;
-
                 const next = currentRepCount + 1;
 
                 if (next >= targetRepCount) {
                   isSetProcessing.current = true;
-                  setRepCount(targetRepCount); // UI 업데이트
+                  setRepCount(targetRepCount);
 
                   const end = Date.now();
                   const elapsed = startTimeRef.current
@@ -241,7 +246,6 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
                     : "0";
 
                   setTimeout(() => {
-                    // [핵심 수정] onSetComplete도 ref에서 호출
                     propsAndStateRef.current.onSetComplete({
                       exerciseName: propsAndStateRef.current.exercise,
                       landmarkHistory: landmarkHistory.current,
@@ -250,17 +254,17 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
                     });
                   }, 200);
                 } else {
-                  setRepCount(next); // UI 업데이트
+                  setRepCount(next);
                 }
               });
             }
           }
         });
 
-        propsAndStateRef.current.setFeedbackMessage("카메라 설정 중... (3/4)");
+        setMsgSafe("카메라 설정 중");
         if (!videoRef.current || !isActive) return;
 
-        cameraRef.current = new Camera(videoRef.current, {
+        cameraRef.current = new (window as any).Camera(videoRef.current, {
           onFrame: async () => {
             if (!isActive || !videoRef.current || !poseRef.current) return;
             try {
@@ -273,23 +277,24 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           height: 720,
         });
 
-        propsAndStateRef.current.setFeedbackMessage("카메라 시작 중... (4/4)");
-        await cameraRef.current.start();
-      } catch (err) {
-        console.error("❌ 카메라 또는 AI 설정 실패:", err);
-
-        // [수정] err 타입 에러 해결
-        let errorMessage = "알 수 없는 오류가 발생했습니다.";
-        if (err instanceof Error) {
-          errorMessage = err.message;
+        try {
+          setMsgSafe("카메라 시작 중");
+          await cameraRef.current.start();
+        } catch (e) {
+          const msg = getCameraErrorMessage(e);
+          setMsgSafe(`❌ ${msg}`);
+          return;
         }
-        propsAndStateRef.current.setFeedbackMessage(
-          `❌ 카메라/AI 초기화 실패: ${errorMessage}`
-        );
+      } catch (e) {
+        const msg = getCameraErrorMessage(e);
+        console.error("❌ 카메라 또는 AI 설정 실패:", msg);
+        let errorMessage = "알 수 없는 오류가 발생했습니다.";
+        if (e instanceof Error) errorMessage = e.message;
+        setMsgSafe(`❌ 카메라/AI 초기화 실패: ${errorMessage}`);
       }
     };
 
-    setupCameraAndPose(); // 설정 함수 실행
+    setupCameraAndPose();
 
     return () => {
       isActive = false;
@@ -306,7 +311,7 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
       ms?.getTracks().forEach((t) => t.stop());
       if (vd) vd.srcObject = null;
     };
-  }, [exercise]); // 운동이 바뀔 때만 카메라/AI 재설정
+  }, [exercise]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -347,7 +352,6 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           fontWeight: "bold",
         }}
       >
-        {/* [수정] 표시되는 횟수도 props에서 직접 받도록 변경 */}
         {`Set ${props.currentSet} / ${props.totalSets} | Reps ${repCount} / ${props.targetReps}`}
       </p>
     </div>
