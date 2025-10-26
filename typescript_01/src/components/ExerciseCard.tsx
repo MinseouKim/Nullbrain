@@ -25,7 +25,7 @@ const Card = styled.div`
 // 이미지 영역 (실제 이미지 렌더링)
 const CardImage = styled.img`
   width: 100%;
-  height: 200px;
+  height: 250px;
   object-fit: cover;
   display: block;
   background-color: #ddd;

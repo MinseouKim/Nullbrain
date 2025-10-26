@@ -13,10 +13,13 @@ const SignUpPage = lazy(() => import("../pages/SignUpPage"));
 const AdminPage = lazy(() => import("../pages/AdminPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const MyPage = lazy(() => import("../pages/MyPage"));
+const ReviewPage = lazy(() => import("../pages/ReviewPage"));
 
 const Routers = (props: any) => {
   return (
-    <Suspense fallback={<LoadingPage />}> {/* 로딩페이지 적용 */}
+    <Suspense fallback={<LoadingPage />}>
+      {" "}
+      {/* 로딩페이지 적용 */}
       <Routes>
         <Route path="/" element={<Navigate replace to="/main" {...props} />} />
         <Route path="main" element={<MainPage {...props} />} />
@@ -28,8 +31,9 @@ const Routers = (props: any) => {
         <Route path="login" element={<LoginPage {...props} />} />
         <Route path="signUp" element={<SignUpPage {...props} />} />
         <Route path="admin" element={<AdminPage {...props} />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="review" element={<ReviewPage {...props} />} />
         <Route path="mypage" element={<MyPage {...props} />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );
