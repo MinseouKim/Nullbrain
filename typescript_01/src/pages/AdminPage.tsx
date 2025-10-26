@@ -15,6 +15,7 @@ const PageSections = [
       { path: "/bodyAnalysis", label: "신체 분석 카메라" },
       { path: "/bodyTypeResult", label: "체형 결과" },
       { path: "/result", label: "운동 결과" },
+      { path: "/review", label: "후기 페이지" },
     ],
   },
   {
@@ -97,28 +98,30 @@ const AdminPage: React.FC = () => {
 
   return (
     <>
-    <Header/>
-    <AdminContainer>
-      <h2 style={{ color: "#860000", fontSize: "32px", marginBottom: "40px" }}>
-        관리자 페이지
-      </h2>
-      {PageSections.map(section => (
-        <SectionContainer key={section.title}>
-          <SectionTitle>{section.title}</SectionTitle>
-          <ButtonGrid>
-            {section.pages.map(page => (
-              <PageCard key={page.path}>
-                <PageButton onClick={() => navigate(page.path)}>
-                  {page.label}
-                </PageButton>
-                <PageLink>{page.path}</PageLink> {/* 링크 주소 표시 */}
-              </PageCard>
-            ))}
-          </ButtonGrid>
-        </SectionContainer>
-      ))}
-    </AdminContainer>
-    <Footer/>
+      <Header />
+      <AdminContainer>
+        <h2
+          style={{ color: "#860000", fontSize: "32px", marginBottom: "40px" }}
+        >
+          관리자 페이지
+        </h2>
+        {PageSections.map((section) => (
+          <SectionContainer key={section.title}>
+            <SectionTitle>{section.title}</SectionTitle>
+            <ButtonGrid>
+              {section.pages.map((page) => (
+                <PageCard key={page.path}>
+                  <PageButton onClick={() => navigate(page.path)}>
+                    {page.label}
+                  </PageButton>
+                  <PageLink>{page.path}</PageLink> {/* 링크 주소 표시 */}
+                </PageCard>
+              ))}
+            </ButtonGrid>
+          </SectionContainer>
+        ))}
+      </AdminContainer>
+      <Footer />
     </>
   );
 };
