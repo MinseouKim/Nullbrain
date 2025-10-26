@@ -14,12 +14,18 @@ import BodyAnalysisModal, {
 } from "../components/BodyAnalysisModal";
 import CompletionModal from "../components/CompletionModal";
 
+const PageGridContainer = styled.div`
+  display: grid;
+  grid-template-rows: auto 1fr auto; 
+  min-height: 100vh; 
+`;
+
 // --- 단계별 이미지 맵 ---
 const poseImageMap: Record<StepId, string | string[]> = {
   full: "/images/전신_정면.png",
   tpose: "/images/전면_T자세.png",
   side: "/images/전신_측면.png",
-  waist_flex: "/images/무릎.png", // <-- 허리굽힘 이미지로 수정해야함
+  waist_flex: "/images/허리.png",
   squat: "/images/전신_정면.png", // 이 줄이 누락되었습니다.
   elbow_flex: "/images/팔꿈치.png",
   shoulder_abd: "/images/팔올림.png",
@@ -28,20 +34,26 @@ const poseImageMap: Record<StepId, string | string[]> = {
 };
 
 
-// --- 스타일 컴포넌트 (기존과 동일) ---
+// --- 스타일 컴포넌트 ---
 const MainLayoutContainer = styled.div`
-  min-height: 100vh;
   background-color: white;
   color: #333;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    sans-serif;
+  sans-serif;
   display: flex;
-  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 `;
 const ContentContainer = styled.div`
   display: flex;
-  flex: 1;
+  flex: 1; /
   width: 100%;
+  min-height: 0; 
+  overflow: hidden;
+  @media (max-width: 768px) {
+    flex-direction: column; /* Stack vertically on tablets and smaller *
+    /* You might need height adjustments here too */
+  }
 `;
 const MainContent = styled.main`
   flex: 1;
@@ -49,27 +61,7 @@ const MainContent = styled.main`
   flex-direction: column;
   min-width: 0;
   padding: 20px;
-  gap: 20px;
-`;
-const FeedbackBox = styled.div`
-    background: #f8f9fa;
-    border-radius: 16px;
-    padding: 24px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-`;
-const CameraWrapper = styled.div`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  gap: 20px; /* Added gap */
 `;
 const Sidebar = styled.aside`
   width: 350px;
@@ -78,66 +70,77 @@ const Sidebar = styled.aside`
   border-left: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  overflow-y: auto;
+  justify-content: flex-start;
+  gap:17px;
+  height: calc(100vh - 160px);
   flex-shrink: 0;
+  box-sizing: border-box;
+  height: 750px;        
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e0e0e0;
+    height: auto;
+    padding: 15px;
+    min-height: 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+  }
 `;
+
+// Added FeedbackBox style
+const FeedbackBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 25px 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  min-height: 80px;
+
+  color: #333;
+  font-size: 22px;
+  font-weight: 700;
+`;
+
+const MeasureOrchestratorWrapper = styled.div`
+    flex: 1;
+    display: flex;
+    min-height: 0;
+`;
+
+
 const EndAnalysisButton = styled.button`
     background-color: #850000;
     color: white;
     border: none;
-    padding: 25px 30px;
+    padding: 15px 20px;
     border-radius: 12px;
     cursor: pointer;
     font-size: 20px;
     font-weight: 700;
-    min-height: 80px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     &:hover { background-color: #6b0000; }
 `;
-const ControlBox = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 20px;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-`;
-
-const GuideBox = styled.div`
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  h3 {
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    color: #850000;
-  }
-  ul {
-    margin: 0;
-    padding-left: 0;
-    list-style: none;
-    font-size: 14px;
-    color: #666;
-    line-height: 1.6;
-  }
-`;
 const InfoBox = styled.div`
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 12px;
+    padding: 15px 20px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
     border: 1px solid #e9ecef;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
     &::before {
         content: "";
         position: absolute;
@@ -145,15 +148,26 @@ const InfoBox = styled.div`
         height: 4px;
         background: linear-gradient(90deg, #850000 0%, #ff6b6b 100%);
     }
-    h3 { margin: 0 0 15px 0; font-size: 16px; color: #850000; }
-    ul { margin: 0; padding-left: 0; list-style: none; font-size: 14px; color: #666; line-height: 1.6; }
+    h3 { margin: 0 0 10px 0; font-size: 16px; color: #850000; }
+    ul { margin: 0; padding-left: 0; list-style: none; font-size: 14px; color: #666; line-height: 1.5; }
+    @media (max-width: 768px) {
+    padding: 12px 15px;
+    }
+
+    @media (max-width: 480px) {
+    padding: 10px;
+  }
 `;
 const PoseImage = styled.img`
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
+  width: 100%;
+  height: auto;
+  max-height: 200px; 
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
+  margin-top: 0px;
 `;
+
 const ActionButton = styled.button<{ isStopped?: boolean }>`
   margin-top: auto;
   background: ${(props) =>
@@ -162,16 +176,17 @@ const ActionButton = styled.button<{ isStopped?: boolean }>`
       : "linear-gradient(135deg, #850000 0%, #a00000 100%)"};
   color: white;
   border: none;
-  padding: 18px;
+  padding: 15px;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   transition: all 0.3s ease;
   box-shadow: ${(props) =>
     props.isStopped
       ? "0 6px 16px rgba(40, 167, 69, 0.3)"
       : "0 6px 16px rgba(133, 0, 0, 0.3)"};
+  flex-shrink: 0;
   &:hover:not(:disabled) {
     background: ${(props) =>
       props.isStopped
@@ -223,74 +238,39 @@ const BodyAnalysis: React.FC = () => {
   const [heightCm, setHeightCm] = useState<number>(175);
   const [isVoiceOn, setIsVoiceOn] = useState(true);
   const [result, setResult] = useState<MeasureResult | null>(null);
-
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const navigate = useNavigate();
-
-  // 현재 측정 단계를 저장하기 위한 state
   const [currentStepId, setCurrentStepId] = useState<StepId>('full');
-  
   const [currentPoseImage, setCurrentPoseImage] = useState<string>('');
+
   useEffect(() => {
     const imagePaths = poseImageMap[currentStepId];
     let intervalId: NodeJS.Timeout | null = null;
-
     if (Array.isArray(imagePaths)) {
-      // 이미지가 배열인 경우 (neck_rom)
       let imageIndex = 0;
-      setCurrentPoseImage(imagePaths[imageIndex]); // 첫 이미지로 즉시 설정
-      
+      setCurrentPoseImage(imagePaths[imageIndex]);
       intervalId = setInterval(() => {
         imageIndex = (imageIndex + 1) % imagePaths.length;
         setCurrentPoseImage(imagePaths[imageIndex]);
-      }, 2000); // 2초 간격
+      }, 2000);
     } else if (typeof imagePaths === 'string') {
-      // 이미지가 단일 문자열인 경우
       setCurrentPoseImage(imagePaths);
     }
+    return () => { if (intervalId) clearInterval(intervalId); };
+   }, [currentStepId]);
 
-    // currentStepId가 변경될 때 이전 interval을 정리합니다. (메모리 누수 방지)
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [currentStepId]);
-
-  // 결과 요약 모달
   const [resultModalOpen, setResultModalOpen] = useState(false);
-
-  const onStart = (data: BodyDataForStart) => {
-    setHeightCm(data.height);
-    setOpenModal(false);
-  };
-
-  const handleEndAnalysis = () => {
-    setResult(null);
-    setSavedId(null);
-    navigate('/main');
-  };
-  
-  const handleNavigateToWorkout = () => {
-    navigate('/workout-items');
-  };
-
-  // MeasureOrchestrator로부터 단계 변경 신호를 받아 state를 업데이트하는 함수
-  const handleStepChange = (stepId: StepId) => {
-    setCurrentStepId(stepId);
-  };
-
+  const onStart = (data: BodyDataForStart) => { setHeightCm(data.height); setOpenModal(false); };
+  const handleEndAnalysis = () => { setResult(null); setSavedId(null); navigate('/main'); };
+  const handleNavigateToWorkout = () => { navigate('/workout-items'); };
+  const handleStepChange = (stepId: StepId) => { setCurrentStepId(stepId); };
   const saveProfile = async () => {
     if (!result) return;
     setSaving(true);
     try {
-      const payload = {
-        version: 2,
-        body: { height_cm: heightCm },
-        measures: result,
-      };
+      const payload = { version: 2, body: { height_cm: heightCm }, measures: result };
       const base = (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:8000";
       const res = await fetch(`${base}/api/profile`, {
         method: "POST",
@@ -312,7 +292,6 @@ const BodyAnalysis: React.FC = () => {
       setSaving(false);
     }
   };
-
   const getFeedbackMessage = () => {
     if (result) {
       return "측정 완료! 결과를 확인하고 저장하세요.";
@@ -329,8 +308,16 @@ const BodyAnalysis: React.FC = () => {
       <MainLayoutContainer>
         <ContentContainer>
           <MainContent>
-            {/* ✅ 완료 후에도 화면 전환 없이 계속 카메라/측정 유지 */}
-            <MeasureOrchestrator heightCm={heightCm} onDone={setResult} />
+            <FeedbackBox>
+              {getFeedbackMessage()}
+            </FeedbackBox>
+            <MeasureOrchestratorWrapper>
+                <MeasureOrchestrator
+                  heightCm={heightCm}
+                  onDone={setResult}
+                  onStepChange={handleStepChange}
+                />
+            </MeasureOrchestratorWrapper>
           </MainContent>
 
           <Sidebar>
@@ -359,23 +346,13 @@ const BodyAnalysis: React.FC = () => {
                 <li>어두운 배경에 밝은 옷이 좋아요</li>
               </ul>
             </InfoBox>
-            <InfoBox style={{ flex: 1 }}>
+            <InfoBox style={{ flexGrow: 1, flexShrink: 1, minHeight: 0, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <PoseImage
                 src={currentPoseImage}
                 alt="분석 자세 가이드"
               />
             </InfoBox>
-{/*       
-      <SaveButton onClick={saveProfile} disabled={!result || saving}>
-              {saving ? "저장 중..." : "프로필 저장하기"}
-            </SaveButton>
-            {savedId && (
-              <p style={{ margin: 0, color: "#555" }}>
-                저장됨: <code>{savedId}</code>
-              </p>
-            )}
-          </Sidebar>
-           */}
+
             <ActionButton
               onClick={() => {
                 if (result) {
@@ -389,39 +366,21 @@ const BodyAnalysis: React.FC = () => {
             </ActionButton>
 
             {result && !savedId && (
-              <p style={{ margin: "8px 0 0", color: "#198754", fontWeight: 600 }}>
-                측정 완료 ✅ — 결과 요약을 확인하려면 버튼을 눌러주세요.
+              <p style={{ margin: "5px 0 0", color: "#198754", fontWeight: 600, fontSize: '13px', textAlign: 'center', flexShrink: 0 }}>
+                측정 완료 ✅ — 버튼을 눌러 저장/확인
               </p>
             )}
-
-
             {savedId && (
-              <p style={{ margin: 0, color: "#555" }}>
+              <p style={{ margin: "5px 0 0", color: "#555", fontSize: '13px', textAlign: 'center', flexShrink: 0 }}>
                 저장됨: <code>{savedId}</code>
               </p>
             )}
           </Sidebar>
         </ContentContainer>
-
-        <BodyAnalysisModal
-          isOpen={openModal}
-          onStart={onStart}
-        />
-
-        <CompletionModal
-          isOpen={showCompletionModal}
-          onNavigate={handleNavigateToWorkout}
-        />
+        <BodyAnalysisModal isOpen={openModal} onStart={onStart} />
+        <CompletionModal isOpen={showCompletionModal} onNavigate={handleNavigateToWorkout} />
       </MainLayoutContainer>
-
-      {/* 결과 요약 모달 */}
-      <ResultModal
-        open={resultModalOpen}
-        result={result}
-        onClose={() => setResultModalOpen(false)}
-        onSave={saveProfile}
-      />
-
+      <ResultModal open={resultModalOpen} result={result} onClose={() => setResultModalOpen(false)} onSave={saveProfile} />
       <Footer />
     </>
   );

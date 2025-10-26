@@ -8,18 +8,42 @@ const ModalOverlay = styled.div`
   background: rgba(0, 0, 0, 0.75);
   z-index: 1000;
   display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 20px;
+  overflow-y: auto; /* Allow scrolling if content is too tall */
+
+  justify-content: center;
+  align-items: center; 
+
+  /* Small screens only: Align to top */
+  @media (max-width: 768px)
+    align-items: flex-start; 
+  }
 `;
 const ModalContent = styled.form`
   background: #fff;
   padding: 30px 40px;
   border-radius: 20px;
   width: 100%;
-  max-width: 500px;
+  max-width: 500px; 
   position: relative;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  margin-top: 5vh; 
+  margin-bottom: 5vh; 
+  max-height: 90vh; 
+  overflow-y: auto; 
+
+
+  @media (max-width: 768px) 
+    max-width: 90%; 
+    padding: 25px 30px;
+  }
+
+  @media (max-width: 480px) { 
+    max-width: 95%; /
+    padding: 20px 15px; 
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+  }
 `;
 const BackButton = styled.button`
   position: absolute;
@@ -38,11 +62,20 @@ const BackButton = styled.button`
     color: #333;
     transform: scale(1.1);
   }
+  @media (max-width: 480px) {
+    font-size: 2rem; 
+    top: 10px; 
+    left: 15px;
+  }
 `;
 const Title = styled.h2`
   text-align: center;
   margin: 0 0 30px;
   color: #333;
+  @media (max-width: 480px) {
+    font-size: 1.3rem; 
+    margin-bottom: 20px; 
+  }
 `;
 const InputGroup = styled.div`
   margin-bottom: 20px;
@@ -52,6 +85,9 @@ const Label = styled.label`
   margin-bottom: 8px;
   font-weight: 600;
   color: #555;
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 const Input = styled.input`
   width: 100%;
@@ -63,6 +99,10 @@ const Input = styled.input`
     outline: none;
     border-color: #850000;
     box-shadow: 0 0 0 3px rgba(133, 0, 0, 0.1);
+  }
+  @media (max-width: 480px) {
+    padding: 10px 12px; 
+    font-size: 0.9rem;
   }
 `;
 const GenderSelector = styled.div`
@@ -81,6 +121,10 @@ const GenderButton = styled.button<{ $selected?: boolean }>`
   &:hover {
     border-color: #850000;
   }
+  @media (max-width: 480px) {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
 `;
 const StartButton = styled.button`
   width: 100%;
@@ -96,6 +140,10 @@ const StartButton = styled.button`
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(133, 0, 0, 0.3);
+  }
+  @media (max-width: 480px) {
+    padding: 12px;
+    font-size: 1rem;
   }
 `;
 
