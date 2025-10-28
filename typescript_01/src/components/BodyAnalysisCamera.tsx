@@ -303,7 +303,6 @@ const BodyAnalysisCamera: React.FC<Props> = ({
       <p
         style={{
           position: "absolute",
-<<<<<<< HEAD
           top: 10, 
           left: 10, 
           background: "rgba(0,0,0,0.7)",
@@ -313,16 +312,6 @@ const BodyAnalysisCamera: React.FC<Props> = ({
           fontSize: 18, 
           margin: 0,
 
-=======
-          top: 10,
-          left: 10,
-          background: "rgba(0,0,0,0.7)",
-          color: running ? "#0f0" : "#FFFF00",
-          padding: "10px",
-          borderRadius: 5,
-          fontSize: 18,
-          margin: 0,
->>>>>>> origin/main
         }}
       />
       <FeedbackOverlay $isRunning={running}>
