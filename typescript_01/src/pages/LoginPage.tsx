@@ -1,9 +1,19 @@
 import React, { useState, useContext, createContext } from "react";
-import styled from "styled-components";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import styled, { keyframes } from "styled-components";
 
-// --- Auth Context (Mocked) ---
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 const AuthContext = createContext({
   login: () => {},
 });
@@ -66,18 +76,19 @@ const SloganContainer = styled.div`
 
 const SloganTitle = styled.h1`
   font-size: 2.25rem;
-  line-height: 1.25;
-  font-weight: 300;
-  margin-bottom: 1rem;
-
-  @media (min-width: 768px) {
-    font-size: 3rem;
-  }
+  /* ... */
+  opacity: 0; 
+  animation: ${fadeInUp} 0.8s ease-out forwards;
+  animation-delay: 0.2s;
 `;
 
 const SloganSubtitle = styled.p`
   font-size: 3rem;
-  font-weight: 700;
+  /* ... */
+  opacity: 0;
+  animation: ${fadeInUp} 0.8s ease-out forwards;
+  animation-delay: 0.5s;
+
 
   @media (min-width: 768px) {
     font-size: 3.75rem;

@@ -161,9 +161,7 @@ const ExerciseModal = ({ isOpen, onClose, exercise }: ExerciseModalProps) => {
         
         <ImageSection>
           <h2>{exercise.name}</h2>
-          {/* ▼▼▼▼▼ [요청하신 수정 사항] ▼▼▼▼▼ */}
           <img src={exercise.modalImageUrl} alt={exercise.name} />
-          {/* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */}
         </ImageSection>
 
         <InfoSection>
