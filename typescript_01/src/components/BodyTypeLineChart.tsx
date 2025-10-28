@@ -4,7 +4,7 @@ import {
 } from "recharts";
 import styled from "styled-components";
 
-const SectionTitle= styled.h2`
+const SectionTitle= styled.h3`
   margin-bottom: 10px;
 `;
 
@@ -224,9 +224,9 @@ const BodyChart = () => {
         {/* 부위별 note */}
         <div style={{ flex: 1,}}>
           <SectionHeader>
-          <h3>{selected.name} 
-            </h3>
-            <h3 style={{color: "#860000"}}>{selected.value}점</h3>
+          <h4>{selected.name} 
+            </h4>
+            <h4 style={{color: "#860000"}}>{selected.value}점</h4>
           </SectionHeader>
           {Object.entries(selected.note).map(([part, text]) => (
             <div key={part} style={{

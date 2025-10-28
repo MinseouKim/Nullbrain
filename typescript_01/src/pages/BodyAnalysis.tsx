@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -26,7 +27,7 @@ const poseImageMap: Record<StepId, string | string[]> = {
   tpose: "/images/전면_T자세.png",
   side: "/images/전신_측면.png",
   waist_flex: "/images/허리.png",
-  squat: "/images/전신_정면.png", // 이 줄이 누락되었습니다.
+  squat: "/images/전신_정면.png",
   elbow_flex: "/images/팔꿈치.png",
   shoulder_abd: "/images/팔올림.png",
   neck_rom: ["/images/고개숙임.png", "/images/고개듦.png"],
@@ -36,6 +37,7 @@ const poseImageMap: Record<StepId, string | string[]> = {
 
 // --- 스타일 컴포넌트 ---
 const MainLayoutContainer = styled.div`
+  min-height: 100vh;
   background-color: white;
   color: #333;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
@@ -61,7 +63,7 @@ const MainContent = styled.main`
   flex-direction: column;
   min-width: 0;
   padding: 20px;
-  gap: 20px; /* Added gap */
+  gap: 20px; 
 `;
 const Sidebar = styled.aside`
   width: 350px;
@@ -114,8 +116,13 @@ const FeedbackBox = styled.div`
 const MeasureOrchestratorWrapper = styled.div`
     flex: 1;
     display: flex;
-    min-height: 0;
-`;
+    flex-direction: column;
+    border-radius: 16px;
+    overflow: hidden;F
+    border: 1px solid #e9ecef;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    min-height: 480px;
+  `;
 
 
 const EndAnalysisButton = styled.button`
@@ -189,14 +196,14 @@ const ActionButton = styled.button<{ isStopped?: boolean }>`
   flex-shrink: 0;
   &:hover:not(:disabled) {
     background: ${(props) =>
-      props.isStopped
-        ? "linear-gradient(135deg, #218838 0%, #1ea085 100%)"
-        : "linear-gradient(135deg, #6b0000 0%, #8b0000 100%)"};
+    props.isStopped
+      ? "linear-gradient(135deg, #218838 0%, #1ea085 100%)"
+      : "linear-gradient(135deg, #6b0000 0%, #8b0000 100%)"};
     transform: translateY(-3px);
     box-shadow: ${(props) =>
-      props.isStopped
-        ? "0 8px 20px rgba(40, 167, 69, 0.4)"
-        : "0 8px 20px rgba(133, 0, 0, 0.4)"};
+    props.isStopped
+      ? "0 8px 20px rgba(40, 167, 69, 0.4)"
+      : "0 8px 20px rgba(133, 0, 0, 0.4)"};
   }
   &:disabled {
     background: linear-gradient(135deg, #ccc 0%, #999 100%);
@@ -218,19 +225,40 @@ const HiddenCheckbox = styled.input.attrs({ type: "checkbox" })`
   height: 0;
 `;
 const SliderSpan = styled.span`
-  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc; transition: 0.4s; border-radius: 34px;
-  &:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: 0.4s; border-radius: 50%; }
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+  &:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
 `;
 const StyledToggleSwitch = styled.div`
-  ${HiddenCheckbox}:checked + ${SliderSpan} { background-color: #850000; }
-  ${HiddenCheckbox}:checked + ${SliderSpan}:before { transform: translateX(26px); }
+  ${HiddenCheckbox}:checked + ${SliderSpan} {
+    background-color: #850000;
+  }
+  ${HiddenCheckbox}:checked + ${SliderSpan}:before {
+    transform: translateX(26px);
+  }
 `;
 const ControlRow = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
 `;
 
 const BodyAnalysis: React.FC = () => {
@@ -242,36 +270,66 @@ const BodyAnalysis: React.FC = () => {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const navigate = useNavigate();
-  const [currentStepId, setCurrentStepId] = useState<StepId>('full');
-  const [currentPoseImage, setCurrentPoseImage] = useState<string>('');
 
+  const { user } = useContext(AuthContext);
+  const userId = user?.id ?? "dev-user-01";
+
+  // 현재 측정 단계를 저장하기 위한 state
+  const [currentStepId, setCurrentStepId] = useState<StepId>("full");
+
+  const [currentPoseImage, setCurrentPoseImage] = useState<string>("");
   useEffect(() => {
     const imagePaths = poseImageMap[currentStepId];
     let intervalId: NodeJS.Timeout | null = null;
     if (Array.isArray(imagePaths)) {
       let imageIndex = 0;
-      setCurrentPoseImage(imagePaths[imageIndex]);
+      setCurrentPoseImage(imagePaths[imageIndex]); // 첫 이미지로 즉시 설정
+
       intervalId = setInterval(() => {
         imageIndex = (imageIndex + 1) % imagePaths.length;
         setCurrentPoseImage(imagePaths[imageIndex]);
-      }, 2000);
-    } else if (typeof imagePaths === 'string') {
+      }, 2000); // 2초 간격
+    } else if (typeof imagePaths === "string") {
+      // 이미지가 단일 문자열인 경우
       setCurrentPoseImage(imagePaths);
     }
     return () => { if (intervalId) clearInterval(intervalId); };
-   }, [currentStepId]);
+  }, [currentStepId]);
 
   const [resultModalOpen, setResultModalOpen] = useState(false);
-  const onStart = (data: BodyDataForStart) => { setHeightCm(data.height); setOpenModal(false); };
-  const handleEndAnalysis = () => { setResult(null); setSavedId(null); navigate('/main'); };
-  const handleNavigateToWorkout = () => { navigate('/workout-items'); };
-  const handleStepChange = (stepId: StepId) => { setCurrentStepId(stepId); };
+
+  const onStart = (data: BodyDataForStart) => {
+    setHeightCm(data.height);
+    setOpenModal(false);
+  };
+
+  const handleEndAnalysis = () => {
+    setResult(null);
+    setSavedId(null);
+    navigate("/main");
+  };
+
+  const handleNavigateToWorkout = () => {
+    navigate("/workout-items");
+  };
+
+  // MeasureOrchestrator로부터 단계 변경 신호를 받아 state를 업데이트하는 함수
+  const handleStepChange = (stepId: StepId) => {
+    setCurrentStepId(stepId);
+  };
+
   const saveProfile = async () => {
     if (!result) return;
     setSaving(true);
     try {
-      const payload = { version: 2, body: { height_cm: heightCm }, measures: result };
-      const base = (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:8000";
+      const payload = {
+        userId,
+        version: 2,
+        body: { height_cm: heightCm },
+        measures: result,
+      };
+      const base =
+        (import.meta as any)?.env?.VITE_API_BASE ?? "http://localhost:8000";
       const res = await fetch(`${base}/api/profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -312,11 +370,11 @@ const BodyAnalysis: React.FC = () => {
               {getFeedbackMessage()}
             </FeedbackBox>
             <MeasureOrchestratorWrapper>
-                <MeasureOrchestrator
-                  heightCm={heightCm}
-                  onDone={setResult}
-                  onStepChange={handleStepChange}
-                />
+              <MeasureOrchestrator
+                heightCm={heightCm}
+                onDone={setResult}
+                onStepChange={handleStepChange}
+              />
             </MeasureOrchestratorWrapper>
           </MainContent>
 
@@ -331,7 +389,7 @@ const BodyAnalysis: React.FC = () => {
                   <ToggleSwitchLabel>
                     <HiddenCheckbox
                       checked={isVoiceOn}
-                      onChange={() => alert('미구현 서비스입니다.')}
+                      onChange={() => alert("미구현 서비스입니다.")}
                     />
                     <SliderSpan />
                   </ToggleSwitchLabel>
@@ -347,12 +405,19 @@ const BodyAnalysis: React.FC = () => {
               </ul>
             </InfoBox>
             <InfoBox style={{ flexGrow: 1, flexShrink: 1, minHeight: 0, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <PoseImage
-                src={currentPoseImage}
-                alt="분석 자세 가이드"
-              />
+              <PoseImage src={currentPoseImage} alt="분석 자세 가이드" />
             </InfoBox>
-
+            {/*       
+      <SaveButton onClick={saveProfile} disabled={!result || saving}>
+              {saving ? "저장 중..." : "프로필 저장하기"}
+            </SaveButton>
+            {savedId && (
+              <p style={{ margin: 0, color: "#555" }}>
+                저장됨: <code>{savedId}</code>
+              </p>
+            )}
+          </Sidebar>
+           */}
             <ActionButton
               onClick={() => {
                 if (result) {
@@ -362,24 +427,32 @@ const BodyAnalysis: React.FC = () => {
               }}
               disabled={!result || saving}
             >
-              {saving ? "저장 중..." : (result ? "프로필 저장하기" : "측정 진행 중…")}
+              {saving
+                ? "저장 중..."
+                : result
+                ? "프로필 저장하기"
+                : "측정 진행 중…"}
             </ActionButton>
 
-            {result && !savedId && (
-              <p style={{ margin: "5px 0 0", color: "#198754", fontWeight: 600, fontSize: '13px', textAlign: 'center', flexShrink: 0 }}>
-                측정 완료 ✅ — 버튼을 눌러 저장/확인
-              </p>
-            )}
-            {savedId && (
-              <p style={{ margin: "5px 0 0", color: "#555", fontSize: '13px', textAlign: 'center', flexShrink: 0 }}>
-                저장됨: <code>{savedId}</code>
-              </p>
-            )}
-          </Sidebar>
-        </ContentContainer>
+  {
+    result && !savedId && (
+      <p style={{ margin: "5px 0 0", color: "#198754", fontWeight: 600, fontSize: '13px', textAlign: 'center', flexShrink: 0 }}>
+        측정 완료 ✅ — 버튼을 눌러 저장/확인
+      </p>
+    )
+  }
+  {
+    savedId && (
+      <p style={{ margin: "5px 0 0", color: "#555", fontSize: '13px', textAlign: 'center', flexShrink: 0 }}>
+        저장됨: <code>{savedId}</code>
+      </p>
+    )
+  }
+          </Sidebar >
+        </ContentContainer >
         <BodyAnalysisModal isOpen={openModal} onStart={onStart} />
         <CompletionModal isOpen={showCompletionModal} onNavigate={handleNavigateToWorkout} />
-      </MainLayoutContainer>
+      </MainLayoutContainer >
       <ResultModal open={resultModalOpen} result={result} onClose={() => setResultModalOpen(false)} onSave={saveProfile} />
       <Footer />
     </>
