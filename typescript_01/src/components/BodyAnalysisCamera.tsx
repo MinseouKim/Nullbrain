@@ -1,6 +1,33 @@
 import React, { useEffect, useRef, useState } from "react";
 import { KP, Size } from "../poseLib/poseTypes";
 import type { SegMask } from "../poseLib/segmentation";
+import styled from 'styled-components';
+
+const FeedbackOverlay = styled.p<{ $isRunning: boolean }>`
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: ${(props) => (props.$isRunning ? "#0f0" : "#FFFF00")};
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 18px;
+  margin: 0;
+  z-index: 10; /* Ensure it's above the canvas */
+
+  /* Responsive styles for smaller screens */
+  @media (max-width: 768px) {
+    font-size: 16px; /* Slightly smaller font on tablets */
+    padding: 8px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px; /* Smaller font on phones */
+    padding: 6px 8px;
+    top: 5px; /* Adjust position */
+    left: 5px;
+  }
+`;
 
 type Props = {
   running: boolean;
@@ -276,18 +303,20 @@ const BodyAnalysisCamera: React.FC<Props> = ({
       <p
         style={{
           position: "absolute",
-          top: 10,
-          left: 10,
+          top: 10, 
+          left: 10, 
           background: "rgba(0,0,0,0.7)",
           color: running ? "#0f0" : "#FFFF00",
-          padding: "10px",
+          padding: "10px", 
           borderRadius: 5,
-          fontSize: 18,
+          fontSize: 18, 
           margin: 0,
+
         }}
-      >
+      />
+      <FeedbackOverlay $isRunning={running}>
         {feedback}
-      </p>
+      </FeedbackOverlay>
     </div>
   );
 };
