@@ -74,7 +74,7 @@ export const EXERCISE_DETAILS: ExerciseDetail[] = [
     category: "하체",
     description:
       "하체 근력과 함께 균형 감각을 효과적으로 향상시킬 수 있는 운동입니다.",
-    imageUrl: "/images/lunge.png",
+    imageUrl: "/images/Exlunge.png",
     modalImageUrl: "",
     stimulationArea: [
       "대퇴사두근 (허벅지 앞)",

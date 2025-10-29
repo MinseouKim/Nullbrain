@@ -1377,7 +1377,7 @@ const MeasureOrchestrator: React.FC<Props> = ({ heightCm, onDone, onStepChange }
           <p style={{ margin: 0, color: "#555", lineHeight: 1.6 }}>{STEPS[stepIdx].instruction}</p>
         </InfoPanelBox>
 
-        <InfoPanelBox style={{ overflowY: 'auto', maxHeight: '363px' }}>
+        <InfoPanelBox style={{ overflowY: 'auto', maxHeight: '428px' }}>
           <h4 style={{ marginTop: 0 }}>실시간 측정값</h4>
            <ul style={{ margin:0, paddingLeft:18, color:"#333", lineHeight:1.8 }}>
              <li>보정: <b>{cmPerPx ? `${cmPerPx.toFixed(4)} cm/px` : "(보정 전) px 단위 표시"}</b></li>
