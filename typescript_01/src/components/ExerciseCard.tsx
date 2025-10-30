@@ -25,10 +25,10 @@ const Card = styled.div`
 
 const CardImage = styled.img`
   width: 100%;
-  height: 250px;
-  object-fit: cover;
+  height: 260px;
+  object-fit: fill; 
   display: block;
-  background-color: #f0f0f0;
+  border-radius: 15px 15px 0 0;
 `;
 
 const ImagePlaceholder = styled.div`

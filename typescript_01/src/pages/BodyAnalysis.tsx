@@ -222,8 +222,8 @@ const ActionButton = styled.button<{ isStopped?: boolean }>`
 const ToggleSwitchLabel = styled.label`
   position: relative;
   display: inline-block;
-  width: 80px;
-  height: 44px;
+  width: 64px;
+  height: 34px;
 `;
 const HiddenCheckbox = styled.input.attrs({ type: "checkbox" })`
   opacity: 0;
@@ -236,8 +236,8 @@ const SliderSpan = styled.span`
   &:before { 
   position: absolute; 
   content: ""; 
-  height: 36px; /* 핸들 세로 크기 증가 */
-  width: 36px; /* 핸들 가로 크기 증가 */
+  height: 26px; 
+  width: 26px ; 
   left: 4px; 
   bottom: 4px; 
   background-color: white; 
@@ -250,7 +250,7 @@ const StyledToggleSwitch = styled.div`
     background-color: #850000;
   }
   ${HiddenCheckbox}:checked + ${SliderSpan}:before {
-    transform: translateX(26px);
+    transform: translateX(30px);
   }
 `;
 const ControlRow = styled.div`
