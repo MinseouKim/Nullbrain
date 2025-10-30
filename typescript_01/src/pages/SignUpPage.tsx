@@ -80,8 +80,7 @@ const SignUpBox = styled.div`
   align-items: center;
   width: 100%;
   max-width: 448px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  border: 1px solid #d1d5db;
+  border: 1px solid #000000;
   animation: ${fadeInUp} 0.8s ease forwards;
 
   @media (max-width: 480px) {
@@ -98,7 +97,7 @@ const Title = styled.h2`
   font-size: 30px;
   font-weight: bold;
   width: 100%;
-  text-align: left;
+  text-align: center;
 
   @media (max-width: 480px) {
     font-size: 24px;
@@ -253,7 +252,7 @@ const SignUpPage: React.FC = () => {
       <Header />
       <SignUpContainer>
         <SloganContainer>
-          <SloganMain>자세On과 함께</SloganMain>
+          <SloganMain>자세On과 </SloganMain>
           <SloganHighlight>당신의 첫걸음을 시작하세요</SloganHighlight>
         </SloganContainer>
 

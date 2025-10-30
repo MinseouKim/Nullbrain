@@ -82,7 +82,7 @@ const Title = styled.h2`
   font-size: 30px;
   font-weight: bold;
   width: 100%;
-  text-align: left;
+  text-align: center;
 `;
 
 const StyledForm = styled.form`
@@ -217,8 +217,8 @@ const LoginPage: React.FC = () => {
       <Header />
       <LoginContainer>
         <SloganContainer>
-          <SloganMain>언제나 어디서나,</SloganMain>
-          <SloganHighlight>정확한 자세</SloganHighlight>
+          <SloganMain>로그인 하시면 자세ON의 모든 서비스를 이용 하실 수 있습니다.</SloganMain>
+          <SloganHighlight>아직 회원이 아니시면 회원가입을 해주세요.</SloganHighlight>
         </SloganContainer>
 
         <LoginBox>

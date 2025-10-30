@@ -25,7 +25,7 @@ const Card = styled.div`
 
 const CardImage = styled.img`
   width: 100%;
-  height: 260px;
+  height: 350px;
   object-fit: fill; 
   display: block;
   border-radius: 15px 15px 0 0;
