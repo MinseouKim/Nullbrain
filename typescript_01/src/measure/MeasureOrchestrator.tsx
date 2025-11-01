@@ -277,14 +277,14 @@ export type StepId =
 type Step = { id: StepId; title: string; instruction: string };
 
 const STEPS: Step[] = [
-  { id: "full", title: "전신 프레임 확보", instruction: "정면 전체가 보이게 서세요(머리~발 포함). 2초 유지!" },
-  { id: "tpose", title: "T-포즈 기준 수집", instruction: "양팔을 좌우로 쫙 펴고 손목이 어깨 이상. 2초 유지!" },
+  { id: "full", title: "전신 프레임 확보", instruction: "정면 전체가 보이게 서세요(머리~발 포함).\n2초 유지!" },
+  { id: "tpose", title: "T-포즈 기준 수집", instruction: "양팔을 좌우로 쫙 펴고 손목이 어깨 이상.\n2초 유지!" },
   { id: "side", title: "측면 정렬 수집", instruction: "옆을 보고 어깨-골반이 겹치게 정렬. 2초 유지!" },
-  { id: "waist_flex", title: "허리 유연성(전굴)", instruction: "측면으로 선 뒤, 허리를 굽혀 손이 바닥에 닿게 내려가 2초 유지!" },
+  { id: "waist_flex", title: "허리 유연성(전굴)", instruction: "측면으로 선 뒤, 허리를 굽혀 손이 바닥에 닿게 \n내려가 2초 유지!" },
   { id: "squat", title: "스쿼트 ROM", instruction: "앉았다 일어서기 3회 반복해 주세요." },
   { id: "elbow_flex", title: "팔꿈치 ROM", instruction: "굽혔다 폈다 3회(한쪽씩 해도 OK)." },
   { id: "shoulder_abd", title: "어깨 외전 ROM", instruction: "옆→머리 위까지 3회 반복해 주세요." },
-  { id: "neck_rom", title: "목 ROM", instruction: "카메라에 상체만 보이게 가까이 오세요. 숙임/뒤젖힘/기울임을 합쳐 3회." },
+  { id: "neck_rom", title: "목 ROM", instruction: "카메라에 상체만 보이게 가까이 오세요.\n숙임/뒤젖힘/기울임을 합쳐 3회." },
   { id: "done", title: "완료", instruction: "요약 확인 후 저장." },
 ];
 
@@ -1374,10 +1374,10 @@ const MeasureOrchestrator: React.FC<Props> = ({ heightCm, onDone, onStepChange }
         <InfoPanelBox>
           <div style={{ marginBottom: 8 }}>{badge}</div>
           <h3 style={{ margin: "4px 0 12px 0" }}>{STEPS[stepIdx].title}</h3>
-          <p style={{ margin: 0, color: "#555", lineHeight: 1.6 }}>{STEPS[stepIdx].instruction}</p>
+          <p style={{ margin: 0, color: "#555", lineHeight: 1.6, whiteSpace: "pre-line" }}>{STEPS[stepIdx].instruction}</p>
         </InfoPanelBox>
 
-        <InfoPanelBox style={{ overflowY: 'auto', maxHeight: '363px' }}>
+        <InfoPanelBox style={{ overflowY: 'auto', maxHeight: '428px' }}>
           <h4 style={{ marginTop: 0 }}>실시간 측정값</h4>
            <ul style={{ margin:0, paddingLeft:18, color:"#333", lineHeight:1.8 }}>
              <li>보정: <b>{cmPerPx ? `${cmPerPx.toFixed(4)} cm/px` : "(보정 전) px 단위 표시"}</b></li>

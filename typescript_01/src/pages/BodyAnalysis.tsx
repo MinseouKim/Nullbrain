@@ -27,7 +27,7 @@ const poseImageMap: Record<StepId, string | string[]> = {
   tpose: "/images/전면_T자세.png",
   side: "/images/전신_측면.png",
   waist_flex: "/images/허리.png",
-  squat: "/images/전신_정면.png",
+  squat: ["/images/전신_정면.png", "/images/스쿼트.png"],
   elbow_flex: "/images/팔꿈치.png",
   shoulder_abd: "/images/팔올림.png",
   neck_rom: ["/images/고개숙임.png", "/images/고개듦.png"],
@@ -77,7 +77,7 @@ const Sidebar = styled.aside`
   height: calc(100vh - 160px);
   flex-shrink: 0;
   box-sizing: border-box;
-  height: 750px;        
+  height: 805px;        
   overflow: hidden;
 
   @media (max-width: 768px) {
@@ -136,6 +136,12 @@ const EndAnalysisButton = styled.button`
     font-weight: 700;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     &:hover { background-color: #6b0000; }
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; 
+    margin-bottom: 10px;
 `;
 const InfoBox = styled.div`
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
@@ -216,7 +222,7 @@ const ActionButton = styled.button<{ isStopped?: boolean }>`
 const ToggleSwitchLabel = styled.label`
   position: relative;
   display: inline-block;
-  width: 60px;
+  width: 64px;
   height: 34px;
 `;
 const HiddenCheckbox = styled.input.attrs({ type: "checkbox" })`
@@ -225,40 +231,33 @@ const HiddenCheckbox = styled.input.attrs({ type: "checkbox" })`
   height: 0;
 `;
 const SliderSpan = styled.span`
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 34px;
-  &:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-  }
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc; transition: 0.4s; border-radius: 44px; /* height와 맞춤 */
+  &:before { 
+  position: absolute; 
+  content: ""; 
+  height: 26px; 
+  width: 26px ; 
+  left: 4px; 
+  bottom: 4px; 
+  background-color: white; 
+  transition: 0.4s; 
+  border-radius: 50%;
+    }
 `;
 const StyledToggleSwitch = styled.div`
   ${HiddenCheckbox}:checked + ${SliderSpan} {
     background-color: #850000;
   }
   ${HiddenCheckbox}:checked + ${SliderSpan}:before {
-    transform: translateX(26px);
+    transform: translateX(30px);
   }
 `;
 const ControlRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 500;
+  font-weight: 600;
 `;
 
 const BodyAnalysis: React.FC = () => {
