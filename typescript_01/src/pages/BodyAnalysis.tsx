@@ -27,7 +27,7 @@ const poseImageMap: Record<StepId, string | string[]> = {
   tpose: "/images/전면_T자세.png",
   side: "/images/전신_측면.png",
   waist_flex: "/images/허리.png",
-  squat: "/images/전신_정면.png",
+  squat: ["/images/전신_정면.png", "/images/스쿼트.png"],
   elbow_flex: "/images/팔꿈치.png",
   shoulder_abd: "/images/팔올림.png",
   neck_rom: ["/images/고개숙임.png", "/images/고개듦.png"],
