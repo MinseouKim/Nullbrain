@@ -195,7 +195,7 @@ const Btn = styled.button<{ danger?: boolean }>`
   background: ${(p) => (p.danger ? "#000" : "#850000")};
   display: flex;
   align-items: center;
-  justify-content: left;
+  justify-content: center;
   color: #fff;
   border: none;
   padding: 10px 14px;
@@ -348,6 +348,193 @@ const CloseBtn = styled.button`
   font-size: 20px;
   cursor: pointer;
 `;
+const EditTitle = styled.h2`
+  margin-bottom: 28px;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  color: #111;
+  letter-spacing: -0.3px;
+`;
+
+const EditFormBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: #fff;
+  padding: 24px 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+`;
+
+const EditInputLabel = styled.label`
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const EditTextInput = styled.input`
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #ddd;
+  background: #fafafa;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.25s ease;
+  color: #222;
+
+  &:focus {
+    background: #fff;
+    border-color: #850000;
+    box-shadow: 0 0 8px rgba(133, 0, 0, 0.2);
+  }
+
+  &::placeholder {
+    color: #aaa;
+    font-size: 14px;
+  }
+`;
+
+const EditButtonGroup = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+`;
+
+const EditSaveButton = styled(Btn)`
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  background: #850000;
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: #a10000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(133, 0, 0, 0.25);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+`;
+
+const EditCancelButton = styled(GhostBtn)`
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  color: #333;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  transition: all 0.25s ease;
+
+  &:hover {
+    border-color: #bbb;
+    background: #f5f5f5;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+// -------------------- 프로필 수정 모달 --------------------
+const EditProfileModal: React.FC<{
+  user: UserProfile | null;
+  onClose: () => void;
+  onSave: (data: Partial<UserProfile>) => void;
+}> = ({ user, onClose, onSave }) => {
+  const [form, setForm] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+  });
+
+  const [emailError, setEmailError] = useState<string>("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    // 이메일 입력 시 실시간 유효성 검사
+    if (name === "email") {
+      if (!value.includes("@") || !value.includes(".com")) {
+        setEmailError("이메일은 '@'과 '.com'을 포함해야 합니다.");
+      } else {
+        setEmailError("");
+      }
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!form.name.trim()) {
+      alert("이름을 입력해주세요.");
+      return;
+    }
+
+    // 이메일 유효성 검사
+    if (!form.email.includes("@") || !form.email.includes(".com")) {
+      setEmailError("이메일은 '@'과 '.com'을 포함해야 합니다.");
+      alert("유효한 이메일을 입력해주세요.");
+      return;
+    }
+
+    const updatedData: Partial<UserProfile> = {
+      name: form.name,
+      email: form.email,
+    };
+    onSave(updatedData);
+    onClose();
+  };
+
+
+  return (
+    <ModalOverlay>
+      <ModalContent>
+        <CloseBtn onClick={onClose}>×</CloseBtn>
+
+        <EditTitle>프로필 수정</EditTitle>
+
+        <EditFormBox>
+          <EditInputLabel>
+            이름
+            <EditTextInput
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="이름을 입력하세요"
+            />
+          </EditInputLabel>
+
+          <EditInputLabel>
+            이메일
+            <EditTextInput
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="이메일을 입력하세요"
+            />
+          </EditInputLabel>
+        </EditFormBox>
+
+        <EditButtonGroup>
+          <EditCancelButton onClick={onClose}>취소</EditCancelButton>
+          <EditSaveButton onClick={handleSubmit}>저장</EditSaveButton>
+        </EditButtonGroup>
+      </ModalContent>
+    </ModalOverlay>
+  );
+};
 
 const MyPage: React.FC = () => {
   const { logout } = useContext(AuthContext);
@@ -358,6 +545,7 @@ const MyPage: React.FC = () => {
   
   // 모달
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
     const openModal: React.MouseEventHandler<HTMLButtonElement> = () => {
       setIsModalOpen(true);
@@ -422,6 +610,12 @@ const MyPage: React.FC = () => {
     navigate("/login");
   };
 
+  const handleSaveProfile = (data: Partial<UserProfile>) => {
+    if (!user) return;
+    setUser({ ...user, ...data });
+    // TODO: 실제 서버에 PATCH 요청 추가 가능
+  };
+
   const exportCsv = () => {
     if (!records || records.length === 0) {
       alert("내보낼 기록이 없습니다.");
@@ -461,7 +655,6 @@ const MyPage: React.FC = () => {
           <Card>
             <Row>
               <div style={{display:"flex", gap:16, alignItems:"center"}}>
-                <Avatar src={user?.avatarUrl ?? "/images/default-avatar.png"} alt="avatar" />
                 <div>
                   <Name>{user?.name ?? "로딩 중..."}</Name>
                   <Meta>{user?.email}</Meta>
@@ -469,7 +662,7 @@ const MyPage: React.FC = () => {
                 </div>
               </div>
               <div style={{display:"flex", flexDirection:"column", gap:8}}>
-                <Btn onClick={() => navigate("/mypage/edit")}>프로필 수정</Btn>
+                <Btn onClick={()=>setIsEditModalOpen(true)}>프로필 수정</Btn>
               </div>
             </Row>
           </Card>
@@ -580,7 +773,7 @@ const MyPage: React.FC = () => {
 
           <Card style={{marginTop:16}}>
             <h4>도움말</h4>
-            <ul style={{paddingLeft:16, color:"#666"}}>
+            <ul style={{paddingLeft:16, color:"#666", fontSize:12}}>
               <li>프로필 수정으로 신체 정보를 업데이트하세요.</li>
               <li>자세 분석 결과는 마이페이지에서 확인 가능합니다.</li>
             </ul>
@@ -599,6 +792,14 @@ const MyPage: React.FC = () => {
             </div>
           </ModalContent>
         </ModalOverlay>
+      )}
+      
+      {isEditModalOpen && (
+        <EditProfileModal
+          user={user}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveProfile}
+        />
       )}
     </>
   );
