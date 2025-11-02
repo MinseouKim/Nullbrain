@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import { AuthContext } from "../context/AuthContext";
+import logoImg from "./assets/logo.png";
 
 const HeaderContainer = styled.header`
   margin: 0 auto;
@@ -103,6 +104,15 @@ const Logo = styled.div`
   @media (max-width: 320px) {
     font-size: 16px;
   }
+`;
+
+const LogoImg = styled.img`
+  margin-top: 7px;
+  width: 120px;
+  height: auto;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
 `;
 
 const LeftBar = styled.div`
@@ -228,7 +238,7 @@ const Header = () => {
         <NavItem onClick={() => navigate("/exercise")}>운동</NavItem>
       </LeftBar>
 
-      <Logo onClick={handleLogoClick}>자세ON</Logo>
+      <LogoImg src={logoImg} onClick={handleLogoClick} alt="자세ON 로고" />
 
       <RightBar>
         {isLoggedIn ? (
