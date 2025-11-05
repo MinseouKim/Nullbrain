@@ -6,6 +6,16 @@ import dummy from "../datas/dummydata.json"; // ✅ 더미데이터 import
 // ✅ 테스트 모드 전환
 const isTestMode = false;
 
+const Placeholder = styled.div`
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280; /* gray-500 */
+  font-weight: 700;
+  font-size: 15px;
+`;
+
 const Page = styled.div`
   width: 100%;
   height: calc(100vh - 140px);
@@ -325,7 +335,9 @@ const ExerciseResult: React.FC = () => {
         {/* 우측 영상 카드 */}
         <VideoCard>
           <CardTitle>운동 영상</CardTitle>
-          <VideoBox />
+          <VideoBox>
+            <Placeholder>추후 추가 예정입니다.</Placeholder>
+          </VideoBox>
         </VideoCard>
       </TopGrid>
 
