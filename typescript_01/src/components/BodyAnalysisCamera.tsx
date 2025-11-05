@@ -168,11 +168,11 @@ if (wantSeg && !segPending.current && now - lastSegTs.current > 200) {
     // 현재 ref 스냅샷을 로컬 변수로 잡아 안전하게 사용
     const segFn = getSegRef.current!;
     const segCb = onSegMaskRef.current!;
-    const vv = videoRef.current;
-if (vv && vv.readyState >= 2 && vv.videoWidth > 0 && vv.videoHeight > 0) {
-  const mask = await segFn(vv);
-  if (mask) segCb(mask);
-}
+const src = videoRef.current ?? canvasRef.current;
+if (src) {
+   const mask = await segFn(src);
+   if (mask) segCb(mask);
+ }
   } catch {
   } finally {
     lastSegTs.current = performance.now();
