@@ -3,9 +3,10 @@ import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 import dummy from "../datas/dummydata.json"; // ✅ 더미데이터 import
 
-// ✅ 테스트 모드 전환
+// ✅ 테스트 모드 전환 (실서비스면 false)
 const isTestMode = false;
 
+/* ======================= Styled Components ======================= */
 const Placeholder = styled.div`
   height: 100%;
   display: flex;
@@ -87,6 +88,7 @@ const ResultLabel = styled.div`
   color: #666;
   font-weight: 600;
 `;
+
 const ResultValue = styled.div`
   text-align: right;
   color: #111;
@@ -157,16 +159,46 @@ const SectionHeadline = styled.h2`
   text-align: center;
 `;
 
+/* ======================= Helpers ======================= */
+function deriveErrorTagsFromClient(allSetResults: any[]): string[] {
+  // 서버가 error_tags를 주지 않을 때만 사용되는 간단한 휴리스틱
+  const tags = new Set<string>();
+  allSetResults.forEach((r: any) => {
+    const ad = r?.analysisData || {};
+    const fb: string = typeof r?.feedback === "string" ? r.feedback : "";
+
+    // 기존 키워드
+    if (ad?.["운동 가동범위"]?.includes?.("부족")) tags.add("가동범위 부족");
+    if (ad?.["좌우 대칭성"]?.includes?.("불균형")) tags.add("좌우 불균형");
+
+    // 가벼운 보강: 피드백 문자열에서 흔한 상황 캐치
+    if (/\b무릎\b.*(안쪽|내전|쏠림)/.test(fb)) tags.add("무릎 안쪽쏠림");
+    if (/\b허리\b.*(과신전|과굴곡|통증)/.test(fb)) tags.add("허리 불안정");
+    if (/\b상체\b.*(흔들|쏠림)/.test(fb)) tags.add("상체 흔들림");
+  });
+  return Array.from(tags);
+}
+
+/* ======================= Component ======================= */
 const ExerciseResult: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation() as { state?: any };
 
   const workoutPlan = location.state?.workoutPlan;
   const performanceData = location.state?.performanceData;
 
   const [overallFeedback, setOverallFeedback] = useState<string>("로딩 중...");
   const [improvementTips, setImprovementTips] = useState<string[]>([]);
+  // ✅ 서버 요약치(오면 우선 표시)
+  const [serverSummaryAccuracy, setServerSummaryAccuracy] = useState<
+    number | null
+  >(null);
+  const [serverTotalCalories, setServerTotalCalories] = useState<number | null>(
+    null
+  );
+  const [serverErrorTags, setServerErrorTags] = useState<string[] | null>(null);
 
+  // 진입 가드
   useEffect(() => {
     if (!isTestMode && (!workoutPlan || !performanceData)) {
       alert("운동 기록이 없습니다. 메인 페이지로 이동합니다.");
@@ -174,30 +206,24 @@ const ExerciseResult: React.FC = () => {
     }
   }, [workoutPlan, performanceData, navigate]);
 
+  // 화면 상단 요약 데이터 (클라이언트 기준)
   const summaryData = useMemo(() => {
-    // 1️⃣ 테스트 모드일 경우: 더미데이터 사용
+    // 1) 테스트 모드: dummy 사용
     if (isTestMode) {
-      const { workoutPlan, performanceData } = dummy;
-
+      const { workoutPlan, performanceData } = dummy as any;
       const { name, reps, sets } = workoutPlan;
-      const { finalTime, allSetResults } = performanceData;
+      const { finalTime, allSetResults = [] } = performanceData || {};
 
-      const errorTags = new Set<string>();
-      allSetResults.forEach((r: any) => {
-        if (r.analysisData?.["운동 가동범위"]?.includes("부족"))
-          errorTags.add("가동범위 부족");
-        if (r.analysisData?.["좌우 대칭성"]?.includes("불균형"))
-          errorTags.add("좌우 불균형");
-      });
+      const clientErrorTags = deriveErrorTagsFromClient(allSetResults);
 
       const totalCalories = allSetResults.reduce(
-        (sum: number, r: any) => sum + (r.stats?.calories || 0),
+        (sum: number, r: any) => sum + (r?.stats?.calories || 0),
         0
       );
       const avgAccuracy =
         allSetResults.length > 0
           ? allSetResults.reduce(
-              (sum: number, r: any) => sum + (r.stats?.accuracy || 0),
+              (sum: number, r: any) => sum + (r?.stats?.accuracy || 0),
               0
             ) / allSetResults.length
           : 0;
@@ -205,46 +231,28 @@ const ExerciseResult: React.FC = () => {
       return {
         name,
         totalReps: reps * sets,
-        finalTime,
-        errorTags: Array.from(errorTags),
+        finalTime: finalTime ?? "0:00",
+        errorTags: clientErrorTags,
         accuracy: Math.round(avgAccuracy),
         kcal: Math.round(totalCalories),
         allSetResults,
       };
     }
 
-    // 2️⃣ 실제 데이터 모드
-    if (!workoutPlan || !performanceData) {
-      return {
-        name: "로딩 중",
-        totalReps: 0,
-        finalTime: "0:00",
-        errorTags: [],
-        accuracy: 0,
-        kcal: 0,
-        allSetResults: [],
-      };
-    }
+    // 2) 실제 데이터
+    const { name = "로딩 중", reps = 0, sets = 0 } = workoutPlan || {};
+    const { finalTime = "0:00", allSetResults = [] } = performanceData || {};
 
-    const { name, reps, sets } = workoutPlan;
-    const { finalTime, allSetResults } = performanceData;
-
-    const errorTags = new Set<string>();
-    allSetResults.forEach((r: any) => {
-      if (r.analysisData?.["운동 가동범위"]?.includes("부족"))
-        errorTags.add("가동범위 부족");
-      if (r.analysisData?.["좌우 대칭성"]?.includes("불균형"))
-        errorTags.add("좌우 불균형");
-    });
+    const clientErrorTags = deriveErrorTagsFromClient(allSetResults);
 
     const totalCalories = allSetResults.reduce(
-      (sum: number, r: any) => sum + (r.stats?.calories || 0),
+      (sum: number, r: any) => sum + (r?.stats?.calories || 0),
       0
     );
     const avgAccuracy =
       allSetResults.length > 0
         ? allSetResults.reduce(
-            (sum: number, r: any) => sum + (r.stats?.accuracy || 0),
+            (sum: number, r: any) => sum + (r?.stats?.accuracy || 0),
             0
           ) / allSetResults.length
         : 0;
@@ -253,15 +261,17 @@ const ExerciseResult: React.FC = () => {
       name,
       totalReps: reps * sets,
       finalTime,
-      errorTags: Array.from(errorTags),
+      errorTags: clientErrorTags,
       accuracy: Math.round(avgAccuracy),
       kcal: Math.round(totalCalories),
       allSetResults,
     };
   }, [workoutPlan, performanceData]);
 
-  // ✅ 전체 피드백 요청
+  // ✅ 종합 피드백 요청 (/api/feedback/overall)
   useEffect(() => {
+    const ctrl = new AbortController();
+
     const fetchOverallFeedback = async () => {
       if (!summaryData?.allSetResults) return;
       try {
@@ -269,16 +279,44 @@ const ExerciseResult: React.FC = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ set_results: summaryData.allSetResults }),
+          signal: ctrl.signal,
         });
         const data = await res.json();
+
         setOverallFeedback(data.overall_feedback || "피드백 생성 실패");
-        setImprovementTips(data.improvement_tips || []);
+        setImprovementTips(
+          Array.isArray(data.improvement_tips) ? data.improvement_tips : []
+        );
+
+        // ✅ 서버 제공 요약치(있으면 우선 사용)
+        setServerSummaryAccuracy(
+          typeof data.summary_accuracy === "number"
+            ? data.summary_accuracy
+            : null
+        );
+        setServerTotalCalories(
+          typeof data.total_calories === "number" ? data.total_calories : null
+        );
+
+        // ✅ 서버 제공 주요 오류 태그가 있으면 우선 사용
+        setServerErrorTags(
+          Array.isArray(data.error_tags) ? data.error_tags : null
+        );
       } catch (err) {
-        setOverallFeedback("⚠️ 종합 피드백 요청 실패");
+        if ((err as any)?.name !== "AbortError") {
+          setOverallFeedback("⚠️ 종합 피드백 요청 실패");
+          setServerSummaryAccuracy(null);
+          setServerTotalCalories(null);
+          setServerErrorTags(null);
+        }
       }
     };
+
     fetchOverallFeedback();
+    return () => ctrl.abort();
   }, [summaryData]);
+
+  const effectiveErrorTags = serverErrorTags ?? summaryData.errorTags;
 
   return (
     <Page>
@@ -299,7 +337,9 @@ const ExerciseResult: React.FC = () => {
             </ResultRow>
             <ResultRow>
               <ResultLabel>평균 정확도</ResultLabel>
-              <ResultValue>{summaryData.accuracy}%</ResultValue>
+              <ResultValue>
+                {serverSummaryAccuracy ?? summaryData.accuracy}%
+              </ResultValue>
             </ResultRow>
             <ResultRow>
               <ResultLabel>총 운동시간</ResultLabel>
@@ -307,8 +347,11 @@ const ExerciseResult: React.FC = () => {
             </ResultRow>
             <ResultRow>
               <ResultLabel>소모 칼로리</ResultLabel>
-              <ResultValue>{summaryData.kcal} kcal</ResultValue>
+              <ResultValue>
+                {serverTotalCalories ?? summaryData.kcal} kcal
+              </ResultValue>
             </ResultRow>
+
             <div
               style={{
                 padding: 10,
@@ -320,8 +363,8 @@ const ExerciseResult: React.FC = () => {
                 주요 자세 오류
               </CardTitle>
               <TagCloud>
-                {summaryData.errorTags.length > 0 ? (
-                  summaryData.errorTags.map((tag: string) => (
+                {effectiveErrorTags.length > 0 ? (
+                  effectiveErrorTags.map((tag: string) => (
                     <Tag key={tag}>{tag}</Tag>
                   ))
                 ) : (

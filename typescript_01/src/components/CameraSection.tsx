@@ -22,6 +22,12 @@ interface CameraSectionProps {
   onAdvanceSet?: () => void;
 }
 
+/* ========= 🔧 메시지 노출 시간 조정 포인트 ========= */
+const LAST_SET_HOLD_MS = 1800; // 마지막 세트 메시지 유지 후 결과로 이동 (기존 600 → 1800)
+const NEXT_SET_HOLD_MS = 3500; // 다음 세트로 넘어가기 전 유지 시간 (기존 2000 → 3500)
+const ERROR_NEXT_SET_HOLD_MS = 2500; // 에러 후 다음 세트로 (기존 1500 → 2500)
+const ERROR_FINISH_HOLD_MS = 1800; // 모든 세트 완료 + 에러 시 결과로 (기존 800 → 1800)
+
 const CameraSectionContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -176,7 +182,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({
       setAllSetResults(combinedResults);
 
       if (currentSet >= totalSets) {
-        // ✅ 마지막 세트: 짧게 보여주고 곧바로 결과 페이지로 이동
+        // ✅ 마지막 세트: 좀 더 오래 보여주고 결과 페이지로 이동
         setFeedbackMessage(
           `💬 ${feedbackText}\n✅ 모든 세트 완료! 결과 페이지로 이동합니다...`
         );
@@ -188,20 +194,19 @@ const CameraSection: React.FC<CameraSectionProps> = ({
               performanceData: {
                 finalTime: data.finalTime,
                 allSetResults: combinedResults,
-                // overall은 결과 페이지에서 mount 시 비동기 호출
               },
             },
           });
-        }, 600); // ⏱ 600ms로 단축
+        }, LAST_SET_HOLD_MS);
       } else {
-        // 다음 세트로 자동 진행(기존 2초 유지)
+        // 다음 세트로 자동 진행(유지 시간 연장)
         setFeedbackMessage(
           `💬 ${feedbackText}\n✅ ${currentSet}세트 완료! 다음 세트를 준비하세요.`
         );
         setTimeout(() => {
           onAdvanceSet?.();
           setFeedbackMessage(`${currentSet + 1}세트를 시작합니다!`);
-        }, 2000);
+        }, NEXT_SET_HOLD_MS);
       }
     } catch (err) {
       console.error("❌ 세트 분석 실패:", err);
@@ -220,7 +225,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({
               },
             },
           });
-        }, 800);
+        }, ERROR_FINISH_HOLD_MS);
       } else {
         setFeedbackMessage("⚠️ AI 분석 실패. 다음 세트로 진행합니다.");
         setTimeout(() => {
@@ -228,7 +233,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({
           setFeedbackMessage(
             `⚠️ AI 분석 오류. ${currentSet + 1}세트를 시작합니다!`
           );
-        }, 1500);
+        }, ERROR_NEXT_SET_HOLD_MS);
       }
     } finally {
       setFeedbackLocked(false);
