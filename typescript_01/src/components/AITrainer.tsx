@@ -91,8 +91,10 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
     return ids.every(safe);
   };
 
+  // ✅ 메시지는 항상 정상 좌표계로 출력되도록 내부에서 좌표계 리셋
   const drawMessage = (ctx: CanvasRenderingContext2D, msg: string) => {
     ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // 변환 초기화(언미러)
     ctx.font = "30px Pretendard, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -165,6 +167,7 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           smoothLandmarks: true,
           minDetectionConfidence: 0.5,
           minTrackingConfidence: 0.5,
+          selfieMode: false, // ✅ 입력 자체는 정방향
         });
 
         pose.onResults((res: any) => {
@@ -172,13 +175,22 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           const ctx = canvas?.getContext("2d");
           if (!canvas || !ctx || !isActive) return;
 
+          // 캔버스 초기화
           canvas.width = res.image.width;
           canvas.height = res.image.height;
           ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // ✅ 프레임/스켈레톤만 언미러-고정 좌표계에서 그림
+          ctx.save();
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+
+          // 원본 프레임
           ctx.drawImage(res.image, 0, 0, canvas.width, canvas.height);
 
           const lms = res.poseLandmarks as Landmark[] | undefined;
           if (!lms) {
+            ctx.restore(); // ← 반드시 복구 후 메시지(정상 좌표계) 출력
             setMsgSafe("카메라 안에 전신이 보이게 서주세요");
             drawMessage(ctx, "카메라 안에 전신이 보이게 서주세요");
             return;
@@ -188,32 +200,38 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
             const visible = isFullBodyVisible(lms);
             if (visible) {
               hasFullBodyRef.current = true;
-              // ✅ “전신 인식 완료” 문구는 최초 1회만
               if (!shownFullBodyMessageRef.current) {
                 shownFullBodyMessageRef.current = true;
+                ctx.restore(); // 메시지는 정상 좌표계에서
                 setMsgSafe("✅ 전신 인식 완료! 세트를 시작합니다!");
                 const nameForUI = propsAndStateRef.current.displayName;
                 setTimeout(
                   () => setMsgSafe(`${nameForUI} 운동을 시작하세요!`),
                   1500
                 );
+                // 다음 프레임에서 계속
+                return;
               }
             } else {
+              ctx.restore();
               setMsgSafe("전신이 화면에 들어오게 서주세요");
               drawMessage(ctx, "전신이 화면에 들어오게 서주세요");
               return;
             }
           }
 
+          // 랜드마크/커넥터는 반전 좌표계에서 함께 그림
           drawConnectors(ctx, lms, POSE_CONNECTIONS, {
             color: "#39b3ff",
             lineWidth: 1.5,
           });
           drawLandmarks(ctx, lms, { color: "#000", lineWidth: 1, radius: 1.8 });
 
-          const now = Date.now();
+          ctx.restore(); // ✅ 좌표계 원복 (이후 로직/텍스트는 정상)
 
-          const { isWorkoutPaused, targetReps, repCount, exercise } =
+          // ---- 이하 기존 로직 동일 ----
+          const now = Date.now();
+          const { isWorkoutPaused, targetReps, exercise } =
             propsAndStateRef.current;
 
           if (
@@ -224,6 +242,7 @@ const AITrainer: React.FC<AITrainerProps> = (props) => {
           ) {
             if (!startTimeRef.current) startTimeRef.current = now;
             lastSavedTimeRef.current = now;
+            // 저장되는 landmark는 원본 좌표(반전 없음) → 분석/서버 전송에 안전
             landmarkHistory.current.push(lms);
 
             const handler =
